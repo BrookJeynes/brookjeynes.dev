@@ -23,6 +23,10 @@
   -webkit-user-select: none; /* Safari */
 }
 
+*::selection {
+  background: rgba(200,200,200,0.2);
+}
+
 .container {
   width: 100%;
   min-height: 95vh;
@@ -121,7 +125,7 @@
 }
 
 .about-me-response {
-  padding: 0 0 30px 40px;
+  padding: 0 0 20px 40px;
 }
 
 .arguments-container {

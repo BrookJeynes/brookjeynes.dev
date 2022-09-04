@@ -82,7 +82,7 @@ const About = () => {
           <Arguments {...args[0]} /> 
         </fieldset> 
 
-        <fieldset className="title-border options">
+        <fieldset className="title-border options" style={{marginBottom: 100}}>
           <legend>Options</legend>
           {options.map((option, index) => (
             <Arguments key={index} {...option} />
@@ -99,11 +99,11 @@ const About = () => {
               While studying I'm also working as a <span className="text-yellow">Software Developer</span> at <a href="https://www.ssw.com.au/people/brook-jeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">SSW</a> creating lots of cool products for companies using technologies such as <span className="text-yellow">React</span>, <span className="text-yellow">ASP.NET</span>, <span className="text-yellow">C#</span>, and many more. <br /> <br />
               In my spare time I like to do a variety of things such as:
               <ul>
-                <li><span className="text-yellow">Programming</span> (obviously)</li>
-                <li><span>Working on many <span className="text-yellow">personal projects</span> such as this website</span></li>
-                <li>Playing <span className="text-yellow">Tabletop</span> and <span className="text-yellow">Video Games</span> with friends</li>
-                <li>Writing, singing and playing music on <span className="text-yellow">guitar</span> and <span className="text-yellow">piano</span></li>
-                <li>Learning about <span className="text-yellow">Micro-controllers</span> and <span className="text-yellow">Electronics</span></li>
+                <li>Programming (obviously)</li>
+                <li>Working on many personal projects such as this website</li>
+                <li>Playing Tabletop and Video Games with friends</li>
+                <li>Writing, singing and playing music on guitar and piano</li>
+                <li>Learning about Micro-controllers and Electronics</li>
               </ul>
               I hope you enjoyed learning a bit more about me!
             </p>
@@ -121,28 +121,28 @@ const About = () => {
 
         <div className="about-me-response">
             <p>
-              I'm currently in my second year of studying <span className="text-yellow">Computer Science</span> at <span className="text-yellow">Queensland University of Technology (QUT)</span>. <br />
+              I'm currently in my second year of studying <span className="text-yellow">Information Technology</span> at <span className="text-yellow">Queensland University of Technology (QUT)</span>. <br />
               I'm majoring in <span className="text-yellow">Computer Science</span> while minoring in <span className="text-yellow">IoT and Mobile Technologies</span> and <span className="text-yellow">Data-Centric Computing Extension</span>. <br /> <br />
               The courses I've taken so far include:
               {/* TODO: Make this look nicer */}
               {/* TODO: Link to unit outline */}
               <ul>
-                <li><span className="text-yellow">IFB102</span> Introduction to Computer Systems</li>
-                <li><span className="text-yellow">IFB103</span> IT System Design</li>
-                <li><span className="text-yellow">IFB104</span> Building IT Systems</li>
-                <li><span className="text-yellow">IFB105</span> Database Management</li>
-                <li><span className="text-yellow">CAB201</span> Programming Principles</li>
-                <li><span className="text-yellow">CAB202</span> Microprocessors and Digital Systems</li>
-                <li><span className="text-yellow">CAB240</span> Information Security</li>
-                <li><span className="text-yellow">IAB207</span> Rapid Web Application Development</li>
-                <li><span className="text-yellow">CAB203</span> Discrete Structures</li>
-                <li><span className="text-yellow">CAB302</span> Software Development</li>
-                <li><span className="text-yellow">CAB230</span> Web Computing</li>
-                <li><span className="text-yellow">IAB230</span> Design of Enterprise IoT</li>
-                <li><span className="text-yellow">CAB303</span> Networks</li>
-                <li><span className="text-yellow">IFB295</span> IT Project Management</li>
-                <li><span className="text-yellow">CAB432</span> Cloud Computing</li>
-                <li><span className="text-yellow">IAB330</span> Applied IoT and Mobile Technologies</li>
+                <li><span className="header-link-active">IFB102</span> Introduction to Computer Systems</li>
+                <li><span className="header-link-active">IFB103</span> IT System Design</li>
+                <li><span className="header-link-active">IFB104</span> Building IT Systems</li>
+                <li><span className="header-link-active">IFB105</span> Database Management</li>
+                <li><span className="header-link-active">CAB201</span> Programming Principles</li>
+                <li><span className="header-link-active">CAB202</span> Microprocessors and Digital Systems</li>
+                <li><span className="header-link-active">CAB240</span> Information Security</li>
+                <li><span className="header-link-active">IAB207</span> Rapid Web Application Development</li>
+                <li><span className="header-link-active">CAB203</span> Discrete Structures</li>
+                <li><span className="header-link-active">CAB302</span> Software Development</li>
+                <li><span className="header-link-active">CAB230</span> Web Computing</li>
+                <li><span className="header-link-active">IAB230</span> Design of Enterprise IoT</li>
+                <li><span className="header-link-active">CAB303</span> Networks</li>
+                <li><span className="header-link-active">IFB295</span> IT Project Management</li>
+                <li><span className="header-link-active">CAB432</span> Cloud Computing</li>
+                <li><span className="header-link-active">IAB330</span> Applied IoT and Mobile Technologies</li>
               </ul>
             </p>
         </div>
@@ -153,14 +153,14 @@ const About = () => {
             <p>
               I've had exposure to a variety of programming languages and technologies such as:
               <ul>
-                <li><span className="text-yellow">C#</span> (ASP.NET, Entity Framework)</li>
-                <li><span className="text-yellow">JavaScript</span> (React, Node.js, Express, Bootstrap, HTML, CSS)</li>
-                <li><span className="text-yellow">Python</span> (Flask, Tkinter)</li>
-                <li><span className="text-yellow">Java</span></li>
-                <li><span className="text-yellow">C</span></li>
-                <li><span className="text-yellow">Git</span></li>
-                <li><span className="text-yellow">Azure</span></li>
-                <li><span className="text-yellow">Linux, Windows and MacOS</span></li>
+                <li>C# (ASP.NET, Entity Framework)</li>
+                <li>JavaScript (React, Node.js, Express, Bootstrap, HTML, CSS)</li>
+                <li>Python (Flask, Tkinter)</li>
+                <li>Java</li>
+                <li>C</li>
+                <li>Git</li>
+                <li>Azure</li>
+                <li>Linux, Windows and MacOS</li>
               </ul>
             </p>
         </div>
