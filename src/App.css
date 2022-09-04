@@ -1,38 +1,165 @@
-.App {
-  text-align: center;
+@font-face {
+  font-family: 'MesloLGS NF';
+  src: local('MesloLGS NF'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Regular.ttf) format('opentype');
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+@font-face {
+  font-family: 'MesloLGS NF Bold';
+  src: local('MesloLGS NF Bold'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Bold.ttf) format('opentype');
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+@font-face {
+  font-family: 'MesloLGS NF Italic';
+  src: local('MesloLGS NF Italic'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Italic.ttf) format('opentype');
+}
+
+@font-face {
+  font-family: 'MesloLGS NF Bold Italic';
+  src: local('MesloLGS NF Bold Italic'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Bold-Italic.ttf) format('opentype');
+}
+
+.container {
+  width: 100%;
+  min-height: 95vh;
+  height: 100%;
+
+  font-family: MesloLGS NF;
+  font-size: 1rem;
+
+  color: #ECEFF4;
+  background-color: #222222;
+}
+
+
+/* Text */
+.text-green {
+  color: #A3BE8C;
+}
+
+.text-yellow {
+  color: #EBCB8B;
+}
+
+.blink {
+  animation: blink 1.5s steps(2) infinite;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+
+/* Border */
+.title-border {
+  border: solid 2px #ECEFF4; 
+  border-radius: 5px;
+  
+  padding: 5px 20px 15px 20px;
+}
+
+
+/* Header */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 0 10% 0 10%;
+
+  font-family: MesloLGS NF;
+
+  height: 50px;
+
+  border-bottom: solid 1px #444444;
+
+  background-color: #222222;
+  color: #ECEFF4;
+}
+
+.header-title {
+  font-weight: bold;
+}
+
+
+/* Header Links */
+.link-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center; 
+
+  width: 225px;
+}
+
+.header-link {
+  text-decoration: none;
+  color: #ECEFF4;
+}
+
+.header-link-active {
+  text-decoration: underline;
+  color: #ECEFF4;
+}
+
+
+/* About */
+.about-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: flex-start;
+
+  font-size: 1.05rem;
+
+  margin: 0 10% 0 10%;
+  padding-top: 3%;
 }
 
-.App-link {
-  color: #61dafb;
+.about-me-response {
+  padding: 0 0 30px 40px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.arguments-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;  
+
+  margin-top: 10px;
+}
+
+.arguments {
+  margin: 5px 0 15px 0;
+  
+  min-width: 415px;
+  width: 60%;
+}
+
+.options {
+  min-width: 415px;
+  margin-bottom: 30px;
+}
+
+
+/* Home */
+.home-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  padding: 50px 10% 0 10%;
+}
+
+.island-container {
+  
+}
+
+.cloud1-container p {
+  font-size: 6px;
+}
+
+
+/* Command */
+.command-container {
+  font-weight: bold;
 }
