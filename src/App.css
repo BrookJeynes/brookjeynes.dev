@@ -18,6 +18,11 @@
   src: local('MesloLGS NF Bold Italic'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Bold-Italic.ttf) format('opentype');
 }
 
+.no-select {
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+}
+
 .container {
   width: 100%;
   min-height: 95vh;

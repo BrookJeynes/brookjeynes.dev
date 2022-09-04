@@ -54,10 +54,10 @@ const Home = () => {
         <Command tag='h1' command='./Brook-Jeynes' blink={true} />
         <div>
           <pre className="island-container">
-            <p>{island}</p>
+            <p className="no-select">{island}</p>
           </pre>
           <pre className="cloud1-container">
-            <p>{cloud1}</p>
+            <p className="no-select">{cloud1}</p>
           </pre>
         </div>
       </div>
