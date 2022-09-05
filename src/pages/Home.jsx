@@ -49,7 +49,7 @@ const Home = () => {
   ].join('\n');
 
   return (
-    <div className="container">
+    <div className="page-container">
       <div className="home-container">
         <Command tag='h1' command='./Brook-Jeynes' blink={true} />
         <div>

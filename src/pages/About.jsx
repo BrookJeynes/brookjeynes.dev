@@ -72,17 +72,18 @@ const About = () => {
   ];
 
   return (
-    <div className="container">
+    <div className="page-container">
       <div className="about-container">
         <Command tag='p' command='about-me --help' blink={false} />
-        <p><span><span className="text-yellow">Usage:</span> about-me [OPTIONS] NAME</span></p>
+        
+        <p className="mt-7 mb-4"><span><span className="text-yellow">Usage:</span> about-me [OPTIONS] NAME</span></p>
 
         <fieldset className="title-border arguments">
           <legend>Arguments</legend>
           <Arguments {...args[0]} /> 
         </fieldset> 
 
-        <fieldset className="title-border options" style={{marginBottom: 100}}>
+        <fieldset className="title-border options" style={{marginBottom: 70}}>
           <legend>Options</legend>
           {options.map((option, index) => (
             <Arguments key={index} {...option} />
@@ -126,7 +127,7 @@ const About = () => {
               The courses I've taken so far include:
               {/* TODO: Make this look nicer */}
               {/* TODO: Link to unit outline */}
-              <ul>
+              <ul className="list-disc list-inside">
                 <li><span className="header-link-active">IFB102</span> Introduction to Computer Systems</li>
                 <li><span className="header-link-active">IFB103</span> IT System Design</li>
                 <li><span className="header-link-active">IFB104</span> Building IT Systems</li>
@@ -152,7 +153,7 @@ const About = () => {
         <div className="about-me-response">
             <p>
               I've had exposure to a variety of programming languages and technologies such as:
-              <ul>
+              <ul className="list-disc list-inside">
                 <li>C# (ASP.NET, Entity Framework)</li>
                 <li>JavaScript (React, Node.js, Express, Bootstrap, HTML, CSS)</li>
                 <li>Python (Flask, Tkinter)</li>
@@ -178,7 +179,7 @@ const About = () => {
         <div className="about-me-response">
             <p>
               You can find me on a variety of platforms such as:
-              <ul>
+              <ul className="mt-5">
                 <li>linkedin - <a href="https://www.linkedin.com/in/brook-jeynes/" target="_blank" className="header-link-active" rel="noreferrer noopener">linkedin/brook-jeynes</a></li>
                 <li>github - <a href="https://github.com/BrookJeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">github/brookjeynes</a></li>
                 <li>email - <a href="mailto:jeynesbrook@pm.me" target="_blank" className="header-link-active" rel="noreferrer noopener">jeynesbrook@pm.me</a></li>

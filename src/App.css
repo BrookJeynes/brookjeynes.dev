@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: 'MesloLGS NF';
   src: local('MesloLGS NF'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Regular.ttf) format('opentype');
@@ -27,9 +31,9 @@
   background: rgba(200,200,200,0.2);
 }
 
-.container {
+.page-container {
   width: 100%;
-  min-height: 95vh;
+  min-height: 100vh;
   height: 100%;
 
   font-family: MesloLGS NF;
@@ -47,6 +51,10 @@
 
 .text-yellow {
   color: #EBCB8B;
+}
+
+.text-blue {
+  color: #81A1C1;
 }
 
 .blink {
@@ -121,30 +129,24 @@
   font-size: 1.05rem;
 
   margin: 0 10% 0 10%;
-  padding-top: 3%;
+  padding-top: 50px;
 }
 
 .about-me-response {
-  padding: 0 0 20px 40px;
+  padding: 20px 0 40px 40px;
 }
 
 .arguments-container {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;  
-
   margin-top: 10px;
 }
 
 .arguments {
   margin: 5px 0 15px 0;
   
-  min-width: 415px;
-  width: 60%;
+  width: 80%;
 }
 
 .options {
-  min-width: 415px;
   margin-bottom: 30px;
 }
 
@@ -157,10 +159,6 @@
   align-items: flex-start;
 
   padding: 50px 10% 0 10%;
-}
-
-.island-container {
-  
 }
 
 .cloud1-container p {
