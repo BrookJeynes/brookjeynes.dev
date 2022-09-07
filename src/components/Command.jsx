@@ -7,7 +7,7 @@ const Command = (props) => {
 
   return (
     <div className="command-container">
-      <Tag><span className="text-green">❯</span>{ command && ` ${command}` }{ blink && <span className="blink">|</span>}</Tag>
+      <Tag><span className="text-green">❯</span> { command && command }{ blink && <span className="blink">|</span>}</Tag>
     </div>
   );
 }

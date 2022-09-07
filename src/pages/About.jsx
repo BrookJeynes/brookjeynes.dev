@@ -60,7 +60,8 @@ const About = () => {
       name: '--links',
       type: 'LIST',
       description: 'The users social links.',
-      defaults: <span>[ <a href="https://www.linkedin.com/in/brook-jeynes/" target="_blank" className="header-link-active" rel="noreferrer noopener">LinkedIn</a>, <a href="https://github.com/BrookJeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">Github</a> ]</span>,
+      defaults: 
+        <span>[ <a href="https://www.linkedin.com/in/brook-jeynes/" target="_blank" className="header-link-active" rel="noreferrer noopener">LinkedIn</a>, <a href="https://github.com/BrookJeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">Github</a>, <a href="mailto:jeynesbrook@pm.me" target="_blank" className="header-link-active" rel="noreferrer noopener">Email</a> ]</span>,
     },
     {
       required: false,
