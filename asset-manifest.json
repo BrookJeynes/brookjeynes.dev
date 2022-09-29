@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.e8b06d94.css",
-    "main.js": "/static/js/main.2797d2c6.js",
+    "main.js": "/static/js/main.03b21292.js",
     "static/js/787.5809834d.chunk.js": "/static/js/787.5809834d.chunk.js",
     "static/media/MesloLGS-NF-Bold.ttf": "/static/media/MesloLGS-NF-Bold.2813f724a73565411c1d.ttf",
     "static/media/MesloLGS-NF-Regular.ttf": "/static/media/MesloLGS-NF-Regular.1a2b8395aa3c5a7c76f9.ttf",
@@ -9,11 +9,11 @@
     "static/media/MesloLGS-NF-Italic.ttf": "/static/media/MesloLGS-NF-Italic.557cde71a402b8ac55ab.ttf",
     "index.html": "/index.html",
     "main.e8b06d94.css.map": "/static/css/main.e8b06d94.css.map",
-    "main.2797d2c6.js.map": "/static/js/main.2797d2c6.js.map",
+    "main.03b21292.js.map": "/static/js/main.03b21292.js.map",
     "787.5809834d.chunk.js.map": "/static/js/787.5809834d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e8b06d94.css",
-    "static/js/main.2797d2c6.js"
+    "static/js/main.03b21292.js"
   ]
 }
