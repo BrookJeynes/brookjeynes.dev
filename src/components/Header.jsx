@@ -15,7 +15,7 @@ const Header = () => {
 
   return (
     <div className="header-container">
-      <span className="header-title">Brook Jeynes</span>
+      <span className="header-title"><a href="/">Brook Jeynes</a></span>
       <div className="link-container">
         <Link to='/' className={`${location.pathname === links['Home'] ? "header-link-active" : "header-link"}`}>Home</Link>
         <span>/</span>

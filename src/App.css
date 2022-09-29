@@ -1,6 +1,6 @@
-@tailwind base;
+@tailwind base; 
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; 
 
 @font-face {
   font-family: 'MesloLGS NF';
@@ -20,6 +20,26 @@
 @font-face {
   font-family: 'MesloLGS NF Bold Italic';
   src: local('MesloLGS NF Bold Italic'), url(./fonts/MesloLGS-NF/MesloLGS-NF-Bold-Italic.ttf) format('opentype');
+}
+
+tr {
+  border-top: 1px solid #2e3440;
+  background: #343434;
+}
+
+th,
+td {
+  padding: 6px 13px;
+  border: 1px solid #171717;
+}
+
+table tr:nth-child(2n) {
+  background: #343434;
+}
+
+.readme table {
+  background-color: red;
+  padding-top: 500px;
 }
 
 .no-select {
@@ -48,13 +68,12 @@ h2 {
 }
 
 .code-box {
-  @apply bg-[#2e3440] text-[#ECEFF4] rounded-md p-2;
+  @apply bg-[#2e3440] text-[#ECEFF4] rounded-md p-2 ml-5;
 
   width: 70vw;
 
   overflow-x: scroll;
 }
-
 
 
 .page-container {
@@ -167,7 +186,7 @@ h2 {
 }
 
 .arguments-container {
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 .arguments {
@@ -244,16 +263,13 @@ h2 {
 }
 
 .project-images {
+  @apply flex-col md:flex-row;
+
   display: flex;
-  flex-direction: row;
   justify-content: space-around;
   align-items: center;
 
   width: 100%;
-}
-
-.project-images img {
-  width: 45%;
 }
 
 .project-features-container {

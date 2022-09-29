@@ -3,6 +3,7 @@ import '../App.css';
 
 import Arguments from '../components/Arguments';
 import Command from '../components/Command';
+import Link from "../components/Link";
 
 const About = () => {
   const args = [{
@@ -27,12 +28,7 @@ const About = () => {
       name: '--current-job',
       type: 'TEXT',
       description: 'The users current job.',
-      defaults: <a 
-                  href="https://www.ssw.com.au/people/brook-jeynes" 
-                  target="_blank" 
-                  className="header-link-active"
-                  rel="noreferrer noopener"
-                >SSW - Software Developer</a>,
+      defaults: <Link link="https://www.ssw.com.au/people/brook-jeynes" text="SSW - Software Developer" />,
     },
     {
       required: false,
@@ -61,7 +57,7 @@ const About = () => {
       type: 'LIST',
       description: 'The users social links.',
       defaults: 
-        <span>[ <a href="https://www.linkedin.com/in/brook-jeynes/" target="_blank" className="header-link-active" rel="noreferrer noopener">LinkedIn</a>, <a href="https://github.com/BrookJeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">Github</a>, <a href="mailto:jeynesbrook@pm.me" target="_blank" className="header-link-active" rel="noreferrer noopener">Email</a> ]</span>,
+        <span>[ <Link link="https://www.linkedin.com/in/brook-jeynes/" text="LinkedIn" />, <Link link="https://github.com/BrookJeynes" text="Github" />, <Link link="mailto:jeynesbrook@pm.me" text="Email" /> ]</span>,
     },
     {
       required: false,
@@ -98,7 +94,7 @@ const About = () => {
               <span style={{fontWeight: 'bold'}}>Hey, I'm Brook!</span> <br /> <br />
               I'm a <span className="text-yellow">19</span> year old <span className="text-yellow">Software Developer</span> from <span className="text-yellow">Brisbane, Australia</span>. <br />
               I'm currently in my second year of studying <span className="text-yellow">Computer Science</span> at <span className="text-yellow">Queensland University of Technology (QUT)</span>. <br />
-              While studying I'm also working as a <span className="text-yellow">Software Developer</span> at <a href="https://www.ssw.com.au/people/brook-jeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">SSW</a> creating lots of cool products for companies using technologies such as <span className="text-yellow">React</span>, <span className="text-yellow">ASP.NET</span>, <span className="text-yellow">C#</span>, and many more. <br /> <br />
+              While studying I'm also working as a <span className="text-yellow">Software Developer</span> at <Link link="https://www.ssw.com.au/people/brook-jeynes" text="SSW" /> creating lots of cool products for companies using technologies such as <span className="text-yellow">React</span>, <span className="text-yellow">ASP.NET</span>, <span className="text-yellow">C#</span>, and many more. <br /> <br />
               In my spare time I like to do a variety of things such as:
               <ul>
                 <li>Programming (obviously)</li>
@@ -181,9 +177,9 @@ const About = () => {
             <p>
               You can find me on a variety of platforms such as:
               <ul className="mt-5">
-                <li>linkedin - <a href="https://www.linkedin.com/in/brook-jeynes/" target="_blank" className="header-link-active" rel="noreferrer noopener">linkedin/brook-jeynes</a></li>
-                <li>github - <a href="https://github.com/BrookJeynes" target="_blank" className="header-link-active" rel="noreferrer noopener">github/brookjeynes</a></li>
-                <li>email - <a href="mailto:jeynesbrook@pm.me" target="_blank" className="header-link-active" rel="noreferrer noopener">jeynesbrook@pm.me</a></li>
+                <li>linkedin - <Link link="https://www.linkedin.com/in/brook-jeynes/" text="linkedin/brook-jeynes" /></li>
+                <li>github - <Link link="https://github.com/BrookJeynes" text="github/brookjeynes" /></li>
+                <li>email - <Link link="mailto:jeynesbrook@pm.me" text="jeynesbrook@pm.me" /></li>
               </ul>
             </p>
         </div>
