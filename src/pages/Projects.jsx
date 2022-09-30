@@ -215,9 +215,44 @@ Usage: scalc [OPTIONS] IP_ADDRESS
 }
 
 const Projects = () => {
+  const projects = {
+    "sr2-interactive-map": {
+      name: "Slime Rancher 2 Interactive Map",
+      link: "https://github.com/BrookJeynes/slime-rancher-2-interactive-map"
+    },
+    "pixel-art-maker": {
+      name: "Pixel Art Maker",
+      link: "https://github.com/BrookJeynes/pixel-art-maker"
+    },
+    "scalc-cli": {
+      name: "scalc - Subnetting calculator",
+      link: "https://github.com/BrookJeynes/slime-rancher-2-interactive-map"
+    },
+  }
+
   return (
     <div className="page-container">
       <div className="projects-container">
+        <div className="project">
+          <Command tag="p"
+            command={<span>ls projects/</span>}
+            blink={false}
+            />
+
+          <div className="flex justify-around my-5">
+            { Object.keys(projects).map(key => {
+              const project = projects[key];
+
+              return (
+                <div>
+                  <Link link={project.link} text={key} />
+                </div>
+              )
+            })
+          }
+          </div>
+        </div>
+
         <div className="project">
           <Command tag='p' 
             command={<span>projects --link <Link 
