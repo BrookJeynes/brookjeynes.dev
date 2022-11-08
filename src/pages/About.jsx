@@ -121,27 +121,6 @@ const About = () => {
             <p>
               I'm currently in my second year of studying <span className="text-yellow">Information Technology</span> at <span className="text-yellow">Queensland University of Technology (QUT)</span>. <br />
               I'm majoring in <span className="text-yellow">Computer Science</span> while minoring in <span className="text-yellow">IoT and Mobile Technologies</span> and <span className="text-yellow">Data-Centric Computing Extension</span>. <br /> <br />
-              The courses I've taken so far include:
-              {/* TODO: Make this look nicer */}
-              {/* TODO: Link to unit outline */}
-              <ul className="list-disc list-inside">
-                <li><span className="header-link-active">IFB102</span> Introduction to Computer Systems</li>
-                <li><span className="header-link-active">IFB103</span> IT System Design</li>
-                <li><span className="header-link-active">IFB104</span> Building IT Systems</li>
-                <li><span className="header-link-active">IFB105</span> Database Management</li>
-                <li><span className="header-link-active">CAB201</span> Programming Principles</li>
-                <li><span className="header-link-active">CAB202</span> Microprocessors and Digital Systems</li>
-                <li><span className="header-link-active">CAB240</span> Information Security</li>
-                <li><span className="header-link-active">IAB207</span> Rapid Web Application Development</li>
-                <li><span className="header-link-active">CAB203</span> Discrete Structures</li>
-                <li><span className="header-link-active">CAB302</span> Software Development</li>
-                <li><span className="header-link-active">CAB230</span> Web Computing</li>
-                <li><span className="header-link-active">IAB230</span> Design of Enterprise IoT</li>
-                <li><span className="header-link-active">CAB303</span> Networks</li>
-                <li><span className="header-link-active">IFB295</span> IT Project Management</li>
-                <li><span className="header-link-active">CAB432</span> Cloud Computing</li>
-                <li><span className="header-link-active">IAB330</span> Applied IoT and Mobile Technologies</li>
-              </ul>
             </p>
         </div>
 
@@ -152,7 +131,7 @@ const About = () => {
               I've had exposure to a variety of programming languages and technologies such as:
               <ul className="list-disc list-inside">
                 <li>C# (ASP.NET, Entity Framework)</li>
-                <li>JavaScript (React, Node.js, Express, Bootstrap, HTML, CSS)</li>
+                <li>JavaScript/Typescript (React, Node.js, Express, Bootstrap, HTML, CSS)</li>
                 <li>Python (Flask, Tkinter)</li>
                 <li>Java</li>
                 <li>C</li>
