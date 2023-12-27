@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Just a personal site">
+    
+    
+    <link rel="shortcut icon" href="brookjeynes.dev/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/brookjeynes.dev/css/style.min.css">
+
+    <link rel="canonical" href="brookjeynes.dev/building-an-api-in-rust-with-rocket.rs-and-diesel.rs-clean-architecture/" />
+    <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
+        rel="stylesheet">
+    <title>Building an API in Rust with Rocket.rs and Diesel.rs (Clean Architecture)</title>
+</head>
+<body><header id="banner">
+    <h2><u><a href="brookjeynes.dev">brookjeynes.dev</a></u></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="brookjeynes.dev/posts/" title="posts">posts</a>
+            </li><li>
+                <a href="brookjeynes.dev/library/" title="library">library</a>
+            </li><li>
+                <a href="brookjeynes.dev/contact/" title="contact">contact</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Building an API in Rust with Rocket.rs and Diesel.rs (Clean Architecture)</h1>
+        <div>
+                <time>November 23, 2022</time>
+            </div>
+    </header><p>In this guide I&rsquo;m going to walk you through the process of building a simple CRUD API from scratch in Rust using Rocket.rs. I will show you how to create migrations and access a PostgreSQL database using Diesel.rs and connect everything up to a React + Typescript front-end. When building the project we will follow Clean Architecture, although I won&rsquo;t go into talking too much about what that is as it&rsquo;s not the focus of this guide.</p>
+<p>This guide assumes:</p>
+<ul>
+<li>You already have a PostgreSQL database setup</li>
+<li>You have the latest version of Rust (this guide uses v1.65.0)</li>
+<li>You have a basic-to-decent understanding of Rust concepts and the language syntax</li>
+</ul>
+<p>Now that that&rsquo;s sorted, let&rsquo;s begin!</p>
+<hr>
+<h2 id="building-the-project-architecture">Building the project architecture</h2>
+<p>The first step is to setup the architecture of the application. Start by creating a overarching Rust project:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cargo new rust-blog
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> rust-blog
+</span></span></code></pre></div><p>After this, delete the src folder as we won&rsquo;t be needing it. The next thing we&rsquo;re going to do is generate a new project for each layer in the Clean Architecture model. Our architecture will follow as such that the:</p>
+<ul>
+<li>API Layer will handle the API requests and act as our route handler.</li>
+<li>Application layer will handle the logic behind the API requests.</li>
+<li>Domain layer will hold our database models and schemas.</li>
+<li>Infrastructure layer will hold our migrations and database connections.</li>
+<li>Shared layer will hold any other models our project will need such as response structures.</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cargo new api --lib
+</span></span><span class="line"><span class="cl">cargo new application --lib
+</span></span><span class="line"><span class="cl">cargo new domain --lib
+</span></span><span class="line"><span class="cl">cargo new infrastructure --lib
+</span></span><span class="line"><span class="cl">cargo new shared --lib
+</span></span></code></pre></div><p>By the end of this, our project should be looking something like this:</p>
+<pre tabindex="0"><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── api
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── application
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── domain
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── infrastructure
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+└── shared
+    ├── Cargo.toml
+    └── src
+        └── lib.rs
+</code></pre><p>We&rsquo;re now going to link all of these projects in the top-level Cargo.toml file. Delete everything inside the file and enter the following:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">workspace</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">members</span> <span class="p">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;api&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;domain&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;infrastructure&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;application&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;shared&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span></code></pre></div><p>Nice! That&rsquo;s the majority of our templating finished, now we can get into some actual fun.</p>
+<hr>
+<h2 id="migrations">Migrations</h2>
+<p>Since we&rsquo;re using Diesel.rs as the database manager, we will need to install the CLI tool. Diesel CLI has a few dependencies that need to be installed beforehand depending on what database you&rsquo;re planning on using:</p>
+<ul>
+<li>libpq for PostgreSQL</li>
+<li>libmysqlclient for Mysql</li>
+<li>libsqlite3 for SQlite</li>
+</ul>
+<p>For this project, we will be using PostgreSQL. This means we only need libpq as a dependency. <em>Please refer to the docs for each dependency required to find out how to install it on your operating system.</em></p>
+<p>With libpq installed, we can now run the following command to install Diesel CLI:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cargo install diesel_cli --no-default-features --features postgres
+</span></span></code></pre></div><p>With that installed, let&rsquo;s set up a connection string to our database. In the top-level project directory, run the following command with your connections details:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">echo</span> <span class="nv">DATABASE_URL</span><span class="o">=</span>postgres://username:password@localhost/blog &gt; .env
+</span></span></code></pre></div><p>Now, we can use the Diesel CLI to do the heavy lifting for us. Navigate into the infrastructure folder and run the following command:
+diesel setup</p>
+<ul>
+<li>This will generate a few things:</li>
+<li>A migrations folder used to store all migrations</li>
+<li>An empty migration we can use to manage our database schema.</li>
+</ul>
+<p>Using the Diesel CLI tool, we can create a new migration to handle the initial setup of our posts table.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">diesel migration generate create_posts
+</span></span></code></pre></div><p>Diesel CLI will generate a new migration consisting of a name similar to 2022–11–18–090125_create_posts. The first part is the date the migration was generated with a unique code followed by the migrations name. Inside this migration folder will be two files: up.sql, telling Diesel CLI what to apply in the migration, and down.sql, telling Diesel CLI how to revert a migration.</p>
+<p>Now, let&rsquo;s go ahead and write some SQL for the migrations.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- up.sql
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">posts</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">id</span><span class="w"> </span><span class="nb">SERIAL</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">title</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">body</span><span class="w"> </span><span class="nb">TEXT</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">genre</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">published</span><span class="w"> </span><span class="nb">BOOLEAN</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="c1">-- down.sql
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">DROP</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">posts</span><span class="w">
+</span></span></span></code></pre></div><p>Using the Diesel CLI, we can apply the new migration we just created.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">diesel migration run
+</span></span></code></pre></div><p><em>For more information on running migrations with Diesel.rs, visit the official getting started guide here.</em></p>
+<hr>
+<h2 id="creating-a-connection">Creating a connection</h2>
+<p>With our first set of migrations finished and our project architecture laid out, let&rsquo;s finally write some Rust code to connect our application to the database.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="c"># infrastructure/Cargo.toml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">name</span> <span class="p">=</span> <span class="s2">&#34;infrastructure&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.1.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">edition</span> <span class="p">=</span> <span class="s2">&#34;2021&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">diesel</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;2.0.0&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;postgres&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">dotenvy</span> <span class="p">=</span> <span class="s2">&#34;0.15&#34;</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// infrastructure/src/lib.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">pg</span>::<span class="n">PgConnection</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">dotenvy</span>::<span class="n">dotenv</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">env</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">establish_connection</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">PgConnection</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">dotenv</span><span class="p">().</span><span class="n">ok</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">database_url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">env</span>::<span class="n">var</span><span class="p">(</span><span class="s">&#34;DATABASE_URL&#34;</span><span class="p">).</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;DATABASE_URL must be set.&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">PgConnection</span>::<span class="n">establish</span><span class="p">(</span><span class="o">&amp;</span><span class="n">database_url</span><span class="p">).</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Error connecting to </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">database_url</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>With our connection made, we need to create some models for our database, namely Post and NewPost.</p>
+<hr>
+<h2 id="models-and-schemas">Models and Schemas</h2>
+<p>Start by navigating into domain and adding the following modules to lib.rs.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// domain/src/lib.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">models</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">schema</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>We&rsquo;ll use models to define the structs our database and code will use, while schema will be auto-generated by Diesel CLI. When we generated our migration, a schema.rs file was created in infrastructure. Simply move that to domain/src. If for some reason schema.rs wasn&rsquo;t generated, you can run diesel print-schema in the terminal to view the schema.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="c"># domain/Cargo.toml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">name</span> <span class="p">=</span> <span class="s2">&#34;domain&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.1.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">edition</span> <span class="p">=</span> <span class="s2">&#34;2021&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">rocket</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.5.0-rc.2&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;json&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">diesel</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;2.0.0&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;postgres&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">serde</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;1.0.147&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;derive&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// domain/src/models.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">schema</span>::<span class="n">posts</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">serde</span>::<span class="p">{</span><span class="n">Deserialize</span><span class="p">,</span><span class="w"> </span><span class="n">Serialize</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">cmp</span>::<span class="p">{</span><span class="nb">Ord</span><span class="p">,</span><span class="w"> </span><span class="nb">Eq</span><span class="p">,</span><span class="w"> </span><span class="nb">PartialOrd</span><span class="p">,</span><span class="w"> </span><span class="nb">PartialEq</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// Queryable will generate the code needed to load the struct from an SQL statement
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cp">#[derive(Queryable, Serialize, Ord, Eq, PartialEq, PartialOrd)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Post</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">id</span>: <span class="kt">i32</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">title</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">body</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">genre</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">published</span>: <span class="kt">bool</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[derive(Insertable, Deserialize)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[serde(crate = </span><span class="s">&#34;rocket::serde&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[diesel(table_name = posts)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">NewPost</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">title</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">body</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">genre</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// domain/src/schema.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// @generated automatically by Diesel CLI.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">diesel</span>::<span class="fm">table!</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">posts</span><span class="w"> </span><span class="p">(</span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">id</span><span class="w"> </span>-&gt; <span class="nc">Int4</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">title</span><span class="w"> </span>-&gt; <span class="nc">Varchar</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">body</span><span class="w"> </span>-&gt; <span class="nc">Text</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">genre</span><span class="w"> </span>-&gt; <span class="nc">Varchar</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">published</span><span class="w"> </span>-&gt; <span class="nc">Bool</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>The code in schema.rs may vary slightly for you, but the concept still remains. This file will be updated whenever we run or revert a migration. It&rsquo;s important to note that the order of fields in our Post struct and the posts table must match.</p>
+<p>As well as defining database models, let&rsquo;s create a model to structure how our API responses are going to be formatted. Navigate to shared/src and create a new file response_models.rs.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="c"># shared/Cargo.toml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">name</span> <span class="p">=</span> <span class="s2">&#34;shared&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.1.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">edition</span> <span class="p">=</span> <span class="s2">&#34;2021&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">domain</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../domain&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">rocket</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.5.0-rc.2&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;json&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">serde</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;1.0.147&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;derive&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// shared/src/lib.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">response_models</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// shared/src/response_models.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="n">Post</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">serde</span>::<span class="n">Serialize</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[derive(Serialize)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span> <span class="nc">ResponseBody</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">Message</span><span class="p">(</span><span class="nb">String</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">Post</span><span class="p">(</span><span class="n">Post</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">Posts</span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[derive(Serialize)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[serde(crate = </span><span class="s">&#34;rocket::serde&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Response</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>The ResponseBody enum will be used to define what types of data can be returned from our API and the Response struct will define how the response will be structured.</p>
+<hr>
+<h2 id="setting-up-rocketrs">Setting up Rocket.rs</h2>
+<p>Wow! That was a lot of setup just for our database, just so we&rsquo;re all up-to-date, here&rsquo;s what the project structure should look like currently:</p>
+<pre tabindex="0"><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── api
+│   └── ...
+├── application
+│   └── ...
+├── domain
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       └── models.rs
+├── infrastructure
+│   ├── Cargo.toml
+│   ├── migrations
+│   │   └── 2022–11–18–090125_create_posts
+│   │       ├── up.sql
+│   │       └── down.sql
+│   └── src
+│     ├── lib.rs
+│     └── schema.rs
+└── shared
+    ├── Cargo.toml
+    └── src
+        ├── lib.rs
+        └── response_models.rs
+</code></pre><p>With the bulk of our database setup done, let&rsquo;s begin the setup of the API portion for the project.</p>
+<p>Navigate to api and import the following dependencies:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="c"># api/Cargo.toml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">name</span> <span class="p">=</span> <span class="s2">&#34;api&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.1.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">edition</span> <span class="p">=</span> <span class="s2">&#34;2021&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">domain</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../domain&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">application</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../application&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">shared</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../shared&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">rocket</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.5.0-rc.2&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;json&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">serde_json</span> <span class="p">=</span> <span class="s2">&#34;1.0.88&#34;</span>
+</span></span></code></pre></div><p>With our dependencies and references to other folders set, let&rsquo;s create a bin folder to hold main.rs.</p>
+<pre tabindex="0"><code>.
+└── api
+    ├── Cargo.toml
+    └── src
+        ├── bin
+        │   └── main.rs
+        └── lib.rs
+</code></pre><p>main.rs is going to be the entry point of our API, this is where we will define the routes we plan to use. We&rsquo;ll start by defining a single route at a time as we build the application up.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/lib.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">post_handler</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/bin/main.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[macro_use]</span><span class="w"> </span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">rocket</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">api</span>::<span class="n">post_handler</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[launch]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">rocket</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">_</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">rocket</span>::<span class="n">build</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">.</span><span class="n">mount</span><span class="p">(</span><span class="s">&#34;/api&#34;</span><span class="p">,</span><span class="w"> </span><span class="fm">routes!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">list_posts_handler</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">list_post_handler</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">])</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>We are going to use post_handler.rs to define the routes themselves. To avoid constant errors from our LSP, we&rsquo;ll use the todo!() macro to let Rust know that these functions/routes are incomplete.</p>
+<p>Create a new file called post_handler.rs in src and write the following template code:</p>
+<pre tabindex="0"><code>// api/src/post_handler.rs
+
+use shared::response_models::{Response, ResponseBody};
+use application::post::{read};
+use domain::models::{Post};
+use rocket::{get};
+use rocket::response::status::{NotFound};
+use rocket::serde::json::Json;
+
+#[get(&#34;/&#34;)]
+pub fn list_posts_handler() -&gt; String {
+    todo!()
+}
+
+#[get(&#34;/post/&lt;post_id&gt;&#34;)]
+pub fn list_post_handler(post_id: i32) -&gt; Result&lt;String, NotFound&lt;String&gt;&gt; {
+    todo!()
+}
+</code></pre><p>Here we define two requests:</p>
+<pre tabindex="0"><code>GET /api/ (used to list all posts)
+GET /api/post/&lt;post_id&gt; (used to list a post by id)
+</code></pre><hr>
+<h2 id="handling-api-logic">Handling API logic</h2>
+<p>With the request handlers templated, let&rsquo;s write the logic required for the routes. Inside of application, create a new folder called post. This folder will contain a file for each of our routes logic.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="c"># application/Cargo.toml</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">name</span> <span class="p">=</span> <span class="s2">&#34;application&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.1.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">edition</span> <span class="p">=</span> <span class="s2">&#34;2021&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">domain</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../domain&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">infrastructure</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../infrastructure&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">shared</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">path</span> <span class="p">=</span> <span class="s2">&#34;../shared&#34;</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">diesel</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;2.0.0&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;postgres&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">serde_json</span> <span class="p">=</span> <span class="s2">&#34;1.0.88&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">rocket</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.5.0-rc.2&#34;</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;json&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/lib.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">post</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/mod.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">read</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/read.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="n">Post</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">shared</span>::<span class="n">response_models</span>::<span class="p">{</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">ResponseBody</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">infrastructure</span>::<span class="n">establish_connection</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">response</span>::<span class="n">status</span>::<span class="n">NotFound</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">list_post</span><span class="p">(</span><span class="n">post_id</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Post</span><span class="p">,</span><span class="w"> </span><span class="n">NotFound</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">schema</span>::<span class="n">posts</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">posts</span>::<span class="n">table</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">post_id</span><span class="p">).</span><span class="n">first</span>::<span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">establish_connection</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">post</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">diesel</span>::<span class="n">result</span>::<span class="n">Error</span>::<span class="n">NotFound</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Message</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;Error selecting post with id </span><span class="si">{}</span><span class="s"> - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">post_id</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">))};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">NotFound</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Database error - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">        
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">list_posts</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">schema</span>::<span class="n">posts</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">posts</span>::<span class="n">table</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">posts</span>::<span class="n">all_columns</span><span class="p">).</span><span class="n">load</span>::<span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">establish_connection</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">posts</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">posts</span><span class="p">.</span><span class="n">sort</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">posts</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Database error - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>It&rsquo;s important to note that when using Rocket.rs, the panic!() macro will return a 500 InternalServerError and not crash your program.</p>
+<p>With the logic for our route written, let&rsquo;s return back to our post handler to finish off our two GET routes.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/post_handler.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[get(</span><span class="s">&#34;/&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">list_posts_handler</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nb">String</span> <span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New function body!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">posts</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read</span>::<span class="n">list_posts</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Posts</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[get(</span><span class="s">&#34;/post/&lt;post_id&gt;&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">list_post_handler</span><span class="p">(</span><span class="n">post_id</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">NotFound</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New function body!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">read</span>::<span class="n">list_post</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span><span class="o">?</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Post</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nb">Ok</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Congratulations! You&rsquo;ve just written your first two routes, hooked them up to a database, and have them both successfully reading content from it. Unfortunately, there isn&rsquo;t much to read yet as there are no blog posts in our table.</p>
+<p>Let&rsquo;s change that.</p>
+<hr>
+<h2 id="creating-posts">Creating Posts</h2>
+<p>Like before, we&rsquo;ll start by templating out the route handler. This will be a POST request that will accept JSON data.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/post_handler.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">shared</span>::<span class="n">response_models</span>::<span class="p">{</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">ResponseBody</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">application</span>::<span class="n">post</span>::<span class="p">{</span><span class="n">create</span><span class="p">,</span><span class="w"> </span><span class="n">read</span><span class="p">};</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="p">{</span><span class="n">Post</span><span class="p">,</span><span class="w"> </span><span class="n">NewPost</span><span class="p">};</span><span class="w"> </span><span class="c1">// 👈 New! 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="p">{</span><span class="n">get</span><span class="p">,</span><span class="w"> </span><span class="n">post</span><span class="p">};</span><span class="w"> </span><span class="c1">// 👈 New! 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">response</span>::<span class="n">status</span>::<span class="p">{</span><span class="n">NotFound</span><span class="p">,</span><span class="w"> </span><span class="n">Created</span><span class="p">};</span><span class="w"> </span><span class="c1">// 👈 New! 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">serde</span>::<span class="n">json</span>::<span class="n">Json</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[post(</span><span class="s">&#34;/new_post&#34;</span><span class="cp">, format = </span><span class="s">&#34;application/json&#34;</span><span class="cp">, data = </span><span class="s">&#34;&lt;post&gt;&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">create_post_handler</span><span class="p">(</span><span class="n">post</span>: <span class="nc">Json</span><span class="o">&lt;</span><span class="n">NewPost</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Created</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">create</span>::<span class="n">create_post</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>With that done, we can start the implementation of the create_post() function.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/mod.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">read</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">create</span><span class="p">;</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/create.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="p">{</span><span class="n">Post</span><span class="p">,</span><span class="w"> </span><span class="n">NewPost</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">shared</span>::<span class="n">response_models</span>::<span class="p">{</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">ResponseBody</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">infrastructure</span>::<span class="n">establish_connection</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">response</span>::<span class="n">status</span>::<span class="n">Created</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">serde</span>::<span class="n">json</span>::<span class="n">Json</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">create_post</span><span class="p">(</span><span class="n">post</span>: <span class="nc">Json</span><span class="o">&lt;</span><span class="n">NewPost</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">Created</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">schema</span>::<span class="n">posts</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">post</span><span class="p">.</span><span class="n">into_inner</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">insert_into</span><span class="p">(</span><span class="n">posts</span>::<span class="n">table</span><span class="p">).</span><span class="n">values</span><span class="p">(</span><span class="o">&amp;</span><span class="n">post</span><span class="p">).</span><span class="n">get_result</span>::<span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">establish_connection</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Post</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">Created</span>::<span class="n">new</span><span class="p">(</span><span class="s">&#34;&#34;</span><span class="p">).</span><span class="n">tagged_body</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Database error - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>The final thing we need to do is register the route so it can be used.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/bin/main.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[macro_use]</span><span class="w"> </span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">rocket</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">api</span>::<span class="n">post_handler</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[launch]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">rocket</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">_</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">rocket</span>::<span class="n">build</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">.</span><span class="n">mount</span><span class="p">(</span><span class="s">&#34;/api&#34;</span><span class="p">,</span><span class="w"> </span><span class="fm">routes!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">list_posts_handler</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">list_post_handler</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">create_post_handler</span><span class="p">,</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="p">])</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Now that&rsquo;s done, lets finally test the API with some data!</p>
+<hr>
+<h2 id="cr__-testing">CR__ Testing</h2>
+<p>With two of our four letters implemented, let&rsquo;s give it a small test run. Navigate back to the root directory and run the application.</p>
+<pre tabindex="0"><code>cargo run
+</code></pre><p>After the project has built, open up your favourite API testing tool and check the routes work as expected.</p>
+<p><img src="" alt="GET / working as intended">
+Figure: GET / working as intended</p>
+<p><img src="" alt="POST /new_post working as intended">
+Figure: POST /new_post working as intended</p>
+<hr>
+<h2 id="the-final-two-letters">The final two letters</h2>
+<p>The final two operations we need is updating and deleting. We&rsquo;ll implement updating via &ldquo;publishing&rdquo; a post and deleting by, well… deleting a post.</p>
+<p>Like with the past two letters, let&rsquo;s create our handlers.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/post_handler.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">shared</span>::<span class="n">response_models</span>::<span class="p">{</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">ResponseBody</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">application</span>::<span class="n">post</span>::<span class="p">{</span><span class="n">create</span><span class="p">,</span><span class="w"> </span><span class="n">read</span><span class="p">,</span><span class="w"> </span><span class="n">publish</span><span class="p">,</span><span class="w"> </span><span class="n">delete</span><span class="p">};</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="p">{</span><span class="n">Post</span><span class="p">,</span><span class="w"> </span><span class="n">NewPost</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="p">{</span><span class="n">get</span><span class="p">,</span><span class="w"> </span><span class="n">post</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">response</span>::<span class="n">status</span>::<span class="p">{</span><span class="n">NotFound</span><span class="p">,</span><span class="w"> </span><span class="n">Created</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">serde</span>::<span class="n">json</span>::<span class="n">Json</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[get(</span><span class="s">&#34;/publish/&lt;post_id&gt;&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">publish_post_handler</span><span class="p">(</span><span class="n">post_id</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">NotFound</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">post</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">publish</span>::<span class="n">publish_post</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span><span class="o">?</span><span class="p">;</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Post</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nb">Ok</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[get(</span><span class="s">&#34;/delete/&lt;post_id&gt;&#34;</span><span class="cp">)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">delete_post_handler</span><span class="p">(</span><span class="n">post_id</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">NotFound</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">posts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">delete</span>::<span class="n">delete_post</span><span class="p">(</span><span class="n">post_id</span><span class="p">)</span><span class="o">?</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Posts</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span><span class="w"> </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nb">Ok</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>And implement the logic for them.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/mod.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">create</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">read</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">publish</span><span class="p">;</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">delete</span><span class="p">;</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/publish.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="n">Post</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">shared</span>::<span class="n">response_models</span>::<span class="p">{</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">ResponseBody</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">infrastructure</span>::<span class="n">establish_connection</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">response</span>::<span class="n">status</span>::<span class="n">NotFound</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">publish_post</span><span class="p">(</span><span class="n">post_id</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="n">Post</span><span class="p">,</span><span class="w"> </span><span class="n">NotFound</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">schema</span>::<span class="n">posts</span>::<span class="n">dsl</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">update</span><span class="p">(</span><span class="n">posts</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">post_id</span><span class="p">)).</span><span class="n">set</span><span class="p">(</span><span class="n">published</span><span class="p">.</span><span class="n">eq</span><span class="p">(</span><span class="kc">true</span><span class="p">)).</span><span class="n">get_result</span>::<span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">establish_connection</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">post</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">diesel</span>::<span class="n">result</span>::<span class="n">Error</span>::<span class="n">NotFound</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Message</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;Error publishing post with id </span><span class="si">{}</span><span class="s"> - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">post_id</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">))};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">NotFound</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Database error - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">        
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// application/src/post/delete.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">shared</span>::<span class="n">response_models</span>::<span class="p">{</span><span class="n">Response</span><span class="p">,</span><span class="w"> </span><span class="n">ResponseBody</span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">infrastructure</span>::<span class="n">establish_connection</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">prelude</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">rocket</span>::<span class="n">response</span>::<span class="n">status</span>::<span class="n">NotFound</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">models</span>::<span class="n">Post</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">delete_post</span><span class="p">(</span><span class="n">post_id</span>: <span class="kt">i32</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Result</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="n">NotFound</span><span class="o">&lt;</span><span class="nb">String</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">schema</span>::<span class="n">posts</span>::<span class="n">dsl</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">use</span><span class="w"> </span><span class="n">domain</span>::<span class="n">schema</span>::<span class="n">posts</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span>: <span class="nc">Response</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">num_deleted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">diesel</span>::<span class="n">delete</span><span class="p">(</span><span class="n">posts</span><span class="p">.</span><span class="n">filter</span><span class="p">(</span><span class="n">id</span><span class="p">.</span><span class="n">eq</span><span class="p">(</span><span class="n">post_id</span><span class="p">))).</span><span class="n">execute</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">establish_connection</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">count</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">count</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">diesel</span>::<span class="n">result</span>::<span class="n">Error</span>::<span class="n">NotFound</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Message</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;Error deleting post with id </span><span class="si">{}</span><span class="s"> - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">post_id</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">))};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">NotFound</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Database error - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">        
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">num_deleted</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">match</span><span class="w"> </span><span class="n">posts</span>::<span class="n">table</span><span class="p">.</span><span class="n">select</span><span class="p">(</span><span class="n">posts</span>::<span class="n">all_columns</span><span class="p">).</span><span class="n">load</span>::<span class="o">&lt;</span><span class="n">Post</span><span class="o">&gt;</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">establish_connection</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nb">Ok</span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">posts_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">posts_</span><span class="p">.</span><span class="n">sort</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nb">Ok</span><span class="p">(</span><span class="n">posts_</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nb">Err</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&#34;Database error - </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">err</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Response</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">body</span>: <span class="nc">ResponseBody</span>::<span class="n">Message</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;Error - no post with id </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">post_id</span><span class="p">))};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">NotFound</span><span class="p">(</span><span class="n">serde_json</span>::<span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">response</span><span class="p">).</span><span class="n">unwrap</span><span class="p">()))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>And finally, register our new routes.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// api/src/bin/main.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[macro_use]</span><span class="w"> </span><span class="k">extern</span><span class="w"> </span><span class="k">crate</span><span class="w"> </span><span class="n">rocket</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">api</span>::<span class="n">post_handler</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[launch]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">rocket</span><span class="p">()</span><span class="w"> </span>-&gt; <span class="nc">_</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">rocket</span>::<span class="n">build</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">.</span><span class="n">mount</span><span class="p">(</span><span class="s">&#34;/api&#34;</span><span class="p">,</span><span class="w"> </span><span class="fm">routes!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">list_posts_handler</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">list_post_handler</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">create_post_handler</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">post_handler</span>::<span class="n">publish_post_handler</span><span class="p">,</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">            </span><span class="n">post_handler</span>::<span class="n">delete_post_handler</span><span class="p">,</span><span class="w"> </span><span class="c1">// 👈 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="p">])</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>And that&rsquo;s it! You now have a fully functioning API written in Rocket.rs, which connects to a PostgreSQL database via Diesel.rs. Not only that, but the application is structured following Clean Architecture.</p>
+<p>Your project should now look close to the following:</p>
+<pre tabindex="0"><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── api
+│   ├── Cargo.toml
+│   └── src
+│       ├── bin
+│       │   └── main.rs
+│       ├── lib.rs
+│       └── post_handler.rs
+├── application
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       └── post
+│           ├── create.rs
+│           ├── delete.rs
+│           ├── mod.rs
+│           ├── publish.rs
+│           └── read.rs
+├── domain
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       ├── models.rs
+│       └── schema.rs
+├── infrastructure
+│   ├── Cargo.toml
+│   ├── migrations
+│   │   └── 2022–11–18–090125_create_posts
+│   │       ├── up.sql
+│   │       └── down.sql
+│   └── src
+│       └── lib.rs
+└── shared
+    ├── Cargo.toml
+    └── src
+        ├── lib.rs
+        └── response_models.rs
+</code></pre><hr>
+<h2 id="further-improvements">Further Improvements</h2>
+<p>There are a few things that could be improved when looking at the application as a whole.</p>
+<p>Firstly, whenever we want to use the database we open up a new connection. This can become costly and resource intensive when on a larger scale. One way this could be fixed is by using a connection pool, Rocket.rs includes built in support for R2D2, a connection pool handler for Rust.</p>
+<p>Secondly, Diesel.rs is not asynchronous - this isn&rsquo;t too much of an issue on this scale. However, it can become a bigger problem for larger applications. There is, at the time writing, no asynchronous implementation from the official team behind Diesel.rs. As an alternative, an external crate is available to provide this functionality.</p>
+<p>Finally, a front-end UI could be created alongside the Rust API. Inside the root directory you would create a new project called web_ui using your front-end language of choice. All you&rsquo;d then need to do is run both projects separately, calling the Rust API from your front-end client. Here&rsquo;s my implementation of a front-end for some inspiration:</p>
+<p><img src="" alt="My implementation of the front-end UI">
+Figure: My implementation of the front-end UI</p>
+<hr>
+<h2 id="conclusion">Conclusion</h2>
+<p>Phew! What a journey. Not only have we learnt how to use Rocket.rs and Diesel.rs but we&rsquo;ve learnt how to use them together to create a blogging API in Rust. Along with that, we&rsquo;ve built a front-end for it and packaged it all together in a single project file following Clean Architecture.</p>
+<p>All code along with my implementation of the front-end can be found here: <a href="https://github.com/BrookJeynes/blog-rust">https://github.com/BrookJeynes/blog-rust</a></p>
+<p>I hope you guys learnt a lot today, and give the process a go yourself and create something new! Make sure to star the <a href="https://github.com/BrookJeynes/blog-rust">Github</a> repository and let me know what I should cover next or any feedback you have.</p>
+<p>Thanks for reading,<br>
+- Brook ❤</p>
+<hr>
+<h2 id="references">References</h2>
+<h3 id="crates">Crates:</h3>
+<ul>
+<li><a href="https://github.com/diesel-rs/diesel">Diesel.rs</a></li>
+<li><a href="https://github.com/SergioBenitez/Rocket/tree/v0.5-rc">Rocket.rs</a></li>
+<li><a href="https://github.com/serde-rs/serde">Serde-rs/serde</a></li>
+<li><a href="https://github.com/serde-rs/json">Serde-rs/json</a></li>
+</ul>
+<h3 id="other-guidesdocs-followed">Other guides/docs followed:</h3>
+<ul>
+<li><a href="https://github.com/diesel-rs/diesel">Diesel.rs - Getting started</a></li>
+<li><a href="https://rocket.rs/v0.5-rc/guide/">Rocket.rs - Getting started</a></li>
+<li><a href="https://medium.com/swlh/a-simple-crud-on-rust-with-rocket-rs-and-diesel-rs-e885672cb23d">A Simple Crud on Rust (With Rocket.rs and Diesel.rs)</a> (Uses deprecated packages for current rust version (v1.65.0) 🙁)</li>
+<li>Too many Stackoverflow posts to mention</li>
+</ul>
+</article>
+
+        </main><footer id="footer">
+    brookjeynes.dev
+</footer>
+</body>
+</html>

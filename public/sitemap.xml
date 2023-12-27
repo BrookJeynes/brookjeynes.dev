@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>brookjeynes.dev/</loc>
+    <lastmod>2023-12-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/posts/</loc>
+    <lastmod>2023-12-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/shared-memory-with-zig/</loc>
+    <lastmod>2023-12-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/socket-programming-in-zig/</loc>
+    <lastmod>2023-12-15T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/learning-leptos-building-a-todo-application-the-basics/</loc>
+    <lastmod>2023-04-20T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/operation-climb-mt-ngungun/</loc>
+    <lastmod>2023-03-18T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/jwt-authentication-for-api-routes-using-rocket.rs-and-rust/</loc>
+    <lastmod>2022-11-30T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/building-an-api-in-rust-with-rocket.rs-and-diesel.rs-clean-architecture/</loc>
+    <lastmod>2022-11-23T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>brookjeynes.dev/categories/</loc>
+  </url><url>
+    <loc>brookjeynes.dev/contact/</loc>
+  </url><url>
+    <loc>brookjeynes.dev/library/</loc>
+  </url><url>
+    <loc>brookjeynes.dev/tags/</loc>
+  </url>
+</urlset>

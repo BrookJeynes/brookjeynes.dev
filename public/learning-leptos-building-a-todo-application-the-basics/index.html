@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Just a personal site">
+    
+    
+    <link rel="shortcut icon" href="brookjeynes.dev/favicon.ico">
+    
+    
+    <link rel="stylesheet" href="/brookjeynes.dev/css/style.min.css">
+
+    <link rel="canonical" href="brookjeynes.dev/learning-leptos-building-a-todo-application-the-basics/" />
+    <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
+        rel="stylesheet">
+    <title>Learning Leptos: Building a Todo application - The basics</title>
+</head>
+<body><header id="banner">
+    <h2><u><a href="brookjeynes.dev">brookjeynes.dev</a></u></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="brookjeynes.dev/posts/" title="posts">posts</a>
+            </li><li>
+                <a href="brookjeynes.dev/library/" title="library">library</a>
+            </li><li>
+                <a href="brookjeynes.dev/contact/" title="contact">contact</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Learning Leptos: Building a Todo application - The basics</h1>
+        <div>
+                <time>April 20, 2023</time>
+            </div>
+    </header><h2 id="introduction">Introduction</h2>
+<p>Hey all, in this 3 part series we&rsquo;re going to build a simple todo application in <a href="https://github.com/leptos-rs/leptos">Leptos</a>.
+We&rsquo;ll start at the basics, building out the initial UI and learning the common Leptos
+language. Then, we&rsquo;ll add a database and move server logic into an API layer with Actix
+in the following parts.</p>
+<p>Here&rsquo;s a sneak peak of what you will have by the end of this part.
+<img src="https://user-images.githubusercontent.com/25432120/232404896-cad3efd9-735a-4484-a6b7-50c16037ffec.png" alt="Website design preview"></p>
+<p>All the code from this blog post can be found here: <a href="https://github.com/BrookJeynes/todo-leptos">https://github.com/BrookJeynes/todo-leptos</a></p>
+<p>This guide assumes:</p>
+<ul>
+<li>You have a basic-to-decent understanding of Rust concepts and the language syntax.</li>
+<li>You have Rust and Cargo installed</li>
+</ul>
+<p><em>Note: The code in this tutorial is used for teaching purposes and does not necessarily
+represent production ready code.</em></p>
+<p>Now that that’s sorted, let’s begin!</p>
+<hr>
+<h2 id="getting-started">Getting started</h2>
+<p>First we must enable nightly rust and add the ability for it to compile Rust to WebAssembly:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">rustup toolchain install nightly
+</span></span><span class="line"><span class="cl">rustup default nightly
+</span></span><span class="line"><span class="cl">rustup target add wasm32-unknown-unknown
+</span></span></code></pre></div><p>Next we need to install <a href="https://github.com/leptos-rs/leptos">Leptos</a> and it&rsquo;s build tool <a href="https://github.com/leptos-rs/cargo-leptos">Cargo-Leptos</a></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cargo install cargo-leptos
+</span></span></code></pre></div><p>Now we need to create our project. In this tutorial we will use the Tailwind example
+Leptos provides for us.</p>
+<p><em>Note: If you don&rsquo;t if you don&rsquo;t care about Tailwind integration, then all you have
+to do is run the following command to pull down the starter template and skip to
+the next section:</em></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cargo leptos new --git https://github.com/leptos-rs/start
+</span></span></code></pre></div><p>Currently, adding Tailwind is a little bit of a complicated process. Luckily for us,
+the team has released a Tailwind template we can simply just copy.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Clone the Leptos project</span>
+</span></span><span class="line"><span class="cl">git clone https://github.com/leptos-rs/leptos
+</span></span><span class="line"><span class="cl"><span class="c1"># Copy the tailwind example and call it todo-leptos</span>
+</span></span><span class="line"><span class="cl">mv leptos/examples/tailwind ./todo-leptos
+</span></span><span class="line"><span class="cl"><span class="c1"># Delete the Leptos project</span>
+</span></span><span class="line"><span class="cl">rm -rf leptos
+</span></span><span class="line"><span class="cl"><span class="c1"># Navigate into the project</span>
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> todo-leptos
+</span></span></code></pre></div><p>With our project created, let&rsquo;s add a few files, folders, and move some things around
+so we have a more ideal structure for long term.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="nb">cd</span> src
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">mkdir components
+</span></span><span class="line"><span class="cl">touch components.rs
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">mkdir pages
+</span></span><span class="line"><span class="cl">touch pages.rs
+</span></span><span class="line"><span class="cl">touch pages/home.rs
+</span></span></code></pre></div><p>Now that we have our pages and components set up, we need to expose these files
+to the rest of the project. Add the following code to the top of <code>lib.rs</code> and <code>main.rs</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">app</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">components</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">pages</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>Let&rsquo;s also move the <code>Home</code> component from <code>app.rs</code> to <code>home.rs</code> and remove everything
+inside it so we&rsquo;re left with a single <code>div</code> tag.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="o">&gt;&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>We now need to expose <code>Home</code> by adding it into <code>pages.rs</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">home</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>Import <code>Home</code> back into <code>app.rs</code> by adding the following code to the
+top of the file.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">pages</span>::<span class="n">home</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>Finally, update <code>Cargo.toml</code> to reflect the code below:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-toml" data-lang="toml"><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">name</span> <span class="p">=</span> <span class="s2">&#34;todo-leptos&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.1.0&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">edition</span> <span class="p">=</span> <span class="s2">&#34;2021&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">lib</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">crate-type</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;cdylib&#34;</span><span class="p">,</span> <span class="s2">&#34;rlib&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">dependencies</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">actix-files</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.6&#34;</span><span class="p">,</span> <span class="nx">optional</span> <span class="p">=</span> <span class="kc">true</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">actix-web</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;4&#34;</span><span class="p">,</span> <span class="nx">optional</span> <span class="p">=</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;macros&#34;</span><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">console_error_panic_hook</span> <span class="p">=</span> <span class="s2">&#34;0.1&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">console_log</span> <span class="p">=</span> <span class="s2">&#34;1&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">cfg-if</span> <span class="p">=</span> <span class="s2">&#34;1&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">leptos</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.2&#34;</span><span class="p">,</span> <span class="nx">default-features</span> <span class="p">=</span> <span class="kc">false</span><span class="p">,</span> <span class="nx">features</span> <span class="p">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;serde&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">leptos_meta</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.2&#34;</span><span class="p">,</span> <span class="nx">default-features</span> <span class="p">=</span> <span class="kc">false</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">leptos_actix</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.2&#34;</span><span class="p">,</span> <span class="nx">optional</span> <span class="p">=</span> <span class="kc">true</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">leptos_router</span> <span class="p">=</span> <span class="p">{</span> <span class="nx">version</span> <span class="p">=</span> <span class="s2">&#34;0.2&#34;</span><span class="p">,</span> <span class="nx">default-features</span> <span class="p">=</span> <span class="kc">false</span> <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">log</span> <span class="p">=</span> <span class="s2">&#34;0.4&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">simple_logger</span> <span class="p">=</span> <span class="s2">&#34;4&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">wasm-bindgen</span> <span class="p">=</span> <span class="s2">&#34;0.2&#34;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">features</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">hydrate</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;leptos/hydrate&#34;</span><span class="p">,</span> <span class="s2">&#34;leptos_meta/hydrate&#34;</span><span class="p">,</span> <span class="s2">&#34;leptos_router/hydrate&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">ssr</span> <span class="p">=</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;dep:actix-files&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;dep:actix-web&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;dep:leptos_actix&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;leptos/ssr&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;leptos_meta/ssr&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="s2">&#34;leptos_router/ssr&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl"><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">profile</span><span class="p">.</span><span class="nx">release</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="nx">codegen-units</span> <span class="p">=</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl"><span class="nx">lto</span> <span class="p">=</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl"><span class="nx">opt-level</span> <span class="p">=</span> <span class="s1">&#39;z&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">[</span><span class="nx">package</span><span class="p">.</span><span class="nx">metadata</span><span class="p">.</span><span class="nx">leptos</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name   </span>
+</span></span><span class="line"><span class="cl"><span class="nx">output-name</span> <span class="p">=</span> <span class="s2">&#34;tailwind&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.</span>
+</span></span><span class="line"><span class="cl"><span class="nx">site-root</span> <span class="p">=</span> <span class="s2">&#34;target/site&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The site-root relative folder where all compiled output (JS, WASM and CSS) is written</span>
+</span></span><span class="line"><span class="cl"><span class="c"># Defaults to pkg	</span>
+</span></span><span class="line"><span class="cl"><span class="nx">site-pkg-dir</span> <span class="p">=</span> <span class="s2">&#34;pkg&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to &lt;site-root&gt;/&lt;site-pkg&gt;/app.css</span>
+</span></span><span class="line"><span class="cl"><span class="nx">style-file</span> <span class="p">=</span> <span class="s2">&#34;style/output.css&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># [Optional] Files in the asset-dir will be copied to the site-root directory</span>
+</span></span><span class="line"><span class="cl"><span class="nx">assets-dir</span> <span class="p">=</span> <span class="s2">&#34;public&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.</span>
+</span></span><span class="line"><span class="cl"><span class="nx">site-addr</span> <span class="p">=</span> <span class="s2">&#34;127.0.0.1:3000&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The port to use for automatic reload monitoring</span>
+</span></span><span class="line"><span class="cl"><span class="nx">reload-port</span> <span class="p">=</span> <span class="mi">3001</span>
+</span></span><span class="line"><span class="cl"><span class="c"># [Optional] Command to use when running end2end tests. It will run in the end2end dir.</span>
+</span></span><span class="line"><span class="cl"><span class="nx">end2end-cmd</span> <span class="p">=</span> <span class="s2">&#34;npx playwright test&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c">#  The browserlist query used for optimizing the CSS.</span>
+</span></span><span class="line"><span class="cl"><span class="nx">browserquery</span> <span class="p">=</span> <span class="s2">&#34;defaults&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># Set by cargo-leptos watch when building with tha tool. Controls whether autoreload JS will be included in the head</span>
+</span></span><span class="line"><span class="cl"><span class="nx">watch</span> <span class="p">=</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The environment Leptos will run in, usually either &#34;DEV&#34; or &#34;PROD&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">env</span> <span class="p">=</span> <span class="s2">&#34;DEV&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="c"># The features to use when compiling the bin target</span>
+</span></span><span class="line"><span class="cl"><span class="c">#</span>
+</span></span><span class="line"><span class="cl"><span class="c"># Optional. Can be over-ridden with the command line parameter --bin-features</span>
+</span></span><span class="line"><span class="cl"><span class="nx">bin-features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;ssr&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c"># If the --no-default-features flag should be used when compiling the bin target</span>
+</span></span><span class="line"><span class="cl"><span class="c">#</span>
+</span></span><span class="line"><span class="cl"><span class="c"># Optional. Defaults to false.</span>
+</span></span><span class="line"><span class="cl"><span class="nx">bin-default-features</span> <span class="p">=</span> <span class="kc">false</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c"># The features to use when compiling the lib target</span>
+</span></span><span class="line"><span class="cl"><span class="c">#</span>
+</span></span><span class="line"><span class="cl"><span class="c"># Optional. Can be over-ridden with the command line parameter --lib-features</span>
+</span></span><span class="line"><span class="cl"><span class="nx">lib-features</span> <span class="p">=</span> <span class="p">[</span><span class="s2">&#34;hydrate&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c"># If the --no-default-features flag should be used when compiling the lib target</span>
+</span></span><span class="line"><span class="cl"><span class="c">#</span>
+</span></span><span class="line"><span class="cl"><span class="c"># Optional. Defaults to false.</span>
+</span></span><span class="line"><span class="cl"><span class="nx">lib-default-features</span> <span class="p">=</span> <span class="kc">false</span>
+</span></span></code></pre></div><p>And we&rsquo;re done! You should now have something that resembles the following.</p>
+<p><em>Note: Your structure may look a little different depending on whether you installed
+Tailwind or not, the following structure includes Tailwind files.</em></p>
+<pre tabindex="0"><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── end2end
+│  ├── package-lock.json
+│  ├── package.json
+│  ├── playwright.config.ts
+│  └── tests
+│     └── example.spec.ts
+├── input.css
+├── LICENSE
+├── Makefile.toml
+├── public
+│  └── favicon.ico
+├── README.md
+├── src
+│  ├── app.rs
+│  ├── components
+│  ├── components.rs
+│  ├── lib.rs
+│  ├── main.rs
+│  ├── pages
+│  │  └── home.rs
+│  └── pages.rs
+├── style
+│  └── output.css
+└── tailwind.config.js
+</code></pre><p>Let&rsquo;s give the project a test run to ensure everything is running correctly.</p>
+<p><em>Note: If you&rsquo;re using Tailwind, open up a terminal and run the following command
+in the background. This will ensure that the tailwind styles are kept updated on save.</em></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">npx tailwindcss -i ./input.css -o ./style/output.css --watch
+</span></span></code></pre></div><p>We can leverage the <code>cargo-leptos</code> tool to run the web app.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">cargo leptos watch
+</span></span></code></pre></div><p>Hopefully everything ran fine :)</p>
+<p>With that sorted, let&rsquo;s create our first component!</p>
+<h2 id="components">Components</h2>
+<p>So what are components? Components are the basic building blocks of web development
+and that&rsquo;s no different here. We can build components in Leptos by writing normal
+functions and adding the <code>#[component]</code> macro to it.</p>
+<p>Let&rsquo;s jump straight in and build our first component, something to handle rendering
+the individual todo items.</p>
+<p>We first need to create a file to house the component.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># todo-leptos/src/components/</span>
+</span></span><span class="line"><span class="cl">touch todo_item.rs
+</span></span></code></pre></div><p>and then register it within <code>components.rs</code></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">todo_item</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>With all that out of the way, let&rsquo;s start building out the structure. As mention
+previously, a Leptos component is a Rust function which has the <code>#[component]</code> macro
+above it. As well as this, every component must take in a reactive <code>Scope</code> and return
+<code>impl IntoView</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">todo!</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>So what is <code>Scope</code> and why are we returning <code>impl IntoView</code>?
+As described by the Leptos handbook:</p>
+<blockquote>
+<p>This <code>Scope</code> is our entrypoint into the reactive system</p>
+</blockquote>
+<p>To expand on this, it&rsquo;s what gives our components the ability to be reactive and
+render new outputs on the DOM based on certain conditions.</p>
+<p><code>impl IntoView</code> on the other hand is almost a wrapper type that allows us to return
+anything from a Leptos <code>view</code>. This is useful as the <code>view!{}</code> macro we&rsquo;ll use to write
+the HTML, generates <code>view</code> types.</p>
+<p>Speaking of the <code>view!{}</code> macro, let&rsquo;s use it to write some RSX, like JSX but using rust ;)
+The <code>view!{}</code> macro starts by taking in our <code>cx</code> variable followed by a series of RSX statements.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between items-center&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="s">&#34;todo task name&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between w-fit sm:w-1/3&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer&#34;</span><span class="o">&gt;</span><span class="s">&#34;Complete&#34;</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer ml-4 sm:ml-0&#34;</span><span class="o">&gt;</span><span class="s">&#34;Delete&#34;</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>I mean, wow! That&rsquo;s pretty much straight HTML. All that&rsquo;s really changed is the
+need to quote text. The power or Rust macros allows us to write
+(pretty much) standard HTML within our components.</p>
+<p>While we&rsquo;re inside of this file, let&rsquo;s setup a struct to represent what a TodoItem
+will look like.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[derive(Clone)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">id</span>: <span class="kt">u32</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">task</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">status</span>: <span class="kt">bool</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>We need to ensure our structures can be cloned as Leptos relies on data to be
+cloned from time to time. We&rsquo;ll learn more about signals later on in the post
+but when signals are created, they must own the data. To access the data from
+the signal, the value is cloned so the signal can continue owning the underlying value.</p>
+<p>With that all setup, let&rsquo;s add a <code>TodoItem</code> component to the Home page.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;h-screen&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>And with that we&rsquo;ve made our first component in Leptos!</p>
+<h2 id="props">Props</h2>
+<p>In the previous section we built a <code>TodoItem</code> component to render the individual
+todo items. However, you may have noticed that all we did was mock some data inside
+of the component. Wouldn&rsquo;t it be great if we could pass a <code>TodoItem</code> into the component?</p>
+<p>Using props we can do exactly that! Props allow us to pass different data structures
+into components. We define props just as we&rsquo;d define a function parameter, let&rsquo;s go
+ahead and add a <code>TodoItem</code> prop to our <code>TodoItem</code> component.</p>
+<p>While we&rsquo;re at it, lets also take the time to document our component. We can do
+so using normal Rust doc strings.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New prop!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>With a <code>TodoItem</code> now being passed in, let&rsquo;s display those values within the RSX.
+Variables can be displayed within RSX by surrounding the expresion in curly brackets - <code>{}</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[derive(Clone)]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">id</span>: <span class="kt">u32</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">task</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">status</span>: <span class="kt">bool</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between items-center&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">{</span><span class="n">todo_item</span><span class="p">.</span><span class="n">task</span><span class="p">}</span><span class="w"> </span><span class="c1">// 👈 New! 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">            </span><span class="o">&lt;/</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between w-fit sm:w-1/3&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer&#34;</span><span class="o">&gt;</span><span class="s">&#34;Complete&#34;</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer ml-4 sm:ml-0&#34;</span><span class="o">&gt;</span><span class="s">&#34;Delete&#34;</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>With the <code>TodoItem</code> component now taking in a prop, we need to update our instance of
+it within <code>home.rs</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">task</span>: <span class="nc">TodoItem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">id</span>: <span class="mi">0</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Take out the trash&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;h-screen&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                      </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="n">todo_item</span><span class="o">=</span><span class="p">{</span><span class="n">task</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><em>There are so many more things that can be done with props which you can read all
+about here: <a href="https://leptos-rs.github.io/leptos/view/03_components.html#components-and-props">https://leptos-rs.github.io/leptos/view/03_components.html#components-and-props</a></em></p>
+<p>Let&rsquo;s curve away from the <code>TodoItem</code> component for a second and build a new component
+that will teach us how to use <code>Children</code>. By having a component which takes in children,
+we can define wrapper components that wrap around some sort of conent. To demonstrate
+this, we&rsquo;ll build a <code>PageWrapper</code> component which takes in children and wraps it in
+some styling.</p>
+<p>We&rsquo;ll start by creating a new file, <code>page_wrapper.rs</code> and register our component
+within <code>components.rs</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># todo-leptos/src/components/</span>
+</span></span><span class="line"><span class="cl">touch page_wrapper.rs
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">todo_item</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">mod</span> <span class="nn">page_wrapper</span><span class="p">;</span><span class="w">
+</span></span></span></code></pre></div><p>Let&rsquo;s now define our component and pass in the <code>Children</code> prop.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/page_wrapper.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">PageWrapper</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> </span><span class="n">children</span>: <span class="nc">Children</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;h-screen&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">{</span><span class="n">children</span><span class="p">(</span><span class="n">cx</span><span class="p">)}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Just as we&rsquo;ve previously embedded code within RSX, we wrap our <code>children()</code> call
+in curly brackets - <code>{}</code>. When using <code>children</code> we must also pass in the components
+<code>Scope</code>, <code>cx</code> in our instance.</p>
+<p>We can now use our <code>PageWrapper</code> component within <code>home.rs</code> and pass in our <code>TodoItem</code> component
+as a child element.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">task</span>: <span class="nc">TodoItem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">id</span>: <span class="mi">0</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Take out the trash&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;todo_items&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="n">todo_item</span><span class="o">=</span><span class="p">{</span><span class="n">task</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Everything we place inside the <code>PageWrapper</code> tags will be rendered where we
+specified <code>children(cx)</code>.</p>
+<h2 id="iteration">Iteration</h2>
+<p>Displaying one todo item is cool and all but what if we wanted to store more?
+Let&rsquo;s go ahead and create a list of <code>TodoItem</code>s and find out how we can iterate
+through them and display them all on the page.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">todo_items</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">0</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Take out the trash&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">1</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Make the bed&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">2</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Mow the lawn&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">true</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">3</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Wash the dishes&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">];</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;todo_items&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// Let&#39;s comment this out for the mean time to avoid errors
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="c1">// &lt;TodoItem todo_item={task} /&gt;
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>There are a few ways we can display a collection of items. One of those ways is
+via the <code>&lt;For /&gt;</code> component. The <code>&lt;For /&gt;</code> component is a keyed dynamic list and
+is particularly useful for our usecase as our list of todo items will be changing
+often as the user creates and deletes items.</p>
+<p>As per the leptos handbook:</p>
+<blockquote>
+<p>The <For/> component &hellip; takes [in] three props:
+1. <code>each</code>: a function (such as a signal) that returns the items <code>T</code> to be iterated over
+2. <code>key</code>: a key function that takes <code>&amp;T</code> and returns a stable, unique key or ID
+3. <code>view</code>: renders each <code>T</code> into a view</p>
+</blockquote>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">todo_items</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">0</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Take out the trash&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">1</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Make the bed&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">2</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Mow the lawn&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">true</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="mi">3</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Wash the dishes&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">];</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;todo_items&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">For</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">each</span><span class="o">=</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">todo_items</span><span class="p">.</span><span class="n">clone</span><span class="p">()</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">key</span><span class="o">=|</span><span class="n">task</span><span class="o">|</span><span class="w"> </span><span class="n">task</span><span class="p">.</span><span class="n">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">view</span><span class="o">=</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">task</span>: <span class="nc">TodoItem</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="n">todo_item</span><span class="o">=</span><span class="p">{</span><span class="n">task</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>And just like that we have a series of todo items being rendered. Don&rsquo;t worry too
+much right now why we&rsquo;re using closures, we&rsquo;ll go over that in the next section.</p>
+<p><em>Read more about iteration here: <a href="https://leptos-rs.github.io/leptos/view/04_iteration.html">https://leptos-rs.github.io/leptos/view/04_iteration.html</a></em></p>
+<h2 id="reactive-data">Reactive data</h2>
+<p>A <code>Signal</code> is &ldquo;the basic unit of reactive change and state management&rdquo; (Leptos handbook)
+and is how we make things reactive in Leptos. Using <code>create_signal()</code> we can create
+a new reactive signal which we can read and write.</p>
+<p><code>create_signal()</code> returns a <code>(getter, setter)</code> tuple. We can use <code>&lt;getter&gt;.get()</code>,
+or <code>&lt;getter&gt;()</code> in nightly, to get the value, <code>&lt;setter&gt;.set()</code>, or <code>&lt;setter&gt;()</code>
+in nightly, to set the value, and <code>&lt;setter&gt;.update()</code> to update the value.</p>
+<p>Let&rsquo;s go ahead and turn our <code>todo_items</code> vector into a signal using <code>create_signal()</code>.
+While we&rsquo;re at it, let&rsquo;s also update the <code>&lt;For /&gt;</code> tag to take in our signal.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">todo_items</span><span class="p">,</span><span class="w"> </span><span class="n">set_todo_items</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">vec!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">id</span>: <span class="mi">0</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Take out the trash&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">id</span>: <span class="mi">1</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Make the bed&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">id</span>: <span class="mi">2</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Mow the lawn&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">status</span>: <span class="nc">true</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">id</span>: <span class="mi">3</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">task</span>: <span class="nb">String</span>::<span class="n">from</span><span class="p">(</span><span class="s">&#34;Wash the dishes&#34;</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">},</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">],</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;todo_items&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">For</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="c1">// We no longer need to use a closure as `todo_items` is now a signal
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                    </span><span class="n">each</span><span class="o">=</span><span class="p">{</span><span class="n">todo_items</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">key</span><span class="o">=|</span><span class="n">task</span><span class="o">|</span><span class="w"> </span><span class="n">task</span><span class="p">.</span><span class="n">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">view</span><span class="o">=</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">task</span>: <span class="nc">TodoItem</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="n">todo_item</span><span class="o">=</span><span class="p">{</span><span class="n">item</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>One thing you may have noticed is we moved from using a closure to just passing in
+our signal, why is that? While I won&rsquo;t try compete with the <a href="https://leptos-rs.github.io/leptos/interlude_functions.html">official handbook which
+explains why in much more detail</a>
+the tldr of it all is that closures give Leptos the ability to re-run certain statements
+allowing certain components to be updated when call to do so.</p>
+<p>Now that we know how to make things reactive, lets get some more practice in and
+make our <code>TodoItem</code> component responsive to change.</p>
+<p>Let&rsquo;s start with something simple, changing the todo task from in-progress to done.
+We&rsquo;ll start by creating a signal to handle the getter and setter methods.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">set_status</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">todo_item</span><span class="p">.</span><span class="n">status</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Now, we want <code>status</code> to update whenever we press the &ldquo;complete&rdquo; button. For this,
+we&rsquo;ll need to add an <code>on:click</code> event handler to the button.</p>
+<p><em>Read more about handlers here: <a href="https://docs.rs/leptos/latest/leptos/ev/trait.EventDescriptor.html#associatedtype.EventType">https://docs.rs/leptos/latest/leptos/ev/trait.EventDescriptor.html#associatedtype.EventType</a></em></p>
+<p>Let&rsquo;s create the logic for when our <code>on:click</code> handler fires. All we want to do is update
+the <code>status</code> and we can do so with the <code>.update()</code> method on the setter <code>set_status</code>.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">set_status</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">todo_item</span><span class="p">.</span><span class="n">status</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Handlers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// We must use a closure here to make the click function reactive.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">on_click</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Update gives us a `&amp;T` so we must dereference the value to use it
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="n">set_status</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">|</span><span class="n">status</span><span class="o">|</span><span class="w"> </span><span class="o">*</span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!*</span><span class="n">status</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>With the <code>on_click</code> handler defined, let&rsquo;s add it to our buttons callback.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">set_status</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">todo_item</span><span class="p">.</span><span class="n">status</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Handlers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">on_click</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">set_status</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">|</span><span class="n">status</span><span class="o">|</span><span class="w"> </span><span class="o">*</span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!*</span><span class="n">status</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between items-center&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">{</span><span class="n">todo_item</span><span class="p">.</span><span class="n">task</span><span class="p">}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between w-fit sm:w-1/3&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> </span><span class="n">on</span>:<span class="nc">click</span><span class="o">=</span><span class="p">{</span><span class="n">on_click</span><span class="p">}</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer&#34;</span><span class="o">&gt;</span><span class="s">&#34;Complete&#34;</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer ml-4 sm:ml-0&#34;</span><span class="o">&gt;</span><span class="s">&#34;Delete&#34;</span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Using the same method as above, let&rsquo;s add some reactive text and button styling.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="n">set_status</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">todo_item</span><span class="p">.</span><span class="n">status</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Handlers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">on_click</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">set_status</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="o">|</span><span class="n">status</span><span class="o">|</span><span class="w"> </span><span class="o">*</span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!*</span><span class="n">status</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Classes
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">task_title_style</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="fm">format!</span><span class="p">(</span><span class="s">&#34;text-md </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">status</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;line-through&#34;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">complete_button_style</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">format!</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="s">&#34;hover:cursor-pointer </span><span class="si">{}</span><span class="s">&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">status</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="s">&#34;opacity-100&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="s">&#34;opacity-50&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between items-center&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">            </span><span class="o">&lt;</span><span class="n">span</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="p">{</span><span class="n">task_title_style</span><span class="p">}</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">{</span><span class="n">todo_item</span><span class="p">.</span><span class="n">task</span><span class="p">}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between w-fit sm:w-1/3&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">on</span>:<span class="nc">click</span><span class="o">=</span><span class="p">{</span><span class="n">on_click</span><span class="p">}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">class</span><span class="o">=</span><span class="p">{</span><span class="n">complete_button_style</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">{</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">status</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;Complete&#34;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;Undo&#34;</span><span class="w"> </span><span class="p">}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer ml-4 sm:ml-0&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="s">&#34;Delete&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Look at us go, Reactivity for the win!</p>
+<p>There&rsquo;s one final thing we need to go over within this section before finishing
+up with the <code>TodoItem</code> component. How would we go about removing
+a task from our task list? We can&rsquo;t have the delete logic in the component but we
+also want the user to click a button within the component. It would be great if
+our component could call a function external to itself.</p>
+<p>We can achieve this behaviour using callbacks. Callback functions are functions we
+pass into components and have their internal logic decide when the function is called.</p>
+<p>Let&rsquo;s jump back into <code>Home</code> and define the function we&rsquo;ll use to delete a task
+from our task list.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">todo_items</span><span class="p">,</span><span class="w"> </span><span class="n">set_todo_items</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">vec!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="p">],</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Handlers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">delete_todo_item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">todo_id</span>: <span class="kt">u32</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Here we use the `retain()` method to filter out all 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="c1">// elements that don&#39;t match the predicate
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="n">set_todo_items</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">todo_items</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">todo_items</span><span class="p">.</span><span class="n">retain</span><span class="p">(</span><span class="o">|</span><span class="n">todo_item</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="n">todo_item</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">todo_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Now we need to alter <code>TodoItem</code> to take in a callback function. We do so by defining
+some generic, <code>F</code> in our instance, that maps out to the callbacks signature. Since
+we&rsquo;re here, we&rsquo;ll also add an <code>on:click</code> method to the delete button using the
+new callback.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/components/todo_item.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="sd">/// A todo item component
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">TodoItem</span><span class="o">&lt;</span><span class="n">F</span><span class="o">&gt;</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="sd">/// The todo item the component will use to populate its internal data
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">todo_item</span>: <span class="nc">TodoItem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="sd">/// A callback to delete a TodoItem
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="n">delete_callback</span>: <span class="nc">F</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">where</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Remember our delete callback takes in a TodoItem ID
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="n">F</span>: <span class="nb">Fn</span><span class="p">(</span><span class="kt">u32</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">&#39;static</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between items-center&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">span</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="p">{</span><span class="n">task_title_style</span><span class="p">}</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">{</span><span class="n">todo_item</span><span class="p">.</span><span class="n">task</span><span class="p">}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">span</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex justify-between w-fit sm:w-1/3&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">on</span>:<span class="nc">click</span><span class="o">=</span><span class="p">{</span><span class="n">on_click</span><span class="p">}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">class</span><span class="o">=</span><span class="p">{</span><span class="n">complete_button_style</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">{</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="n">status</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;Complete&#34;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">&#34;Undo&#34;</span><span class="w"> </span><span class="p">}}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">button</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                    </span><span class="n">on</span>:<span class="nc">click</span><span class="o">=</span><span class="p">{</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">delete_callback</span><span class="p">(</span><span class="n">todo_item</span><span class="p">.</span><span class="n">id</span><span class="p">)}</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cusor-pointer ml-4 sm:ml-0&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="s">&#34;Delete&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;/</span><span class="n">button</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>To close off this section let&rsquo;s pass in the callback from <code>home.rs</code> and pat
+ourselves on the back, we&rsquo;re nearly at the finish line for part 1.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">todo_items</span><span class="p">,</span><span class="w"> </span><span class="n">set_todo_items</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_signal</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="fm">vec!</span><span class="p">[</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="p">],</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Handlers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">delete_todo_item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">todo_id</span>: <span class="kt">u32</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Here we use the `retain()` method to filter out all 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="c1">// elements that don&#39;t match the predicate
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="n">set_todo_items</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">todo_items</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">todo_items</span><span class="p">.</span><span class="n">retain</span><span class="p">(</span><span class="o">|</span><span class="n">todo_item</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="n">todo_item</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">todo_id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;todo_items&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">For</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">each</span><span class="o">=</span><span class="p">{</span><span class="n">todo_items</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">key</span><span class="o">=|</span><span class="n">task</span><span class="o">|</span><span class="w"> </span><span class="n">task</span><span class="p">.</span><span class="n">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">view</span><span class="o">=</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">task</span>: <span class="nc">TodoItem</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                                                    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                            </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="n">todo_item</span><span class="o">=</span><span class="p">{</span><span class="n">item</span><span class="p">}</span><span class="w"> </span><span class="n">delete_callback</span><span class="o">=</span><span class="p">{</span><span class="n">delete_todo_item</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><em>Read more about callbacks here: <a href="https://leptos-rs.github.io/leptos/view/08_parent_child.html#2-use-a-callback">https://leptos-rs.github.io/leptos/view/08_parent_child.html#2-use-a-callback</a></em></p>
+<h2 id="forms">Forms</h2>
+<p>With our todo items able to be complete and deleted, all we need to do now is create
+a way of adding new tasks. To do this, we&rsquo;ll set up a <code>&lt;form&gt;</code> and learn how to reference
+nodes and use the <code>on:submit</code> callback.</p>
+<p>To start off, let&rsquo;s create the HTML for the form.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;add-task&#34;</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex flex-col rounded mb-20 text-black&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">h2</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;text-2xl font-medium mb-4&#34;</span><span class="o">&gt;</span><span class="s">&#34;Add Task&#34;</span><span class="o">&lt;/</span><span class="n">h2</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">form</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;w-full flex flex-col&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex items-center justify-between&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">&lt;</span><span class="n">input</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="k">type</span><span class="o">=</span><span class="s">&#34;text&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">placeholder</span><span class="o">=</span><span class="s">&#34;Add a new task&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">&lt;</span><span class="n">input</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cursor-pointer&#34;</span><span class="w"> </span><span class="k">type</span><span class="o">=</span><span class="s">&#34;submit&#34;</span><span class="w"> </span><span class="n">value</span><span class="o">=</span><span class="s">&#34;Submit&#34;</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;/</span><span class="n">form</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;todo_items&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                </span><span class="o">&lt;</span><span class="n">h2</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;text-2xl font-medium mb-4&#34;</span><span class="o">&gt;</span><span class="s">&#34;Tasks&#34;</span><span class="o">&lt;/</span><span class="n">h2</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">For</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">each</span><span class="o">=</span><span class="p">{</span><span class="n">todo_items</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">key</span><span class="o">=|</span><span class="n">task</span><span class="o">|</span><span class="w"> </span><span class="n">task</span><span class="p">.</span><span class="n">id</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">view</span><span class="o">=</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">cx</span><span class="p">,</span><span class="w"> </span><span class="n">task</span>: <span class="nc">TodoItem</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                                                    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                            </span><span class="o">&lt;</span><span class="n">TodoItem</span><span class="w"> </span><span class="n">todo_item</span><span class="o">=</span><span class="p">{</span><span class="n">item</span><span class="p">}</span><span class="w"> </span><span class="n">delete_callback</span><span class="o">=</span><span class="p">{</span><span class="n">delete_todo_item</span><span class="p">}</span><span class="w"> </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Inside our form we have an text input box and a submit button. To get the information
+from inside the text input box on submit, we&rsquo;ll need to create a <code>NodeRef</code>. &ldquo;[A]
+NodeRef to access the input once when we want to get its value.&rdquo; (Leptos handbook).</p>
+<p>To create a <code>NodeRef</code>, the <code>create_node_ref()</code> function can be used. Let&rsquo;s also
+create the function to handle the <code>on:submit</code> callback.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="n">html</span>::<span class="n">Input</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="n">ev</span>::<span class="n">SubmitEvent</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Signals
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">todo_task_input_ref</span>: <span class="nc">NodeRef</span><span class="o">&lt;</span><span class="n">Input</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">create_node_ref</span><span class="p">(</span><span class="n">cx</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// Helpers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="sd">/// Helper function to grab the largest ID.
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="sd">/// Used to know what the next todo item ID should be
+</span></span></span><span class="line"><span class="cl"><span class="sd"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">last_todo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">todo_items</span><span class="p">().</span><span class="n">iter</span><span class="p">().</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">todo_item</span><span class="o">|</span><span class="w"> </span><span class="n">todo_item</span><span class="p">.</span><span class="n">id</span><span class="p">).</span><span class="n">max</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// Handlers
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">on_submit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">ev</span>: <span class="nc">SubmitEvent</span><span class="o">|</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Prevent the page from refreshing
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="n">ev</span><span class="p">.</span><span class="n">prevent_default</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Clone the vector to mutate it
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">new_todo_items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">todo_items</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Get the next node ID
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">todo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">last_todo_id</span><span class="p">().</span><span class="n">unwrap_or_default</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Create a new TodoItem and push it to our new todo_items vector
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="n">new_todo_items</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">TodoItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">id</span>: <span class="nc">todo_id</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">task</span>: <span class="nc">todo_task_input_ref</span><span class="p">().</span><span class="n">expect</span><span class="p">(</span><span class="s">&#34;&lt;input&gt; to exist&#34;</span><span class="p">).</span><span class="n">value</span><span class="p">(),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">status</span>: <span class="nc">false</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">});</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Set our todo_items signal to have the new todo_items vector
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">        </span><span class="n">set_todo_items</span><span class="p">.</span><span class="n">set</span><span class="p">(</span><span class="n">new_todo_items</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">};</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>Now all we need to do is add the <code>on_submit</code> handler to the submit input button
+and add the <code>todo_task_input_ref</code> to the text input.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-rust" data-lang="rust"><span class="line"><span class="cl"><span class="c1">// todo-leptos/src/pages/home.rs
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="n">html</span>::<span class="n">Input</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="n">leptos</span>::<span class="n">ev</span>::<span class="n">SubmitEvent</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">todo_item</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">use</span><span class="w"> </span><span class="k">crate</span>::<span class="n">components</span>::<span class="n">page_wrapper</span>::<span class="o">*</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="cp">#[component]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span> <span class="nf">Home</span><span class="p">(</span><span class="n">cx</span>: <span class="nc">Scope</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">impl</span><span class="w"> </span><span class="n">IntoView</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="fm">view!</span><span class="w"> </span><span class="p">{</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">cx</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">id</span><span class="o">=</span><span class="s">&#34;add-task&#34;</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex flex-col rounded mb-20 text-black&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">h2</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;text-2xl font-medium mb-4&#34;</span><span class="o">&gt;</span><span class="s">&#34;Add Task&#34;</span><span class="o">&lt;/</span><span class="n">h2</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;</span><span class="n">form</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;w-full flex flex-col&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                    </span><span class="n">on</span>:<span class="nc">submit</span><span class="o">=</span><span class="p">{</span><span class="n">on_submit</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="o">&lt;</span><span class="n">div</span><span class="w"> </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;flex items-center justify-between&#34;</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">&lt;</span><span class="n">input</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="k">type</span><span class="o">=</span><span class="s">&#34;text&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">placeholder</span><span class="o">=</span><span class="s">&#34;Add a new task&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="c1">// 👇 New!
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">                            </span><span class="n">node_ref</span><span class="o">=</span><span class="p">{</span><span class="n">todo_task_input_ref</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">&lt;</span><span class="n">input</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">class</span><span class="o">=</span><span class="s">&#34;hover:cursor-pointer&#34;</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="k">type</span><span class="o">=</span><span class="s">&#34;submit&#34;</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                            </span><span class="n">value</span><span class="o">=</span><span class="s">&#34;Submit&#34;</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">                        </span><span class="o">/&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="o">&lt;/</span><span class="n">form</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="o">&lt;/</span><span class="n">div</span><span class="o">&gt;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="o">&lt;/</span><span class="n">PageWrapper</span><span class="o">&gt;</span><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><em>Read more about forms here: <a href="https://leptos-rs.github.io/leptos/view/05_forms.html#uncontrolled-inputs">https://leptos-rs.github.io/leptos/view/05_forms.html#uncontrolled-inputs</a></em></p>
+<p>And we&rsquo;re done! You can now add, update, and remove todo items.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Today we covered:</p>
+<ul>
+<li>Creating a Leptos project</li>
+<li>Creating components</li>
+<li>Passing in props</li>
+<li>Passing in children</li>
+<li>Adding reactivity via signals</li>
+<li>Creating and passing callbacks</li>
+<li>Creating node references and dealing with forms</li>
+<li>And more&hellip;</li>
+</ul>
+<p>We covered a lot of important concepts and going forward will be using them and
+learning even more. To learn more about what we covered today, I&rsquo;ve linked the
+Leptos handbook in the &ldquo;References / Resources&rdquo; section below which I highly
+recommend reading along with this guide.</p>
+<p>All the code from this blog post can be found here: <a href="https://github.com/BrookJeynes/todo-leptos">https://github.com/BrookJeynes/todo-leptos</a>
+If you liked the post, please star the <a href="https://github.com/BrookJeynes/todo-leptos">GitHub repository</a> and
+if you have any comments, feel free to leave them below, I always love hearing
+what you guys have to say.</p>
+<p>Look out for part 2 and 3 where we create a database and API to interact with from
+our front-end.</p>
+<p>I&rsquo;d like to end with saying a huge thank you to the team working at Leptos who not
+only proof-read this blog post but who have also been working incredibly hard to bring such
+an amazing framework to the community. Your work is appreciated</p>
+<p>Thanks for reading,<br>
+- Brook ❤</p>
+<h2 id="references--resources">References / Resources</h2>
+<ul>
+<li><a href="https://leptos-rs.github.io/leptos/">The Leptos Handbook</a></li>
+</ul>
+</article>
+
+        </main><footer id="footer">
+    brookjeynes.dev
+</footer>
+</body>
+</html>
