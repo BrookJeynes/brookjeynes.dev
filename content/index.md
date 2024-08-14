@@ -9,8 +9,7 @@
 
 brook, just a tech. 
 
-you can find my cv [here](/brook-jeynes-cv.pdf). i enjoy hiking, bouldering, and 
-playing music.
+i enjoy hiking, bouldering, and playing music. you can find my cv [here](/brook-jeynes-cv.pdf). 
 
 ### notable projects
 <ul id="posts">
