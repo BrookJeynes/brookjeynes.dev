@@ -1,0 +1,12 @@
+<extend template="base.shtml">
+<title id="title" var="$page.title"></title>
+<main id="content">
+  <div id="page" var="$page.content"></div>
+
+  <ul loop="$page.subpages()" id="posts">
+    <li>
+      <a href="$loop.it.link()" var="$loop.it.title"></a>
+      <small var="$loop.it.date.format('January 02, 2006')"></small>
+    </li>
+  </ul>
+</main>

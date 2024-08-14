@@ -1,2 +1,2 @@
-.vercel
-public
+zig-out/
+.zig-cache
