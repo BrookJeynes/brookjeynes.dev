@@ -13,6 +13,7 @@ pub fn build(b: *std.Build) !void {
         .localized_variants = &.{
             .{
                 .locale_code = "en-US",
+                .output_prefix_override = "",
                 .title = "brookjeynes.dev",
                 .content_dir_path = "content",
             },
