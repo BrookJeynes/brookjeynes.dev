@@ -8,6 +8,7 @@ pub fn build(b: *std.Build) !void {
         .assets_dir_path = "assets",
         .static_assets = &.{
             "brook-jeynes-cv.pdf",
+            "CNAME",
         },
         .i18n_dir_path = "i18n",
         .localized_variants = &.{
