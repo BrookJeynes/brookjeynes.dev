@@ -12,6 +12,7 @@ brook, just a tech.
 i enjoy hiking, bouldering, and playing music. you can find my cv [here](/brook-jeynes-cv.pdf). 
 
 ### notable projects
+```=html
 <ul id="posts">
     <li>
         <a href="https://github.com/BrookJeynes/zfe">zfe</a> <br>
@@ -38,3 +39,4 @@ i enjoy hiking, bouldering, and playing music. you can find my cv [here](/brook-
         <small>a home for all my projects.</small>
     </li>
 </ul>
+```

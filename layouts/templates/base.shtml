@@ -28,9 +28,9 @@
       </h2>
       <nav>
         <ul>
-          <li><a class="$page.link().contains('/posts/').then('selected', '')" href="/posts/" var="$i18n.get('posts', 'posts')"></a></li>
-          <li><a class="$page.link().contains('/library/').then('selected', '')" href="/library/" var="$i18n.get('library', 'library')"></a></li>
-          <li><a class="$page.link().contains('/contact/').then('selected', '')" href="/contact/" var="$i18n.get('contact', 'contact')"></a></li>
+          <li><a class="$page.link().contains('/posts/').then('selected', '')" href="$site.page('/posts').link()" var="$i18n.get('posts', 'posts')"></a></li>
+          <li><a class="$page.link().contains('/library/').then('selected', '')" href="$site.page('/library').link()" var="$i18n.get('library', 'library')"></a></li>
+          <li><a class="$page.link().contains('/contact/').then('selected', '')" href="$site.page('/contact').link()" var="$i18n.get('contact', 'contact')"></a></li>
         </ul>
       </nav>
     </header>

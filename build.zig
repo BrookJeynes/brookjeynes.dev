@@ -11,16 +11,18 @@ pub fn build(b: *std.Build) !void {
             "CNAME",
         },
         .i18n_dir_path = "i18n",
-        .localized_variants = &.{
+        .locales = &.{
             .{
-                .locale_code = "en-US",
+                .code = "en-US",
+                .name = "English",
                 .output_prefix_override = "",
-                .title = "brookjeynes.dev",
+                .site_title = "brookjeynes.dev",
                 .content_dir_path = "content",
             },
             .{
-                .locale_code = "ko-KR",
-                .title = "brookjeynes.dev",
+                .code = "ko-KR",
+                .name = "Korean",
+                .site_title = "brookjeynes.dev",
                 .content_dir_path = "content",
             },
         },

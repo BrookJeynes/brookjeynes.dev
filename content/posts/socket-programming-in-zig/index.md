@@ -10,6 +10,7 @@ Socket programming in Zig can be incredibly simple when compared with C.
 In this video, I'll dive into creating a simple socket server, sending HTTP 
 information, and making the server multi-threaded.
 
+```=html
 <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden">
     <iframe 
         src="https://www.youtube.com/embed/V7Jql_SZ7kY" 
@@ -18,6 +19,7 @@ information, and making the server multi-threaded.
         title="YouTube Video"
     ></iframe>
 </div>
+```
 
 Disclaimer: This code is not production safe and just for educational purposes.
 

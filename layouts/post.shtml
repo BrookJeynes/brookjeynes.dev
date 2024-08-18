@@ -7,5 +7,5 @@
       <time var="$page.date.format('January 02, 2006')"></time>
     </div>
   </header>
-  <div var="$page.content"></div>
+  <div var="$page.content()"></div>
 </main>
