@@ -1,10 +1,8 @@
 ---
-{
-    .title = "home",
-    .date = @date("2024-07-26T00:00:00"),
-    .author = "Brook Jeynes",
-    .layout = "index.shtml",
-}  
+.title = "home",
+.date = @date("2024-07-26T00:00:00"),
+.author = "Brook Jeynes",
+.layout = "index.shtml",
 ---
 
 brook, just a tech. 
