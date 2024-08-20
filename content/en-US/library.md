@@ -1,16 +1,15 @@
 ---
-{
-    .title = "library",
-    .date = @date("2024-07-26T00:00:00"),
-    .author = "Brook Jeynes",
-    .layout = "index.shtml",
-}  
+.title = "library",
+.date = @date("2024-07-26T00:00:00"),
+.author = "Brook Jeynes",
+.layout = "index.shtml",
 ---
 
 ### library
 a collection of books i've read or am reading.
 
 #### tech
+```=html
 <ul id="posts">
     <li>
         <span>C Programming Language, 2nd Edition</span>
@@ -53,32 +52,40 @@ a collection of books i've read or am reading.
         <small>Bruce A. Tate</small>
     </li>
 </ul>
+```
 
 #### electronics
+```=html
 <ul id="posts">
     <li>
         <span>Learning the Art of Electronics: A Hands-On Lab Course</span>
         <small>Thomas C. Hayes, Paul Horowitz</small>
     </li>
 </ul>
+```
 
 #### fiction
+```=html
 <ul id="posts">
     <li>
         <span>Kokoro</span>
         <small>Natsume Sōseki</small>
     </li>
 </ul>
+```
 
 #### philosophy
+```=html
 <ul id="posts">
     <li>
         <span>Letters from a Stoic</span>
         <small>Seneca</small>
     </li>
 </ul>
+```
 
 #### manga
+```=html
 <ul id="posts">
     <li>
         <span>No Longer Human</span>
@@ -93,8 +100,10 @@ a collection of books i've read or am reading.
         <small>Junji Ito</small>
     </li>
 </ul>
+```
     
 #### self help
+```=html
 <ul id="posts">
     <li>
         <span>The Subtle Art of Not Giving a F*ck: A Counterintuitive Approach to Living a Good Life</span>
@@ -105,3 +114,4 @@ a collection of books i've read or am reading.
         <small>James Clear</small>
     </li>
 </ul>
+```

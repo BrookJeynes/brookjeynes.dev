@@ -2,12 +2,12 @@
 <html>
   <head id="head">
     <meta charset="UTF-8">
-    <meta name="description" content="Brook. Just a tech.">
+    <meta name="description" content="Brook, Just a tech.">
     <meta property="og:title" content="$page.title">
     <meta property="og:type" content="website">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title id="title">
-      <super>
+      <ctx text="$page.title"></ctx>
       - brookjeynes.dev
     </title>
     <link rel="stylesheet" type="text/css" href="$site.asset('style.css').link()">
@@ -24,13 +24,13 @@
   <body>
     <header id="banner">
       <h2>
-        <a href="/">brookjeynes.dev</a>
+        <a href="$site.page('/').link()">brookjeynes.dev</a>
       </h2>
       <nav>
         <ul>
-          <li><a class="$page.link().contains('/posts/').then('selected', '')" href="/posts/" var="$i18n.get('posts', 'posts')"></a></li>
-          <li><a class="$page.link().contains('/library/').then('selected', '')" href="/library/" var="$i18n.get('library', 'library')"></a></li>
-          <li><a class="$page.link().contains('/contact/').then('selected', '')" href="/contact/" var="$i18n.get('contact', 'contact')"></a></li>
+          <li><a class="$page.link().contains('/posts/').then('selected', '')" href="$site.page('posts').link()" text="$i18n.get('posts', 'posts')"></a></li>
+          <li><a class="$page.link().contains('/library/').then('selected', '')" href="$site.page('library').link()" text="$i18n.get('library', 'library')"></a></li>
+          <li><a class="$page.link().contains('/contact/').then('selected', '')" href="$site.page('contact').link()" text="$i18n.get('contact', 'contact')"></a></li>
         </ul>
       </nav>
     </header>

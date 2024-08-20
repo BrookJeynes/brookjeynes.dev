@@ -1,10 +1,8 @@
 ---
-{
-    .title = "home",
-    .date = @date("2024-07-26T00:00:00"),
-    .author = "Brook Jeynes",
-    .layout = "index.shtml",
-}  
+.title = "home",
+.date = @date("2024-07-26T00:00:00"),
+.author = "Brook Jeynes",
+.layout = "index.shtml",
 ---
 
 brook, just a tech. 
@@ -12,6 +10,7 @@ brook, just a tech.
 i enjoy hiking, bouldering, and playing music. you can find my cv [here](/brook-jeynes-cv.pdf). 
 
 ### notable projects
+```=html
 <ul id="posts">
     <li>
         <a href="https://github.com/BrookJeynes/zfe">zfe</a> <br>
@@ -38,3 +37,4 @@ i enjoy hiking, bouldering, and playing music. you can find my cv [here](/brook-
         <small>a home for all my projects.</small>
     </li>
 </ul>
+```
