@@ -17,13 +17,13 @@ pub fn build(b: *std.Build) !void {
                 .name = "English",
                 .output_prefix_override = "",
                 .site_title = "brookjeynes.dev",
-                .content_dir_path = "content",
+                .content_dir_path = "content/en-US",
             },
             .{
                 .code = "ko-KR",
                 .name = "Korean",
                 .site_title = "brookjeynes.dev",
-                .content_dir_path = "content",
+                .content_dir_path = "content/ko-KR",
             },
         },
     });
