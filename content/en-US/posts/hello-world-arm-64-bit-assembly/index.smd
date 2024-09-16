@@ -24,7 +24,7 @@ instructions, and writing a simple hello world program.
 
 Disclaimer: This code is not production safe and just for educational purposes.
 
-You can find the code written in this video here: [github.com/arm64bit-hello-world/](github.com/arm64bit-hello-world/)
+You can find the code written in this video here: [github.com/arm64bit-hello-world/]($link.url('https://github.com/arm64bit-hello-world/'))
 
 Corrections are in the pinned ERRATA comment.
 
@@ -41,9 +41,9 @@ Timestamps:
 - [4:47] Outro
 
 Resources:
-- [Programming with 64-Bit ARM Assembly Language]()
-- [ARM 64-bit syscall docs]()
-- [ARM Assembly By Example]()
+- [Programming with 64-Bit ARM Assembly Language]($link.url('https://www.oreilly.com/library/view/programming-with-64-bit/9781484258811/'))
+- [ARM 64-bit syscall docs]($link.url('https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md'))
+- [ARM Assembly By Example]($link.url('https://armasm.com/'))
 
 \------------------------------------------------------------------------------- <br>
 🎵 Music “simple things” by ‘moonboy’ <br>

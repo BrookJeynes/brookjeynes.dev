@@ -1,18 +1,18 @@
 <extend template="base.shtml">
 <main id="content">
-  <div id="page" html="$page.content()"></div>
+  <div id="page" :html="$page.content()"></div>
 
   <!-- <ul loop="$site.locale('en-US').page('posts').subpages()" id="posts"> -->
-  <ul loop="$page.subpages()" id="posts">
+  <ul :loop="$page.subpages()" id="posts">
     <li>
-      <div if="$site.localeCode().eql('en-US')">
-        <a href="$loop.it.link()" text="$loop.it.title"></a>
-        <small text="$loop.it.date.format('January 02, 2006')"></small>
+      <div :if="$site.localeCode().eql('en-US')">
+        <a href="$loop.it.link()" :text="$loop.it.title"></a>
+        <small :text="$loop.it.date.format('January 02, 2006')"></small>
       </div>
 
-      <div if="$site.localeCode().eql('ko-KR')">
-        <a href="$loop.it.link()" text="$loop.it.title"></a>
-        <small text="$loop.it.date.format('January 02, 2006')"></small>
+      <div :if="$site.localeCode().eql('ko-KR')">
+        <a href="$loop.it.link()" :text="$loop.it.title"></a>
+        <small :text="$loop.it.date.format('January 02, 2006')"></small>
       </div>
     </li>
   </ul>

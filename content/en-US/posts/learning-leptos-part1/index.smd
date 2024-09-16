@@ -6,13 +6,13 @@
 --- 
 
 ## Introduction
-Hey all, in this 3 part series we're going to build a simple todo application in [Leptos](https://github.com/leptos-rs/leptos).
+Hey all, in this 3 part series we're going to build a simple todo application in [Leptos]($link.url('https://github.com/leptos-rs/leptos')).
 We'll start at the basics, building out the initial UI and learning the common Leptos
 language. Then, we'll add a database and move server logic into an API layer with Actix
 in the following parts.
 
 Here's a sneak peak of what you will have by the end of this part.
-![Website design preview](https://user-images.githubusercontent.com/25432120/232404896-cad3efd9-735a-4484-a6b7-50c16037ffec.png)
+[Website design preview]($link.url('https://user-images.githubusercontent.com/25432120/232404896-cad3efd9-735a-4484-a6b7-50c16037ffec.png'))
 
 All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos
 
@@ -35,7 +35,7 @@ rustup default nightly
 rustup target add wasm32-unknown-unknown
 ```
 
-Next we need to install [Leptos](https://github.com/leptos-rs/leptos) and it's build tool [Cargo-Leptos](https://github.com/leptos-rs/cargo-leptos)
+Next we need to install [Leptos]($link.url('https://github.com/leptos-rs/leptos')) and it's build tool [Cargo-Leptos]($link.url('https://github.com/leptos-rs/cargo-leptos'))
 ```bash
 cargo install cargo-leptos
 ```
