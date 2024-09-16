@@ -7,7 +7,7 @@
     <meta property="og:type" content="website">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title id="title">
-      Learning Leptos: Building a Todo application - The basics
+      
       - brookjeynes.dev
     </title>
     <link rel="stylesheet" type="text/css" href="/style.css">
@@ -43,7 +43,7 @@
       <time>April 20, 2023</time>
     </div>
   </header>
-  <div><h2>Introduction</h2><p>Hey all, in this 3 part series we're going to build a simple todo application in <a href="https://github.com/leptos-rs/leptos">Leptos</a>. We'll start at the basics, building out the initial UI and learning the common Leptos language. Then, we'll add a database and move server logic into an API layer with Actix in the following parts.</p><p>Here's a sneak peak of what you will have by the end of this part. <figure data-title=""><img src="https://user-images.githubusercontent.com/25432120/232404896-cad3efd9-735a-4484-a6b7-50c16037ffec.png" alt="Website design preview" title=""></figure></p><p>All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos</p><p>This guide assumes:</p><ul><li>You have a basic-to-decent understanding of Rust concepts and the language syntax.</li><li>You have Rust and Cargo installed</li></ul><p><em>Note: The code in this tutorial is used for teaching purposes and does not necessarily represent production ready code.</em></p><p>Now that that’s sorted, let’s begin!</p><hr><h2>Getting started</h2><p>First we must enable nightly rust and add the ability for it to compile Rust to WebAssembly:</p><pre><code class="bash"><span class="constant">rustup</span> <span class="constant">toolchain</span> <span class="constant">install</span> <span class="constant">nightly</span>
+  <div><h2>Introduction</h2><p>Hey all, in this 3 part series we're going to build a simple todo application in <a href="https://github.com/leptos-rs/leptos">Leptos</a>. We'll start at the basics, building out the initial UI and learning the common Leptos language. Then, we'll add a database and move server logic into an API layer with Actix in the following parts.</p><p>Here's a sneak peak of what you will have by the end of this part. <a href="https://user-images.githubusercontent.com/25432120/232404896-cad3efd9-735a-4484-a6b7-50c16037ffec.png">Website design preview</a></p><p>All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos</p><p>This guide assumes:</p><ul><li>You have a basic-to-decent understanding of Rust concepts and the language syntax.</li><li>You have Rust and Cargo installed</li></ul><p><em>Note: The code in this tutorial is used for teaching purposes and does not necessarily represent production ready code.</em></p><p>Now that that’s sorted, let’s begin!</p><hr><h2>Getting started</h2><p>First we must enable nightly rust and add the ability for it to compile Rust to WebAssembly:</p><pre><code class="bash"><span class="constant">rustup</span> <span class="constant">toolchain</span> <span class="constant">install</span> <span class="constant">nightly</span>
 <span class="constant">rustup</span> <span class="constant">default</span> <span class="constant">nightly</span>
 <span class="constant">rustup</span> <span class="constant">target</span> <span class="constant">add</span> <span class="constant">wasm32-unknown-unknown</span>
 </code></pre>
@@ -90,73 +90,73 @@
 <p>Import <code>Home</code> back into <code>app.rs</code> by adding the following code to the top of the file.</p><pre><code class="rust"><span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">pages</span><span class="punctuation delimiter">::</span><span class="constant">home</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
 </code></pre>
 <p>Finally, update <code>Cargo.toml</code> to reflect the code below:</p><pre><code class="toml"><span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
-<span class="property">name</span> <span class="operator">=</span> <span class="string">"todo-leptos"</span>
-<span class="property">version</span> <span class="operator">=</span> <span class="string">"0.1.0"</span>
-<span class="property">edition</span> <span class="operator">=</span> <span class="string">"2021"</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;todo-leptos&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
 
 <span class="punctuation bracket">[</span><span class="property">lib</span><span class="punctuation bracket">]</span>
-<span class="property">crate-type</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">"cdylib"</span><span class="punctuation delimiter">,</span> <span class="string">"rlib"</span><span class="punctuation bracket">]</span>
+<span class="property">crate-type</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;cdylib&quot;</span><span class="punctuation delimiter">,</span> <span class="string">&quot;rlib&quot;</span><span class="punctuation bracket">]</span>
 
 <span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
-<span class="property">actix-files</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">"0.6"</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span> <span class="punctuation bracket">}</span>
-<span class="property">actix-web</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">"4"</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">"macros"</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
-<span class="property">console_error_panic_hook</span> <span class="operator">=</span> <span class="string">"0.1"</span>
-<span class="property">console_log</span> <span class="operator">=</span> <span class="string">"1"</span>
-<span class="property">cfg-if</span> <span class="operator">=</span> <span class="string">"1"</span>
-<span class="property">leptos</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">"0.2"</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span>
-  <span class="string">"serde"</span><span class="punctuation delimiter">,</span>
+<span class="property">actix-files</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.6&quot;</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span> <span class="punctuation bracket">}</span>
+<span class="property">actix-web</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;4&quot;</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;macros&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">console_error_panic_hook</span> <span class="operator">=</span> <span class="string">&quot;0.1&quot;</span>
+<span class="property">console_log</span> <span class="operator">=</span> <span class="string">&quot;1&quot;</span>
+<span class="property">cfg-if</span> <span class="operator">=</span> <span class="string">&quot;1&quot;</span>
+<span class="property">leptos</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span>
+  <span class="string">&quot;serde&quot;</span><span class="punctuation delimiter">,</span>
 <span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
-<span class="property">leptos_meta</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">"0.2"</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span> <span class="punctuation bracket">}</span>
-<span class="property">leptos_actix</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">"0.2"</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span> <span class="punctuation bracket">}</span>
-<span class="property">leptos_router</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">"0.2"</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span> <span class="punctuation bracket">}</span>
-<span class="property">log</span> <span class="operator">=</span> <span class="string">"0.4"</span>
-<span class="property">simple_logger</span> <span class="operator">=</span> <span class="string">"4"</span>
-<span class="property">wasm-bindgen</span> <span class="operator">=</span> <span class="string">"0.2"</span>
+<span class="property">leptos_meta</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span> <span class="punctuation bracket">}</span>
+<span class="property">leptos_actix</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span> <span class="punctuation bracket">}</span>
+<span class="property">leptos_router</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span> <span class="punctuation bracket">}</span>
+<span class="property">log</span> <span class="operator">=</span> <span class="string">&quot;0.4&quot;</span>
+<span class="property">simple_logger</span> <span class="operator">=</span> <span class="string">&quot;4&quot;</span>
+<span class="property">wasm-bindgen</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span>
 
 <span class="punctuation bracket">[</span><span class="property">features</span><span class="punctuation bracket">]</span>
-<span class="property">hydrate</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">"leptos/hydrate"</span><span class="punctuation delimiter">,</span> <span class="string">"leptos_meta/hydrate"</span><span class="punctuation delimiter">,</span> <span class="string">"leptos_router/hydrate"</span><span class="punctuation bracket">]</span>
+<span class="property">hydrate</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;leptos/hydrate&quot;</span><span class="punctuation delimiter">,</span> <span class="string">&quot;leptos_meta/hydrate&quot;</span><span class="punctuation delimiter">,</span> <span class="string">&quot;leptos_router/hydrate&quot;</span><span class="punctuation bracket">]</span>
 <span class="property">ssr</span> <span class="operator">=</span> <span class="punctuation bracket">[</span>
-  <span class="string">"dep:actix-files"</span><span class="punctuation delimiter">,</span>
-  <span class="string">"dep:actix-web"</span><span class="punctuation delimiter">,</span>
-  <span class="string">"dep:leptos_actix"</span><span class="punctuation delimiter">,</span>
-  <span class="string">"leptos/ssr"</span><span class="punctuation delimiter">,</span>
-  <span class="string">"leptos_meta/ssr"</span><span class="punctuation delimiter">,</span>
-  <span class="string">"leptos_router/ssr"</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;dep:actix-files&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;dep:actix-web&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;dep:leptos_actix&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;leptos/ssr&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;leptos_meta/ssr&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;leptos_router/ssr&quot;</span><span class="punctuation delimiter">,</span>
 <span class="punctuation bracket">]</span>
 
 <span class="punctuation bracket">[</span><span class="property">profile</span><span class="punctuation delimiter">.</span><span class="property">release</span><span class="punctuation bracket">]</span>
 <span class="property">codegen-units</span> <span class="operator">=</span> <span class="number">1</span>
 <span class="property">lto</span> <span class="operator">=</span> <span class="constant builtin">true</span>
-<span class="property">opt-level</span> <span class="operator">=</span> <span class="string">'z'</span>
+<span class="property">opt-level</span> <span class="operator">=</span> <span class="string">&apos;z&apos;</span>
 
 <span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation delimiter">.</span><span class="property">metadata</span><span class="punctuation delimiter">.</span><span class="property">leptos</span><span class="punctuation bracket">]</span>
 <span class="comment"># The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name   </span>
-<span class="property">output-name</span> <span class="operator">=</span> <span class="string">"tailwind"</span>
+<span class="property">output-name</span> <span class="operator">=</span> <span class="string">&quot;tailwind&quot;</span>
 <span class="comment"># The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.</span>
-<span class="property">site-root</span> <span class="operator">=</span> <span class="string">"target/site"</span>
+<span class="property">site-root</span> <span class="operator">=</span> <span class="string">&quot;target/site&quot;</span>
 <span class="comment"># The site-root relative folder where all compiled output (JS, WASM and CSS) is written</span>
 <span class="comment"># Defaults to pkg	</span>
-<span class="property">site-pkg-dir</span> <span class="operator">=</span> <span class="string">"pkg"</span>
+<span class="property">site-pkg-dir</span> <span class="operator">=</span> <span class="string">&quot;pkg&quot;</span>
 <span class="comment"># [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to &lt;site-root&gt;/&lt;site-pkg&gt;/app.css</span>
-<span class="property">style-file</span> <span class="operator">=</span> <span class="string">"style/output.css"</span>
+<span class="property">style-file</span> <span class="operator">=</span> <span class="string">&quot;style/output.css&quot;</span>
 <span class="comment"># [Optional] Files in the asset-dir will be copied to the site-root directory</span>
-<span class="property">assets-dir</span> <span class="operator">=</span> <span class="string">"public"</span>
+<span class="property">assets-dir</span> <span class="operator">=</span> <span class="string">&quot;public&quot;</span>
 <span class="comment"># The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.</span>
-<span class="property">site-addr</span> <span class="operator">=</span> <span class="string">"127.0.0.1:3000"</span>
+<span class="property">site-addr</span> <span class="operator">=</span> <span class="string">&quot;127.0.0.1:3000&quot;</span>
 <span class="comment"># The port to use for automatic reload monitoring</span>
 <span class="property">reload-port</span> <span class="operator">=</span> <span class="number">3001</span>
 <span class="comment"># [Optional] Command to use when running end2end tests. It will run in the end2end dir.</span>
-<span class="property">end2end-cmd</span> <span class="operator">=</span> <span class="string">"npx playwright test"</span>
+<span class="property">end2end-cmd</span> <span class="operator">=</span> <span class="string">&quot;npx playwright test&quot;</span>
 <span class="comment">#  The browserlist query used for optimizing the CSS.</span>
-<span class="property">browserquery</span> <span class="operator">=</span> <span class="string">"defaults"</span>
+<span class="property">browserquery</span> <span class="operator">=</span> <span class="string">&quot;defaults&quot;</span>
 <span class="comment"># Set by cargo-leptos watch when building with tha tool. Controls whether autoreload JS will be included in the head</span>
 <span class="property">watch</span> <span class="operator">=</span> <span class="constant builtin">false</span>
-<span class="comment"># The environment Leptos will run in, usually either "DEV" or "PROD"</span>
-<span class="property">env</span> <span class="operator">=</span> <span class="string">"DEV"</span>
+<span class="comment"># The environment Leptos will run in, usually either &quot;DEV&quot; or &quot;PROD&quot;</span>
+<span class="property">env</span> <span class="operator">=</span> <span class="string">&quot;DEV&quot;</span>
 <span class="comment"># The features to use when compiling the bin target</span>
 <span class="comment">#</span>
 <span class="comment"># Optional. Can be over-ridden with the command line parameter --bin-features</span>
-<span class="property">bin-features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">"ssr"</span><span class="punctuation bracket">]</span>
+<span class="property">bin-features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;ssr&quot;</span><span class="punctuation bracket">]</span>
 
 <span class="comment"># If the --no-default-features flag should be used when compiling the bin target</span>
 <span class="comment">#</span>
@@ -166,7 +166,7 @@
 <span class="comment"># The features to use when compiling the lib target</span>
 <span class="comment">#</span>
 <span class="comment"># Optional. Can be over-ridden with the command line parameter --lib-features</span>
-<span class="property">lib-features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">"hydrate"</span><span class="punctuation bracket">]</span>
+<span class="property">lib-features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;hydrate&quot;</span><span class="punctuation bracket">]</span>
 
 <span class="comment"># If the --no-default-features flag should be used when compiling the lib target</span>
 <span class="comment">#</span>
@@ -225,13 +225,13 @@
 <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between items-center"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
             &lt;<span class="constant">span</span>&gt;
-                <span class="string">"todo task name"</span>
+                <span class="string">&quot;todo task name&quot;</span>
             &lt;/<span class="constant">span</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between w-fit sm:w-1/3"</span>&gt;
-                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">"hover:cusor-pointer"</span>&gt;<span class="string">"Complete"</span>&lt;/<span class="constant">button</span>&gt;
-                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">"hover:cusor-pointer ml-4 sm:ml-0"</span>&gt;<span class="string">"Delete"</span>&lt;/<span class="constant">button</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer&quot;</span>&gt;<span class="string">&quot;Complete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>&gt;<span class="string">&quot;Delete&quot;</span>&lt;/<span class="constant">button</span>&gt;
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">div</span>&gt;
     <span class="punctuation bracket">}</span>
@@ -260,8 +260,8 @@
 <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"h-screen"</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;h-screen&quot;</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&quot;</span>&gt;
                 <span class="comment">// 👇 New!</span>
                 &lt;<span class="constant">TodoItem</span> /&gt;
             &lt;/<span class="constant">div</span>&gt;
@@ -306,13 +306,13 @@
 <span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between items-center"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
             &lt;<span class="constant">span</span>&gt;
                 <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> <span class="comment">// 👈 New! </span>
             &lt;/<span class="constant">span</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between w-fit sm:w-1/3"</span>&gt;
-                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">"hover:cusor-pointer"</span>&gt;<span class="string">"Complete"</span>&lt;/<span class="constant">button</span>&gt;
-                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">"hover:cusor-pointer ml-4 sm:ml-0"</span>&gt;<span class="string">"Delete"</span>&lt;/<span class="constant">button</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer&quot;</span>&gt;<span class="string">&quot;Complete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>&gt;<span class="string">&quot;Delete&quot;</span>&lt;/<span class="constant">button</span>&gt;
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">div</span>&gt;
     <span class="punctuation bracket">}</span>
@@ -326,14 +326,14 @@
 <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
     <span class="keyword">let</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span> = <span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
         <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
-        <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">::</span><span class="function">from</span><span class="punctuation bracket">(</span><span class="string">"Take out the trash"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+        <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">::</span><span class="function">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
         <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
     <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
 
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"h-screen"</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;h-screen&quot;</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&quot;</span>&gt;
                       <span class="comment">// 👇 New!</span>
                 &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">task</span><span class="punctuation bracket">}</span> /&gt;
             &lt;/<span class="constant">div</span>&gt;
@@ -356,8 +356,8 @@
 <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">PageWrapper</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> <span class="variable parameter">children</span><span class="punctuation delimiter">:</span> <span class="type">Children</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span>
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"h-screen"</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;h-screen&quot;</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&quot;</span>&gt;
                 <span class="punctuation bracket">{</span><span class="constant">children</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span>
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">div</span>&gt;
@@ -374,7 +374,7 @@
 <span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
     <span class="keyword">let</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span> = <span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
         <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
-        <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">::</span><span class="function">from</span><span class="punctuation bracket">(</span><span class="string">"Take out the trash"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+        <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">::</span><span class="function">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
         <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
     <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
 
@@ -382,7 +382,7 @@
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         <span class="comment">// 👇 New!</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"todo_items"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
                 &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">task</span><span class="punctuation bracket">}</span> /&gt;
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">PageWrapper</span>&gt;    
@@ -400,22 +400,22 @@
     <span class="keyword">let</span> <span class="constant">todo_items</span><span class="punctuation delimiter">:</span> <span class="type">Vec</span>&lt;<span class="type">TodoItem</span><span class="punctuation bracket">&gt;</span> = <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Take out the trash"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">1</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Make the bed"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Make the bed&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">2</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Mow the lawn"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Mow the lawn&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">3</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Wash the dishes"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Wash the dishes&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
     <span class="punctuation bracket">]</span><span class="punctuation delimiter">;</span>
@@ -423,8 +423,8 @@
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"todo_items"</span>&gt;
-                <span class="comment">// Let's comment this out for the mean time to avoid errors</span>
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                <span class="comment">// Let&apos;s comment this out for the mean time to avoid errors</span>
                 <span class="comment">// &lt;TodoItem todo_item={task} /&gt;</span>
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">PageWrapper</span>&gt;    
@@ -441,22 +441,22 @@
     <span class="keyword">let</span> <span class="constant">todo_items</span><span class="punctuation delimiter">:</span> <span class="type">Vec</span>&lt;<span class="type">TodoItem</span><span class="punctuation bracket">&gt;</span> = <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Take out the trash"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">1</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Make the bed"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Make the bed&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">2</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Mow the lawn"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Mow the lawn&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">3</span><span class="punctuation delimiter">,</span>
-            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Wash the dishes"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Wash the dishes&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
     <span class="punctuation bracket">]</span><span class="punctuation delimiter">;</span>
@@ -464,7 +464,7 @@
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"todo_items"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
                 <span class="comment">// 👇 New!</span>
                 &lt;<span class="constant">For</span>
                     <span class="constant">each</span>=<span class="constant">move</span> || <span class="punctuation bracket">{</span> <span class="constant">todo_items</span><span class="punctuation delimiter">.</span><span class="constant">clone</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span>
@@ -495,22 +495,22 @@
         <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
             <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
                 <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
-                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Take out the trash"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
                 <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
             <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
             <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
                 <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">1</span><span class="punctuation delimiter">,</span>
-                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Make the bed"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Make the bed&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
                 <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
             <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
             <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
                 <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">2</span><span class="punctuation delimiter">,</span>
-                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Mow the lawn"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Mow the lawn&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
                 <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span>
             <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
             <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
                 <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">3</span><span class="punctuation delimiter">,</span>
-                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">"Wash the dishes"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Wash the dishes&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
                 <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
             <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">]</span><span class="punctuation delimiter">,</span>
@@ -519,7 +519,7 @@
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"todo_items"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
                 <span class="comment">// 👇 New!</span>
                 &lt;<span class="constant">For</span>
                     <span class="comment">// We no longer need to use a closure as `todo_items` is now a signal</span>
@@ -537,7 +537,7 @@
     <span class="punctuation bracket">}</span>
 <span class="punctuation bracket">}</span>
 </code></pre>
-<p>One thing you may have noticed is we moved from using a closure to just passing in our signal, why is that? While I won't try compete with the <a href="https://leptos-rs.github.io/leptos/interlude_functions.html">official handbook which explains why in much more detail</a> the tldr of it all is that closures give Leptos the ability to re-run certain statements allowing certain components to be updated when call to do so.</p><p>Now that we know how to make things reactive, lets get some more practice in and make our <code>TodoItem</code> component responsive to change.</p><p>Let's start with something simple, changing the todo task from in-progress to done. We'll start by creating a signal to handle the getter and setter methods.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<p>One thing you may have noticed is we moved from using a closure to just passing in our signal, why is that? While I won't try compete with the <a href="https://leptos-rs.github.io/leptos/interlude_functions.html" target="_blank">official handbook which explains why in much more detail</a> the tldr of it all is that closures give Leptos the ability to re-run certain statements allowing certain components to be updated when call to do so.</p><p>Now that we know how to make things reactive, lets get some more practice in and make our <code>TodoItem</code> component responsive to change.</p><p>Let's start with something simple, changing the todo task from in-progress to done. We'll start by creating a signal to handle the getter and setter methods.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
 <span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
 
 <span class="comment">// ...</span>
@@ -608,14 +608,14 @@
 
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between items-center"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
             &lt;<span class="constant">span</span>&gt;
                 <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> 
             &lt;/<span class="constant">span</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between w-fit sm:w-1/3"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
                 <span class="comment">// 👇 New!</span>
-                &lt;<span class="constant">button</span> <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> <span class="constant">class</span>=<span class="string">"hover:cusor-pointer"</span>&gt;<span class="string">"Complete"</span>&lt;/<span class="constant">button</span>&gt;
-                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">"hover:cusor-pointer ml-4 sm:ml-0"</span>&gt;<span class="string">"Delete"</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer&quot;</span>&gt;<span class="string">&quot;Complete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>&gt;<span class="string">&quot;Delete&quot;</span>&lt;/<span class="constant">button</span>&gt;
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">div</span>&gt;
     <span class="punctuation bracket">}</span>
@@ -643,38 +643,38 @@
 
     <span class="comment">// 👇 New!</span>
     <span class="comment">// Classes</span>
-    <span class="keyword">let</span> <span class="constant">task_title_style</span> = <span class="keyword">move</span> || <span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">"text-md {}"</span><span class="punctuation delimiter">,</span> <span class="keyword">if</span> <span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">"line-through"</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">""</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+    <span class="keyword">let</span> <span class="constant">task_title_style</span> = <span class="keyword">move</span> || <span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;text-md {}&quot;</span><span class="punctuation delimiter">,</span> <span class="keyword">if</span> <span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">&quot;line-through&quot;</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">&quot;&quot;</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
     <span class="keyword">let</span> <span class="constant">complete_button_style</span> = <span class="keyword">move</span> || <span class="punctuation bracket">{</span>
         <span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span>
-            <span class="string">"hover:cursor-pointer {}"</span><span class="punctuation delimiter">,</span>
+            <span class="string">&quot;hover:cursor-pointer {}&quot;</span><span class="punctuation delimiter">,</span>
             <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
-                <span class="string">"opacity-100"</span>
+                <span class="string">&quot;opacity-100&quot;</span>
             <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span>
-                <span class="string">"opacity-50"</span>
+                <span class="string">&quot;opacity-50&quot;</span>
             <span class="punctuation bracket">}</span>
         <span class="punctuation bracket">)</span>
     <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
 
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between items-center"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
             <span class="comment">// 👇 New!</span>
             &lt;<span class="constant">span</span> <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">task_title_style</span><span class="punctuation bracket">}</span>&gt;
                 <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> 
             &lt;/<span class="constant">span</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between w-fit sm:w-1/3"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
                 <span class="comment">// 👇 New!</span>
                 &lt;<span class="constant">button</span> 
                     <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> 
                     <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">complete_button_style</span><span class="punctuation bracket">}</span>
                 &gt;
-                    <span class="punctuation bracket">{</span><span class="constant">move</span> || <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">"Complete"</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">"Undo"</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">}</span>
+                    <span class="punctuation bracket">{</span><span class="constant">move</span> || <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Complete&quot;</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Undo&quot;</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">}</span>
                 &lt;/<span class="constant">button</span>&gt;
 
                 &lt;<span class="constant">button</span> 
-                    <span class="constant">class</span>=<span class="string">"hover:cusor-pointer ml-4 sm:ml-0"</span>
+                    <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>
                 &gt;
-                    <span class="string">"Delete"</span>
+                    <span class="string">&quot;Delete&quot;</span>
                 &lt;/<span class="constant">button</span>&gt;
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">div</span>&gt;
@@ -700,7 +700,7 @@
     <span class="comment">// Handlers</span>
     <span class="keyword">let</span> <span class="constant">delete_todo_item</span> = <span class="keyword">move</span> |<span class="variable parameter">todo_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">u32</span>| <span class="punctuation bracket">{</span>
         <span class="comment">// Here we use the `retain()` method to filter out all </span>
-        <span class="comment">// elements that don't match the predicate</span>
+        <span class="comment">// elements that don&apos;t match the predicate</span>
         <span class="constant">set_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span><span class="keyword">move</span> |<span class="constant">todo_items</span>| <span class="punctuation bracket">{</span>
                 <span class="constant">todo_items</span><span class="punctuation delimiter">.</span><span class="function method">retain</span><span class="punctuation bracket">(</span>|<span class="constant">todo_item</span>| <span class="punctuation bracket">{</span>
                         <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">id</span> != <span class="constant">todo_id</span>
@@ -733,30 +733,30 @@
 <span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span>
 <span class="keyword">where</span>
     <span class="comment">// Remember our delete callback takes in a TodoItem ID</span>
-    <span class="type">F</span><span class="punctuation delimiter">:</span> <span class="type">Fn</span><span class="punctuation bracket">(</span><span class="type builtin">u32</span><span class="punctuation bracket">)</span> + <span class="operator">'</span><span class="label">static</span><span class="punctuation delimiter">,</span>
+    <span class="type">F</span><span class="punctuation delimiter">:</span> <span class="type">Fn</span><span class="punctuation bracket">(</span><span class="type builtin">u32</span><span class="punctuation bracket">)</span> + <span class="operator">&apos;</span><span class="label">static</span><span class="punctuation delimiter">,</span>
 <span class="punctuation bracket">{</span>
     <span class="comment">// ...</span>
 
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
-        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between items-center"</span>&gt;
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
             &lt;<span class="constant">span</span> <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">task_title_style</span><span class="punctuation bracket">}</span>&gt;
                 <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> 
             &lt;/<span class="constant">span</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex justify-between w-fit sm:w-1/3"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
                 &lt;<span class="constant">button</span> 
                     <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> 
                     <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">complete_button_style</span><span class="punctuation bracket">}</span>
                 &gt;
-                    <span class="punctuation bracket">{</span><span class="constant">move</span> || <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">"Complete"</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">"Undo"</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">}</span>
+                    <span class="punctuation bracket">{</span><span class="constant">move</span> || <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Complete&quot;</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Undo&quot;</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">}</span>
                 &lt;/<span class="constant">button</span>&gt;
 
                 &lt;<span class="constant">button</span> 
                     <span class="comment">// 👇 New!</span>
                     <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">move</span> |_| <span class="constant">delete_callback</span><span class="punctuation bracket">(</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">id</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span> 
-                    <span class="constant">class</span>=<span class="string">"hover:cusor-pointer ml-4 sm:ml-0"</span>
+                    <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>
                 &gt;
-                    <span class="string">"Delete"</span>
+                    <span class="string">&quot;Delete&quot;</span>
                 &lt;/<span class="constant">button</span>&gt;
             &lt;/<span class="constant">div</span>&gt;
         &lt;/<span class="constant">div</span>&gt;
@@ -781,7 +781,7 @@
     <span class="comment">// Handlers</span>
     <span class="keyword">let</span> <span class="constant">delete_todo_item</span> = <span class="keyword">move</span> |<span class="variable parameter">todo_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">u32</span>| <span class="punctuation bracket">{</span>
         <span class="comment">// Here we use the `retain()` method to filter out all </span>
-        <span class="comment">// elements that don't match the predicate</span>
+        <span class="comment">// elements that don&apos;t match the predicate</span>
         <span class="constant">set_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span><span class="keyword">move</span> |<span class="constant">todo_items</span>| <span class="punctuation bracket">{</span>
                 <span class="constant">todo_items</span><span class="punctuation delimiter">.</span><span class="function method">retain</span><span class="punctuation bracket">(</span>|<span class="constant">todo_item</span>| <span class="punctuation bracket">{</span>
                         <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">id</span> != <span class="constant">todo_id</span>
@@ -794,7 +794,7 @@
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"todo_items"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
                 &lt;<span class="constant">For</span>
                     <span class="constant">each</span>=<span class="punctuation bracket">{</span><span class="constant">todo_items</span><span class="punctuation bracket">}</span>
                     <span class="constant">key</span>=|<span class="constant">task</span>| <span class="constant">task</span><span class="punctuation delimiter">.</span><span class="constant">id</span>
@@ -824,23 +824,23 @@
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
             <span class="comment">// 👇 New!</span>
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"add-task"</span> <span class="constant">class</span>=<span class="string">"flex flex-col rounded mb-20 text-black"</span>&gt;
-                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">"text-2xl font-medium mb-4"</span>&gt;<span class="string">"Add Task"</span>&lt;/<span class="constant">h2</span>&gt;
-                &lt;<span class="constant">form</span> <span class="constant">class</span>=<span class="string">"w-full flex flex-col"</span>&gt;
-                    &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex items-center justify-between"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;add-task&quot;</span> <span class="constant">class</span>=<span class="string">&quot;flex flex-col rounded mb-20 text-black&quot;</span>&gt;
+                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">&quot;text-2xl font-medium mb-4&quot;</span>&gt;<span class="string">&quot;Add Task&quot;</span>&lt;/<span class="constant">h2</span>&gt;
+                &lt;<span class="constant">form</span> <span class="constant">class</span>=<span class="string">&quot;w-full flex flex-col&quot;</span>&gt;
+                    &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex items-center justify-between&quot;</span>&gt;
                         &lt;<span class="constant">input</span>
-                            <span class="constant">class</span>=<span class="string">"w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none"</span>
-                            <span class="keyword">type</span>=<span class="string">"text"</span>
-                            <span class="constant">placeholder</span>=<span class="string">"Add a new task"</span>
+                            <span class="constant">class</span>=<span class="string">&quot;w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none&quot;</span>
+                            <span class="keyword">type</span>=<span class="string">&quot;text&quot;</span>
+                            <span class="constant">placeholder</span>=<span class="string">&quot;Add a new task&quot;</span>
                         /&gt;
-                        &lt;<span class="constant">input</span> <span class="constant">class</span>=<span class="string">"hover:cursor-pointer"</span> <span class="keyword">type</span>=<span class="string">"submit"</span> <span class="constant">value</span>=<span class="string">"Submit"</span> /&gt;
+                        &lt;<span class="constant">input</span> <span class="constant">class</span>=<span class="string">&quot;hover:cursor-pointer&quot;</span> <span class="keyword">type</span>=<span class="string">&quot;submit&quot;</span> <span class="constant">value</span>=<span class="string">&quot;Submit&quot;</span> /&gt;
                     &lt;/<span class="constant">div</span>&gt;
                 &lt;/<span class="constant">form</span>&gt;
             &lt;/<span class="constant">div</span>&gt;
 
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"todo_items"</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
                 <span class="comment">// 👇 New!</span>
-                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">"text-2xl font-medium mb-4"</span>&gt;<span class="string">"Tasks"</span>&lt;/<span class="constant">h2</span>&gt;
+                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">&quot;text-2xl font-medium mb-4&quot;</span>&gt;<span class="string">&quot;Tasks&quot;</span>&lt;/<span class="constant">h2</span>&gt;
                 &lt;<span class="constant">For</span>
                     <span class="constant">each</span>=<span class="punctuation bracket">{</span><span class="constant">todo_items</span><span class="punctuation bracket">}</span>
                     <span class="constant">key</span>=|<span class="constant">task</span>| <span class="constant">task</span><span class="punctuation delimiter">.</span><span class="constant">id</span>
@@ -892,7 +892,7 @@
         <span class="comment">// Create a new TodoItem and push it to our new todo_items vector</span>
         <span class="constant">new_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">push</span><span class="punctuation bracket">(</span><span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
             <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="constant">todo_id</span><span class="punctuation delimiter">,</span>
-            <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="function">todo_task_input_ref</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">expect</span><span class="punctuation bracket">(</span><span class="string">"&lt;input&gt; to exist"</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">value</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="function">todo_task_input_ref</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">expect</span><span class="punctuation bracket">(</span><span class="string">&quot;&lt;input&gt; to exist&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">value</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
             <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
         <span class="punctuation bracket">}</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
 
@@ -923,25 +923,25 @@
     <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
         <span class="constant">cx</span><span class="punctuation delimiter">,</span>
         &lt;<span class="constant">PageWrapper</span>&gt;
-            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">"add-task"</span> <span class="constant">class</span>=<span class="string">"flex flex-col rounded mb-20 text-black"</span>&gt;
-                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">"text-2xl font-medium mb-4"</span>&gt;<span class="string">"Add Task"</span>&lt;/<span class="constant">h2</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;add-task&quot;</span> <span class="constant">class</span>=<span class="string">&quot;flex flex-col rounded mb-20 text-black&quot;</span>&gt;
+                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">&quot;text-2xl font-medium mb-4&quot;</span>&gt;<span class="string">&quot;Add Task&quot;</span>&lt;/<span class="constant">h2</span>&gt;
                 &lt;<span class="constant">form</span> 
-                    <span class="constant">class</span>=<span class="string">"w-full flex flex-col"</span>
+                    <span class="constant">class</span>=<span class="string">&quot;w-full flex flex-col&quot;</span>
                     <span class="comment">// 👇 New!</span>
                     <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">submit</span>=<span class="punctuation bracket">{</span><span class="constant">on_submit</span><span class="punctuation bracket">}</span>
                 &gt;
-                    &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">"flex items-center justify-between"</span>&gt;
+                    &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex items-center justify-between&quot;</span>&gt;
                         &lt;<span class="constant">input</span>
-                            <span class="constant">class</span>=<span class="string">"w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none"</span>
-                            <span class="keyword">type</span>=<span class="string">"text"</span>
-                            <span class="constant">placeholder</span>=<span class="string">"Add a new task"</span>
+                            <span class="constant">class</span>=<span class="string">&quot;w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none&quot;</span>
+                            <span class="keyword">type</span>=<span class="string">&quot;text&quot;</span>
+                            <span class="constant">placeholder</span>=<span class="string">&quot;Add a new task&quot;</span>
                             <span class="comment">// 👇 New!</span>
                             <span class="constant">node_ref</span>=<span class="punctuation bracket">{</span><span class="constant">todo_task_input_ref</span><span class="punctuation bracket">}</span>
                         /&gt;
                         &lt;<span class="constant">input</span>
-                            <span class="constant">class</span>=<span class="string">"hover:cursor-pointer"</span> 
-                            <span class="keyword">type</span>=<span class="string">"submit"</span> 
-                            <span class="constant">value</span>=<span class="string">"Submit"</span> 
+                            <span class="constant">class</span>=<span class="string">&quot;hover:cursor-pointer&quot;</span> 
+                            <span class="keyword">type</span>=<span class="string">&quot;submit&quot;</span> 
+                            <span class="constant">value</span>=<span class="string">&quot;Submit&quot;</span> 
                         /&gt;
                     &lt;/<span class="constant">div</span>&gt;
                 &lt;/<span class="constant">form</span>&gt;
@@ -953,7 +953,7 @@
     <span class="punctuation bracket">}</span>
 <span class="punctuation bracket">}</span>
 </code></pre>
-<p><em>Read more about forms here: https://leptos-rs.github.io/leptos/view/05_forms.html#uncontrolled-inputs</em></p><p>And we're done! You can now add, update, and remove todo items.</p><h2>Conclusion</h2><p>Today we covered:</p><ul><li>Creating a Leptos project</li><li>Creating components</li><li>Passing in props</li><li>Passing in children</li><li>Adding reactivity via signals</li><li>Creating and passing callbacks</li><li>Creating node references and dealing with forms</li><li>And more...</li></ul><p>We covered a lot of important concepts and going forward will be using them and learning even more. To learn more about what we covered today, I've linked the Leptos handbook in the "References / Resources" section below which I highly recommend reading along with this guide.</p><p>All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos If you liked the post, please star the <a href="https://github.com/BrookJeynes/todo-leptos">GitHub repository</a> and if you have any comments, feel free to leave them below, I always love hearing what you guys have to say.</p><p>Look out for part 2 and 3 where we create a database and API to interact with from our front-end.</p><p>I'd like to end with saying a huge thank you to the team working at Leptos who not only proof-read this blog post but who have also been working incredibly hard to bring such an amazing framework to the community. Your work is appreciated</p><p>Thanks for reading,<br>- Brook ❤</p><h2>References / Resources</h2><ul><li><a href="https://leptos-rs.github.io/leptos/">The Leptos Handbook</a></li></ul></div>
+<p><em>Read more about forms here: https://leptos-rs.github.io/leptos/view/05_forms.html#uncontrolled-inputs</em></p><p>And we're done! You can now add, update, and remove todo items.</p><h2>Conclusion</h2><p>Today we covered:</p><ul><li>Creating a Leptos project</li><li>Creating components</li><li>Passing in props</li><li>Passing in children</li><li>Adding reactivity via signals</li><li>Creating and passing callbacks</li><li>Creating node references and dealing with forms</li><li>And more...</li></ul><p>We covered a lot of important concepts and going forward will be using them and learning even more. To learn more about what we covered today, I've linked the Leptos handbook in the "References / Resources" section below which I highly recommend reading along with this guide.</p><p>All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos If you liked the post, please star the <a href="https://github.com/BrookJeynes/todo-leptos" target="_blank">GitHub repository</a> and if you have any comments, feel free to leave them below, I always love hearing what you guys have to say.</p><p>Look out for part 2 and 3 where we create a database and API to interact with from our front-end.</p><p>I'd like to end with saying a huge thank you to the team working at Leptos who not only proof-read this blog post but who have also been working incredibly hard to bring such an amazing framework to the community. Your work is appreciated</p><p>Thanks for reading,<br>- Brook ❤</p><h2>References / Resources</h2><ul><li><a href="https://leptos-rs.github.io/leptos/" target="_blank">The Leptos Handbook</a></li></ul></div>
 
     </main>
 
