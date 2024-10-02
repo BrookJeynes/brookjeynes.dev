@@ -1,5 +1,5 @@
 ---
-.title = "도서관",
+.title = "라이브러리",
 .date = @date("2024-07-26T00:00:00"),
 .author = "Brook Jeynes",
 .layout = "index.shtml",
