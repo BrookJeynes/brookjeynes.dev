@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head id="head">
+    <meta charset="UTF-8">
+    <meta name="description" content="Brook, Just a tech.">
+    <meta property="og:title" content="Git Tricks: Staging with patches">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title id="title">
+      Git Tricks: Staging with patches
+      - brookjeynes.dev
+    </title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/highlight.css">
+    <link rel="stylesheet" type="text/css" href="/min770px.css">
+    <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
+        rel="stylesheet">
+  </head>
+
+  <body>
+    <header id="banner">
+      <h2>
+        <a href="/">brookjeynes.dev</a>
+      </h2>
+      <nav>
+        <ul>
+          <li><a class="selected" href="/posts/">posts</a></li>
+          <li><a class="" href="/videos/">videos</a></li>
+          <li><a class="" href="/library/">library</a></li>
+          <li><a class="" href="/contact/">contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="content">
+      
+  <header id="post-header">
+    <h1>Git Tricks: Staging with patches</h1>
+    <div>
+      <time>December 12, 2024</time>
+    </div>
+  </header>
+  <div><h3>Introduction</h3><p>When working with Git, it's common to accidentally include changes you didn't intend to stage. Git provides tools to manage these situations effectively. One such tool is the <code>patch</code> sub-command, which allows you to interactively select and stage parts of a file's changes.</p><p>This post explores how <code>git add</code> operates and how to leverage the <code>patch</code> sub-command to stage changes and avoid unintended modifications in your commits.</p><hr><h3>The basics of <code>git add</code></h3><p><code>git add [&lt;pathspec&gt;...]</code> will:</p><blockquote><p>update the index<sup>1</sup> using the current content found in the working tree...</p></blockquote><p>In other words, this will stage the entire patch from the specified files.</p><p>In the following example, there are two initial untracked files, <code>foo.txt</code> and <code>bar.txt</code>. After running the <code>git-add</code> command specifying <code>foo.txt</code>, it can be seen that the entire patch of <code>foo.txt</code> now exists in the index.</p><pre><code class="bash"><span class="constant">$ ls</span>
+<span class="constant">foo.txt</span>  <span class="constant">bar.txt</span>
+
+<span class="constant">$ cat</span> <span class="constant">foo.txt</span>
+<span class="constant">foo</span>
+
+<span class="constant">$ git</span> <span class="constant">status</span>
+<span class="constant">Untracked</span> <span class="constant">files:</span>
+    <span class="constant">foo.txt</span>
+    <span class="constant">bar.txt</span>
+
+<span class="constant">$ git</span> <span class="constant">add</span> <span class="constant">foo.txt</span>
+<span class="constant">$ git</span> <span class="constant">status</span>
+<span class="constant">Changes</span> <span class="constant">to</span> <span class="constant">be</span> <span class="constant">committed:</span>
+    <span class="constant">new</span> <span class="constant">file:</span> <span class="constant">foo.txt</span>
+
+<span class="constant">Untracked</span> <span class="constant">files:</span>
+    <span class="constant">bar.txt</span>
+</code></pre>
+<h3>Why use the <code>patch</code> sub-command</h3><p>Adding the whole patch is usually the intended result by the user. However, there may be a time when you realise you left a modification within the file you don't want to stage.</p><p>This is where the <code>patch</code> sub-command can come in handy. Continuing from the previous example, let's add the following lines to <code>foo.txt</code>.</p><pre><code class="diff"><span class="variable builtin">diff --git a/foo.txt b/foo.txt</span>
+index <span class="constant">257cc56</span>..<span class="constant">bbbdac3</span> 100644
+<span class="keyword">--- a/foo.txt</span>
+<span class="string">+++ b/foo.txt</span>
+<span class="attribute">@@ -1 +1,4 @@</span>
+foo
+<span class="string">+ foo</span>
+<span class="string">+ bar</span>
+<span class="string">+ foo</span>
+</code></pre>
+<p>Just before staging the file, I notice that the line <code>bar</code> was mistakenly included in <code>foo.txt</code>.</p><p>At this stage, you have two options:</p><ol><li>Open up a code editor and modify the file directly, then run <code>git add foo.txt</code>.</li><li>Use the <code>patch</code> sub-command.</li></ol><p><code>git add [-p | --patch]</code> allows you to:</p><blockquote><p>Interactively choose hunks<sup>2</sup> of patch between the index and the work tree and add them to the index.</p></blockquote><p>The <code>patch</code> sub-command allows one to review the difference, and optionally edit it, before it is added to the index. The <code>patch</code> sub-command is shorthand for <code>git add --interactive</code> and selecting <code>5: patch</code>.</p><p>Running the <code>patch</code> sub-command on the current example results in the following:</p><pre><code class="diff">$ git add -p foo.txt
+<span class="variable builtin">diff --git a/foo.txt b/foo.txt</span>
+index <span class="constant">257cc56</span>..<span class="constant">bbbdac3</span> 100644
+<span class="keyword">--- a/foo.txt</span>
+<span class="string">+++ b/foo.txt</span>
+<span class="attribute">@@ -1 +1,4 @@</span>
+ foo
+<span class="string">+foo</span>
+<span class="string">+bar</span>
+<span class="string">+foo</span>
+(1/1) Stage this hunk [y,n,q,a,d,e,p,?]?
+</code></pre>
+<p>Git offers many options<sup>3</sup>, which can be overwhelming at first. Pressing <code>?</code> will print out a small help menu describing what each of the keybinds do.</p><pre><code>y - stage this hunk
+n - do not stage this hunk
+q - quit; do not stage this hunk or any of the remaining ones
+a - stage this and all the remaining hunks in the file
+d - do not stage this hunk nor any of the remaining hunks in the file
+e - manually edit the current hunk
+p - print the current hunk
+? - print help
+</code></pre><p>In the example above, the line <code>bar</code> should be removed. To do so, press <code>e</code> to open <code>$EDITOR</code> and manually remove the line.</p><pre><code class="diff"># Manual hunk edit mode -- see bottom for a quick guide.
+<span class="attribute">@@ -1 +1,4 @@</span>
+ foo
+<span class="string">+foo</span>
+<span class="string">+bar</span>
+<span class="string">+foo</span>
+# ---
+# To remove &apos;-&apos; lines, make them &apos; &apos; lines (context).
+# To remove &apos;+&apos; lines, delete them.
+# Lines starting with # will be removed.
+# If the patch applies cleanly, the edited hunk will immediately be marked for staging.
+# If it does not apply cleanly, you will be given an opportunity to
+# edit again.  If all lines of the hunk are removed, then the edit is
+# aborted and the hunk is left unchanged.
+</code></pre>
+<p>Once resolved, Git will provide the same options with the next hunk if available.</p><p>After the interaction, the index is left in the following state showing that only our selected hunks were staged.</p><pre><code class="diff">$ git status
+Changes to be committed:
+    new file: foo.txt    
+
+Changes not staged for commit:
+    modified: foo.txt
+
+Untracked files:
+    bar.txt
+
+$ git diff --staged foo.txt
+<span class="variable builtin">diff --git a/foo.txt b/foo.txt</span>
+new file mode 100644
+index <span class="constant">0000000</span>..<span class="constant">b4dfe34</span>
+<span class="keyword">--- /dev/null</span>
+<span class="string">+++ b/foo.txt</span>
+<span class="attribute">@@ -0,0 +1,3 @@</span>
+<span class="string">+foo</span>
+<span class="string">+foo</span>
+<span class="string">+foo</span>
+
+$ git diff foo.txt
+<span class="variable builtin">diff --git a/foo.txt b/foo.txt</span>
+index <span class="constant">b4dfe34</span>..<span class="constant">bbbdac3</span> 100644
+<span class="keyword">--- a/foo.txt</span>
+<span class="string">+++ b/foo.txt</span>
+<span class="attribute">@@ -1,3 +1,4 @@</span>
+ foo
+ foo
+<span class="string">+bar</span>
+ foo
+</code></pre>
+<h3>Conclusion</h3><p>By using Gits <code>patch</code> sub-command, changes can be easily reviewed and controlled prior to staging ensuring commits are clean, intentional, and free of accidental modifications.</p><p>Thanks for reading,<br>- Brook ❤</p><h4>Footnotes</h4><p><strong>1</strong>: The "index" holds a snapshot of the content of the working tree, and it is this snapshot that is taken as the contents of the next commit.<br><strong>2</strong>: <a href="https://www.gnu.org/software/diffutils/manual/html_node/Hunks.html" target="_blank">https://www.gnu.org/software/diffutils/manual/html_node/Hunks.html</a><br><strong>3</strong>: <a href="https://git-scm.com/book/en/v2/Git-Tools-Interactive-Staging#_staging_patches" target="_blank">https://git-scm.com/book/en/v2/Git-Tools-Interactive-Staging#_staging_patches</a></p></div>
+
+    </main>
+
+    <footer id="footer">brookjeynes.dev</footer>
+  </body>
+</html>
