@@ -23,8 +23,7 @@ sub-command to stage changes and avoid unintended modifications in your commits.
 > update the index<sup>1</sup> using the current content found in the working 
 tree... 
 
-To be more specific, this will 
-update the index with the entire patch from the specified files.
+In other words, this will stage the entire patch from the specified files.
 
 In the following example, there are two initial untracked files, `foo.txt` and 
 `bar.txt`. After running the `git-add` command specifying `foo.txt`, it can be
@@ -55,7 +54,7 @@ Untracked files:
 
 Adding the whole patch is usually the intended result by the user. However, 
 there may be a time when you realise you left a modification within the file 
-you don't want to add to the index.
+you don't want to stage.
 
 This is where the `patch` sub-command can come in handy. Continuing from the 
 previous example, let's add the following lines to `foo.txt`.
@@ -103,7 +102,7 @@ index 257cc56..bbbdac3 100644
 (1/1) Stage this hunk [y,n,q,a,d,e,p,?]?
 ```
 
-Git offers many options here, which can be overwhelming at first. Pressing `?` 
+Git offers many options<sup>3</sup>, which can be overwhelming at first. Pressing `?` 
 will print out a small help menu describing what each of the keybinds do.
 
 ```
