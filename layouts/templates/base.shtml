@@ -29,6 +29,7 @@
       <nav>
         <ul>
           <li><a class="$page.link().contains('/posts/').then('selected', '')" href="$site.page('posts').link()" :text="$i18n.getOr('posts', 'posts')"></a></li>
+          <li><a class="$page.link().contains('/videos/').then('selected', '')" href="$site.page('videos').link()" :text="$i18n.getOr('videos', 'videos')"></a></li>
           <li><a class="$page.link().contains('/library/').then('selected', '')" href="$site.page('library').link()" :text="$i18n.getOr('library', 'library')"></a></li>
           <li><a class="$page.link().contains('/contact/').then('selected', '')" href="$site.page('contact').link()" :text="$i18n.getOr('contact', 'contact')"></a></li>
         </ul>
