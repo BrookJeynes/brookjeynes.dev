@@ -1,8 +1,8 @@
 <rss version="2.0">
  <channel>
-  <title>My blog</title>
-  <link>https://site.com/</link>
-  <description>Recent content</description>
+  <title>brookjeynes.dev</title>
+  <link>brookjeynes.dev</link>
+  <description>a collection of my english posts</description>
   <generator>Zine -- https://zine-ssg.io</generator>
   <language>en-us</language>
   <lastBuildDate :text="$build.generated.formatHTTP()"></lastBuildDate>
