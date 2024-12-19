@@ -1,11 +1,11 @@
 <rss version="2.0">
  <channel>
-  <title>My blog</title>
-  <link>https://site.com/</link>
-  <description>Recent content</description>
+  <title>brookjeynes.dev</title>
+  <link>brookjeynes.dev</link>
+  <description>a collection of my english posts</description>
   <generator>Zine -- https://zine-ssg.io</generator>
   <language>en-us</language>
-  <lastBuildDate>Thu, 19 Dec 2024 21:50:39 +0000</lastBuildDate>
+  <lastBuildDate>Thu, 19 Dec 2024 21:59:45 +0000</lastBuildDate>
   
    <item>
     <title>Git Tricks: Staging with patches</title>
