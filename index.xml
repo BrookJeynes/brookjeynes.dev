@@ -1,0 +1,46 @@
+<rss version="2.0">
+ <channel>
+  <title>My blog</title>
+  <link>https://site.com/</link>
+  <description>Recent content</description>
+  <generator>Zine -- https://zine-ssg.io</generator>
+  <language>en-us</language>
+  <lastBuildDate>Thu, 19 Dec 2024 21:50:39 +0000</lastBuildDate>
+  
+   <item>
+    <title>Git Tricks: Staging with patches</title>
+    <link>https://brookjeynes.dev/posts/git-tricks-git-add-patch/</link>
+    <pubDate>Thu, 12 Dec 2024 00:00:00 +0000</pubDate>
+    <guid>https://brookjeynes.dev/posts/git-tricks-git-add-patch/</guid>
+   </item>
+  
+   <item>
+    <title>Learning Leptos: Building a Todo application - The basics</title>
+    <link>https://brookjeynes.dev/posts/learning-leptos-part1/</link>
+    <pubDate>Thu, 20 Apr 2023 00:00:00 +0000</pubDate>
+    <guid>https://brookjeynes.dev/posts/learning-leptos-part1/</guid>
+   </item>
+  
+   <item>
+    <title>Operation: Climb Mt Ngungun</title>
+    <link>https://brookjeynes.dev/posts/climbing-mt-ngungun/</link>
+    <pubDate>Sat, 18 Mar 2023 00:00:00 +0000</pubDate>
+    <guid>https://brookjeynes.dev/posts/climbing-mt-ngungun/</guid>
+   </item>
+  
+   <item>
+    <title>JWT Authentication for API Routes using Rocket.rs and Rust</title>
+    <link>https://brookjeynes.dev/posts/jwt-authentication-rust/</link>
+    <pubDate>Wed, 30 Nov 2022 00:00:00 +0000</pubDate>
+    <guid>https://brookjeynes.dev/posts/jwt-authentication-rust/</guid>
+   </item>
+  
+   <item>
+    <title>Building an API in Rust with Rocket.rs and Diesel.rs (Clean Architecture)</title>
+    <link>https://brookjeynes.dev/posts/rocket-diesel-api-rust/</link>
+    <pubDate>Wed, 23 Nov 2022 00:00:00 +0000</pubDate>
+    <guid>https://brookjeynes.dev/posts/rocket-diesel-api-rust/</guid>
+   </item>
+  
+ </channel>
+</rss>
