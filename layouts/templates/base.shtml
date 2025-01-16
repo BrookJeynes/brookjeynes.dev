@@ -13,12 +13,15 @@
     <link rel="stylesheet" type="text/css" href="$site.asset('style.css').link()">
     <link rel="stylesheet" type="text/css" href="$site.asset('highlight.css').link()">
     <link rel="stylesheet" type="text/css" href="$site.asset('min770px.css').link()">
+
+    <!-- Preload fonts -->
+    <link rel="preconnect" href="https://iosevka-webfonts.github.io">
+    <link rel="preload" href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" as="style">
     <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
-        rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap" rel="stylesheet">
   </head>
 
   <body>
