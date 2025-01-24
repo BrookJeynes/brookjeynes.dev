@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html>
+  <head id="head">
+    <meta charset="UTF-8">
+    <meta name="description" content="Brook, Just a tech.">
+    <meta property="og:title" content="Encoding Hangeul, Koreas writing system.">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title id="title">
+      Encoding Hangeul, Koreas writing system.
+      - brookjeynes.dev
+    </title>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="/highlight.css">
+    <link rel="stylesheet" type="text/css" href="/min770px.css">
+    <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
+        rel="stylesheet">
+  </head>
+
+  <body>
+    <header id="banner">
+      <h2>
+        <a href="/">brookjeynes.dev</a>
+      </h2>
+      <nav>
+        <ul>
+          <li><a class="selected" href="/posts/">posts</a></li>
+          <li><a class="" href="/videos/">videos</a></li>
+          <li><a class="" href="/library/">library</a></li>
+          <li><a class="" href="/contact/">contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="content">
+      
+  <header id="post-header">
+    <h1>Encoding Hangeul, Koreas writing system.</h1>
+    <div>
+      <time>January 24, 2025</time>
+    </div>
+  </header>
+  <div><h3>Introduction</h3><p>Hangeul (한글) is the modern writing system for the Korean language, created in 1443 by King Sejong the great, the fourth king of the Joseon dynasty<sup>1</sup>. Before its invention, Korean was written using Hanja (한자) — Chinese characters adapted for Korean. Even after Hangeul's creation, Hanja remained in regular use for centuries, particularly in formal and scholarly contexts<sup>2</sup>.</p><p>Hangeul is a syllabic writing system where each syllable is composed of letters called Jamo (자모). These Jamo function like Latin letters, each representing an individual sound. There are a total of 11,172 syllabic combinations of Jamo which can be used to form Hangeul<sup>3</sup>.</p><p>However, learning Hangeul doesn't require memorizing thousands of combinations. Instead, one only needs to learn the 68 different Jamo shapes and rules governing the construction of Hangeul. This is much easier than it sounds with the basics of the Korean alphabet being able to be learned within 60-90 minutes.</p><p>This post explores how Hangeul is encoded in Unicode, a universal standard that assigns unique values to characters across all languages<sup>4</sup>. It also delves into the mathematical operations used to construct and deconstruct individual Jamo from encoded Hangeul.</p><hr><h3>Hangeul, Jamo, and Unicode</h3><p>A Korean syllable consists of a lead consonant, a medial vowel, and a tail consonant. For example,</p><p>한 (han) can be deconstructed like so:</p><ul><li>ㅎ (h) is the lead consonant.</li><li>ㅏ (a) is the medial vowel.</li><li>ㄴ (n) is the tail consonant.</li></ul><p>자 (ja) can be deconstructed like so:</p><ul><li>ㅈ (j) is the lead consonant.</li><li>ㅏ (a) is the medial vowel.</li><li>There is no tail consonant.</li></ul><p>Syllables starting with an intial vowel must be prefixed with ㅇ (eung), a special lead consonant that produces no sound.</p><p>There are 19 different lead consonants ranging between Unicode values U+1100 and U+1112. There are 21 different vowels ranging between Unicode values U+1161 and U+1175. Finally, there are 27 tail consonants ranging between Unicode values U+11A8 and U+11C2 + a null consonant used when there is no tail. This range of Unicode is called the Hangeul Jamo block.</p><p>Below is a set of tables providing each Jamo, its canonical order, as well as its Unicode value. When Jamo are used in combination with eachother, they change their shape, size, and positions slightly to fit into a single Hangeul. Unicode has a second range of Jamo characters called "Hangeul Compatibility Jamo" starting at U+3130 which represent the initial and final consonants with the same Unicode codepoint as opposed to the Hangeul Jamo block which assigns them separate codepoints<sup>5</sup>. These compatibility Jamo typically render much more clearer.</p><p>The table below shows both, the conjoining Jamo as well as the [compatibility Jamo] with the character reference hex value referring to the former<sup>6</sup>. Depending on your browser, both Jamo may render the same.</p><table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Lead</th>
+<th>Jamo</th>
+<th>Character reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>G</td>
+<td>ᄀ [ㄱ]</td>
+<td>0x1100</td>
+</tr>
+<tr>
+<td>2</td>
+<td>GG</td>
+<td>ᄁ [ㄲ]</td>
+<td>0x1101</td>
+</tr>
+<tr>
+<td>3</td>
+<td>N</td>
+<td>ᄂ [ㄴ]</td>
+<td>0x1102</td>
+</tr>
+<tr>
+<td>4</td>
+<td>D</td>
+<td>ᄃ [ㄷ]</td>
+<td>0x1103</td>
+</tr>
+<tr>
+<td>5</td>
+<td>DD</td>
+<td>ᄄ [ㄸ]</td>
+<td>0x1104</td>
+</tr>
+<tr>
+<td>6</td>
+<td>R</td>
+<td>ᄅ [ㄹ]</td>
+<td>0x1105</td>
+</tr>
+<tr>
+<td>7</td>
+<td>M</td>
+<td>ᄆ [ㅁ]</td>
+<td>0x1106</td>
+</tr>
+<tr>
+<td>8</td>
+<td>B</td>
+<td>ᄇ [ㅂ]</td>
+<td>0x1107</td>
+</tr>
+<tr>
+<td>9</td>
+<td>BB</td>
+<td>ᄈ [ㅃ]</td>
+<td>0x1108</td>
+</tr>
+<tr>
+<td>10</td>
+<td>S</td>
+<td>ᄉ [ㅅ]</td>
+<td>0x1109</td>
+</tr>
+<tr>
+<td>11</td>
+<td>SS</td>
+<td>ᄊ [ㅆ]</td>
+<td>0x110A</td>
+</tr>
+<tr>
+<td>12</td>
+<td></td>
+<td>ᄋ [ㅇ]</td>
+<td>0x110B</td>
+</tr>
+<tr>
+<td>13</td>
+<td>J</td>
+<td>ᄌ [ㅈ]</td>
+<td>0x110C</td>
+</tr>
+<tr>
+<td>14</td>
+<td>JJ</td>
+<td>ᄍ [ㅉ]</td>
+<td>0x110D</td>
+</tr>
+<tr>
+<td>15</td>
+<td>C</td>
+<td>ᄎ [ㅊ]</td>
+<td>0x110E</td>
+</tr>
+<tr>
+<td>16</td>
+<td>K</td>
+<td>ᄏ [ㅋ]</td>
+<td>0x110F</td>
+</tr>
+<tr>
+<td>17</td>
+<td>T</td>
+<td>ᄐ [ㅌ]</td>
+<td>0x1110</td>
+</tr>
+<tr>
+<td>18</td>
+<td>P</td>
+<td>ᄑ [ㅍ]</td>
+<td>0x1111</td>
+</tr>
+<tr>
+<td>19</td>
+<td>H</td>
+<td>ᄒ [ㅎ]</td>
+<td>0x1112</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Vowel</th>
+<th>Jamo</th>
+<th>Character reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>A</td>
+<td>ᅡ [ㅏ]</td>
+<td>0x1161</td>
+</tr>
+<tr>
+<td>2</td>
+<td>AE</td>
+<td>ᅢ [ㅐ]</td>
+<td>0x1162</td>
+</tr>
+<tr>
+<td>3</td>
+<td>YA</td>
+<td>ᅣ [ㅑ]</td>
+<td>0x1163</td>
+</tr>
+<tr>
+<td>4</td>
+<td>YAE</td>
+<td>ᅤ [ㅒ]</td>
+<td>0x1164</td>
+</tr>
+<tr>
+<td>5</td>
+<td>EO</td>
+<td>ᅥ [ㅓ]</td>
+<td>0x1165</td>
+</tr>
+<tr>
+<td>6</td>
+<td>E</td>
+<td>ᅦ [ㅔ]</td>
+<td>0x1166</td>
+</tr>
+<tr>
+<td>7</td>
+<td>YEO</td>
+<td>ᅧ [ㅕ]</td>
+<td>0x1167</td>
+</tr>
+<tr>
+<td>8</td>
+<td>YE</td>
+<td>ᅨ [ㅖ]</td>
+<td>0x1168</td>
+</tr>
+<tr>
+<td>9</td>
+<td>O</td>
+<td>ᅩ [ㅗ]</td>
+<td>0x1169</td>
+</tr>
+<tr>
+<td>10</td>
+<td>WA</td>
+<td>ᅪ [ㅘ]</td>
+<td>0x116A</td>
+</tr>
+<tr>
+<td>11</td>
+<td>WAE</td>
+<td>ᅫ [ㅙ]</td>
+<td>0x116B</td>
+</tr>
+<tr>
+<td>12</td>
+<td>OE</td>
+<td>ᅬ [ㅚ]</td>
+<td>0x116C</td>
+</tr>
+<tr>
+<td>13</td>
+<td>YO</td>
+<td>ᅭ [ㅛ]</td>
+<td>0x116D</td>
+</tr>
+<tr>
+<td>14</td>
+<td>U</td>
+<td>ᅮ [ㅜ]</td>
+<td>0x116E</td>
+</tr>
+<tr>
+<td>15</td>
+<td>WEO</td>
+<td>ᅯ [ㅝ]</td>
+<td>0x116F</td>
+</tr>
+<tr>
+<td>16</td>
+<td>WE</td>
+<td>ᅰ [ㅞ]</td>
+<td>0x1170</td>
+</tr>
+<tr>
+<td>17</td>
+<td>WI</td>
+<td>ᅱ [ㅟ]</td>
+<td>0x1171</td>
+</tr>
+<tr>
+<td>18</td>
+<td>YU</td>
+<td>ᅲ [ㅠ]</td>
+<td>0x1172</td>
+</tr>
+<tr>
+<td>19</td>
+<td>EU</td>
+<td>ᅳ [ㅡ]</td>
+<td>0x1173</td>
+</tr>
+<tr>
+<td>20</td>
+<td>YI</td>
+<td>ᅴ [ㅢ]</td>
+<td>0x1174</td>
+</tr>
+<tr>
+<td>21</td>
+<td>I</td>
+<td>ᅵ [ㅣ]</td>
+<td>0x1175</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Number</th>
+<th>Tail</th>
+<th>Jamo</th>
+<th>Character reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>G</td>
+<td>ᆨ [ㄱ]</td>
+<td>0x11A8</td>
+</tr>
+<tr>
+<td>2</td>
+<td>GG</td>
+<td>ᆩ [ㄲ]</td>
+<td>0x11A9</td>
+</tr>
+<tr>
+<td>3</td>
+<td>GS</td>
+<td>ᆪ [ㄳ]</td>
+<td>0x11AA</td>
+</tr>
+<tr>
+<td>4</td>
+<td>N</td>
+<td>ᆫ [ㄴ]</td>
+<td>0x11AB</td>
+</tr>
+<tr>
+<td>5</td>
+<td>NJ</td>
+<td>ᆬ [ㄵ]</td>
+<td>0x11AC</td>
+</tr>
+<tr>
+<td>6</td>
+<td>NH</td>
+<td>ᆭ [ㄶ]</td>
+<td>0x11AD</td>
+</tr>
+<tr>
+<td>7</td>
+<td>D</td>
+<td>ᆮ [ㄷ]</td>
+<td>0x11AE</td>
+</tr>
+<tr>
+<td>8</td>
+<td>L</td>
+<td>ᆯ [ㄹ]</td>
+<td>0x11AF</td>
+</tr>
+<tr>
+<td>9</td>
+<td>LG</td>
+<td>ᆰ [ㄺ]</td>
+<td>0x11B0</td>
+</tr>
+<tr>
+<td>10</td>
+<td>LM</td>
+<td>ᆱ [ㄻ]</td>
+<td>0x11B1</td>
+</tr>
+<tr>
+<td>11</td>
+<td>LB</td>
+<td>ᆲ [ㄼ]</td>
+<td>0x11B2</td>
+</tr>
+<tr>
+<td>12</td>
+<td>LS</td>
+<td>ᆳ [ㄽ]</td>
+<td>0x11B3</td>
+</tr>
+<tr>
+<td>13</td>
+<td>LT</td>
+<td>ᆴ [ㄾ]</td>
+<td>0x11B4</td>
+</tr>
+<tr>
+<td>14</td>
+<td>LP</td>
+<td>ᆵ [ㄿ]</td>
+<td>0x11B5</td>
+</tr>
+<tr>
+<td>15</td>
+<td>LH</td>
+<td>ᆶ [ㅀ]</td>
+<td>0x11B6</td>
+</tr>
+<tr>
+<td>16</td>
+<td>M</td>
+<td>ᆷ [ㅁ]</td>
+<td>0x11B7</td>
+</tr>
+<tr>
+<td>17</td>
+<td>B</td>
+<td>ᆸ [ㅂ]</td>
+<td>0x11B8</td>
+</tr>
+<tr>
+<td>18</td>
+<td>BS</td>
+<td>ᆹ [ㅄ]</td>
+<td>0x11B9</td>
+</tr>
+<tr>
+<td>19</td>
+<td>S</td>
+<td>ᆺ [ㅅ]</td>
+<td>0x11BA</td>
+</tr>
+<tr>
+<td>20</td>
+<td>SS</td>
+<td>ᆻ [ㅆ]</td>
+<td>0x11BB</td>
+</tr>
+<tr>
+<td>21</td>
+<td>NG</td>
+<td>ᆼ [ㅇ]</td>
+<td>0x11BC</td>
+</tr>
+<tr>
+<td>22</td>
+<td>J</td>
+<td>ᆽ [ㅈ]</td>
+<td>0x11BD</td>
+</tr>
+<tr>
+<td>23</td>
+<td>C</td>
+<td>ᆾ [ㅊ]</td>
+<td>0x11BE</td>
+</tr>
+<tr>
+<td>24</td>
+<td>K</td>
+<td>ᆿ [ㅋ]</td>
+<td>0x11BF</td>
+</tr>
+<tr>
+<td>25</td>
+<td>T</td>
+<td>ᇀ [ㅌ]</td>
+<td>0x11C0</td>
+</tr>
+<tr>
+<td>26</td>
+<td>P</td>
+<td>ᇁ [ㅍ]</td>
+<td>0x11C1</td>
+</tr>
+<tr>
+<td>27</td>
+<td>H</td>
+<td>ᇂ [ㅎ]</td>
+<td>0x11C2</td>
+</tr>
+</tbody>
+</table>
+<h3>Encoding Hangeul</h3><p>Although each Jamo has its own individual Unicode value, Unicode values U+AC00 to U+D7A3 define every combination of Jamo, or every Hangeul character. This range of Unicode is called the Hangeul Syllables block<sup>7</sup>.</p><p>These syllables can be directly mapped by algorithm back to sequences of two or three Jamo in the Hangeul Jamo block mentioned earlier<sup>8</sup>. It's due to this that it's theoretically possible to encode Korean texts with Jamo only and let the font rendered handle Hangeul construction. This is not recommended in practice though due to limitations and lack of support in current renderers.</p><p>Isolated Jamo are rarely found in Korean texts instead opting for use of the precomposed Hangeul syllables. The codepoint of a Hangeul can be calculated from its Jamo components using the following formula<sup>9</sup>.</p><div align="center">
+Hangeul Unicode = (((lead − 1) * 588) + ((vowel − 1) * 28) + tail) + 44032 
+</div>
+<p>In the formula, lead, vowel, and tail refer to the small integers given in the above tables. If there is no tail, the value 0 is used. The value 28 is the sum of the tail count. The value 588 is the sum of vowel and tail count. 44032 (0xAC00) is the first character of the Hangeul Syllables Unicode block.</p><p>As an example, let's take the Hangeul 한 (han), which in Unicode is U+D55C. Using the Jamo that construct it, let's try reach the final value.</p><pre><code>ㅎ = 19 // Lead consonant
+ㅏ = 1  // Median vowel
+ㄴ = 4  // Tail consonant
+
+한 = U+D55C = 54620 = (((19 − 1) * 588) + ((1 − 1) * 28) + 4) + 44032
+                    = (10584 + 0 + 4) + 44032
+                    = 10588 + 44032
+                    = 54620
+</code></pre><p>Given the above formula, it can be rearranged to extract the Jamo of a Hangeul.</p><div align="center">
+tail = mod(Hangeul Unicode - 44032, 28) <br>
+vowel = 1 + mod(Hangeul Unicode - 44032 - tail, 588) / 28 <br>
+lead = 1 + floor[(Hangeul Unicode - 44032) / 588]
+</div>
+<p>As another example, let's try work backwards. Given the Hangeul 한 (han), let's try deconstruct it.</p><pre><code>한 = U+D55C = 54620
+
+// tail
+ㄴ = 4 = mod(54620 - 44032, 28)
+       = mod(10588, 28)
+       = 4
+          
+// vowel
+ㅏ = 1 = 1 + mod(54620 - 44032 - 4, 588) / 28
+       = 1 + mod(10584, 588) / 28
+       = 1 + 0 / 28
+       = 1
+
+// lead
+ㅎ = 19 = 1 + floor[(54620 - 44032) / 588]
+        = 1 + floor[10592 / 588]
+        = 1 + 18
+        = 19
+</code></pre><h3>Obsolete Hangeul</h3><p>Overtime, Hangeul has undergone many changes with several Jamo no longer being used in modern Korean<sup>10</sup>.</p><ul><li>ㆍ (아래아, arae-a): A short "a" sound.</li><li>ㆆ (여린히읗, yeorin-hieut): A "light h", akin to a softer version of the English "h".</li><li>ㅿ (반시옷, bansiot): A "z" sound.</li><li>ㆁ (옛이응, yet-ieung): A velar nasal sound comparable to "ng" in the word "sing".</li></ul><p>Since these obsolete characters are still used in older literature and historical texts, there's still a need to have some way of using them. However, because they're obsolete, Unicode does not offer precomposed Hangeul. Instead, syllables using them must be coded by Jamo.</p><h3>Conclusion</h3><p>Next time you type "한글" on your keyboard or read a text in Korean, you’ll know there’s a beautifully logical system at play behind the scenes — one that blends centuries of linguistic history with the modern efficiency of Unicode.</p><p>Thanks for reading,<br>- Brook ❤</p><h4>Footnotes</h4><p><strong>1</strong>: <a href="https://en.wikipedia.org/wiki/Hangul" target="_blank">https://en.wikipedia.org/wiki/Hangul</a><br><strong>2</strong>: <a href="https://en.wikipedia.org/wiki/Hanja" target="_blank">https://en.wikipedia.org/wiki/Hanja</a><br><strong>3</strong>: <a href="https://www.namhansouthkorea.com/how-many-korean-characters-are-there/" target="_blank">https://www.namhansouthkorea.com/how-many-korean-characters-are-there/</a><br><strong>4</strong>: <a href="https://www.unicode.org/standard/WhatIsUnicode.html" target="_blank">https://www.unicode.org/standard/WhatIsUnicode.html</a><br><strong>5</strong>: <a href="https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo" target="_blank">https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo</a><br><strong>6</strong>: <a href="http://www.gernot-katzers-spice-pages.com/var/korean_hangul_unicode.html" target="_blank">http://www.gernot-katzers-spice-pages.com/var/korean_hangul_unicode.html</a><br><strong>7</strong>: <a href="https://en.wikipedia.org/wiki/Hangul_Syllables" target="_blank">https://en.wikipedia.org/wiki/Hangul_Syllables</a><br><strong>8</strong>: <a href="https://www.unicode.org/reports/tr15/tr15-29.html#Hangul" target="_blank">https://www.unicode.org/reports/tr15/tr15-29.html#Hangul</a><br><strong>9</strong>: <a href="https://en.wikipedia.org/wiki/Korean_language_and_computers#Hangul_in_Unicode" target="_blank">https://en.wikipedia.org/wiki/Korean_language_and_computers#Hangul_in_Unicode</a><br><strong>10</strong>: <a href="https://colab.research.google.com/github/bebechien/gemma/blob/main/Translator_of_Old_Korean_Literature.ipynb" target="_blank">https://colab.research.google.com/github/bebechien/gemma/blob/main/Translator_of_Old_Korean_Literature.ipynb</a></p></div>
+
+    </main>
+
+    <footer id="footer">brookjeynes.dev</footer>
+  </body>
+</html>
