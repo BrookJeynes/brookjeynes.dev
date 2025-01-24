@@ -3,7 +3,7 @@
 }
 
 html {
-    font-size: 62.5%;
+    font-size: 80%;
 }
 
 body {
@@ -239,4 +239,11 @@ footer#footer {
     font-weight: 400;
     color: #b3b3b3;
     margin: 40px 0;
+}
+
+table, th, td {
+  border: 1px solid;
+  border-collapse: collapse;
+  padding: 5px;
+  margin: 10px 0 10px 0;
 }
