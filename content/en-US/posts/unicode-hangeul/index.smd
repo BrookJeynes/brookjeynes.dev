@@ -45,8 +45,8 @@ consonant. For example,
 - ㅏ (a) is the medial vowel.
 - There is no tail consonant.
 
-Syllables starting with an intial vowel must be prefixed with ㅇ (eung), a 
-special lead consonant that produces no sound.
+Syllables starting with an intial vowel, for example 안 (an), must be prefixed 
+with ㅇ (eung), a special lead consonant that produces no sound.
 
 There are 19 different lead consonants ranging between Unicode values U+1100 
 and U+1112. There are 21 different vowels ranging between Unicode values U+1161
