@@ -45,7 +45,7 @@ consonant. For example,
 - ㅏ (a) is the medial vowel.
 - There is no tail consonant.
 
-Syllables starting with an intial vowel, for example 안 (an), must be prefixed 
+Syllables starting with an initial vowel, for example 안 (an), must be prefixed 
 with ㅇ (eung), a special lead consonant that produces no sound.
 
 There are 19 different lead consonants ranging between Unicode values U+1100 
@@ -55,7 +55,7 @@ U+11A8 and U+11C2 + a null consonant used when there is no tail. This range of
 Unicode is called the Hangeul Jamo block.
 
 Below is a set of tables providing each Jamo, its canonical order, as well as
-its Unicode value. When Jamo are used in combination with eachother, they change 
+its Unicode value. When Jamo are used in combination with each other, they change 
 their shape, size, and positions slightly to fit into a single Hangeul. Unicode 
 has a second range of Jamo characters called "Hangeul Compatibility Jamo" 
 starting at U+3130 which represent the initial and final consonants with the 
