@@ -2,7 +2,6 @@
 <main id="content">
   <div id="page" :html="$page.content()"></div>
 
-  <!-- <ul loop="$site.locale('en-US').page('posts').subpages()" id="posts"> -->
   <ul :loop="$page.subpages()" id="posts">
     <li>
       <div :if="$site.localeCode().eql('en-US')">

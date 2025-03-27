@@ -1,16 +1,17 @@
 ---
-.title = "연락",
+.title = "연락처",
 .date = @date("2024-07-26T00:00:00"),
 .author = "Brook Jeynes",
 .layout = "index.shtml",
 ---
 
-### 연락
+### 연락처
 
 ```=html
-github - <a href="https://github.com/brookjeynes">brookjeynes</a> <br>
-email - <a href="mailto:jeynesbrook@pm.me">jeynesbrook@pm.me</a> <br>
-twitter - <a href="https://twitter.com/brookjeynes">@brookjeynes</a> <br>
-youtube - <a href="https://www.youtube.com/@chooky_">@chooky_</a> <br>
-linkedin - <a href="https://www.linkedin.com/in/brook-jeynes">linkedin/brook-jeynes</a>
+<ul>
+    <li><a href="https://github.com/brookjeynes">github/brookjeynes</a></li>
+    <li><a href="https://www.youtube.com/@chooky_">youtube/@chooky_</a></li>
+    <li><a href="https://www.linkedin.com/in/brook-jeynes">linkedin/brook-jeynes</a></li>
+    <li><a href="mailto:jeynesbrook@pm.me">mailto:jeynesbrook@pm.me</a></li>
+</ul>
 ```

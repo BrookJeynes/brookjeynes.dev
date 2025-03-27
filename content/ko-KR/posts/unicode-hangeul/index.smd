@@ -1,0 +1,254 @@
+---
+.title = "Encoding Hangeul, Koreas writing system.",
+.date = @date("2025-01-24T00:00:00"),
+.author = "Brook Jeynes",
+.layout = "post.shtml",
+--- 
+
+### Introduction
+
+Hangeul (한글) is the modern writing system for the Korean language, created in 
+1443 by King Sejong the great, the fourth king of the Joseon dynasty<sup>1</sup>. 
+Before its invention, Korean was written using Hanja (한자) — Chinese characters 
+adapted for Korean. Even after Hangeul's creation, Hanja remained in regular use 
+for centuries, particularly in formal and scholarly contexts<sup>2</sup>.
+
+Hangeul is a syllabic writing system where each syllable is composed of letters
+called Jamo (자모). These Jamo function like Latin letters, each representing
+an individual sound. There are a total of 11,172 syllabic combinations of Jamo 
+which can be used to form Hangeul<sup>3</sup>.
+
+However, learning Hangeul doesn't require memorizing thousands of combinations.
+Instead, one only needs to learn the 68 different Jamo shapes and rules 
+governing the construction of Hangeul. This is much easier than it sounds with 
+the basics of the Korean alphabet being able to be learned within 60-90 minutes.
+
+This post explores how Hangeul is encoded in Unicode, a universal standard that 
+assigns unique values to characters across all languages<sup>4</sup>. It also 
+delves into the mathematical operations used to construct and deconstruct 
+individual Jamo from encoded Hangeul.
+
+---
+
+### Hangeul, Jamo, and Unicode
+
+A Korean syllable consists of a lead consonant, a medial vowel, and a tail 
+consonant. For example, 
+
+한 (han) can be deconstructed like so:
+- ㅎ (h) is the lead consonant.
+- ㅏ (a) is the medial vowel.
+- ㄴ (n) is the tail consonant.
+
+자 (ja) can be deconstructed like so:
+- ㅈ (j) is the lead consonant.
+- ㅏ (a) is the medial vowel.
+- There is no tail consonant.
+
+Syllables starting with an initial vowel, for example 안 (an), must be prefixed 
+with ㅇ (eung), a special lead consonant that produces no sound.
+
+There are 19 different lead consonants ranging between Unicode values U+1100 
+and U+1112. There are 21 different vowels ranging between Unicode values U+1161
+and U+1175. Finally, there are 27 tail consonants ranging between Unicode values
+U+11A8 and U+11C2 + a null consonant used when there is no tail. This range of 
+Unicode is called the Hangeul Jamo block.
+
+Below is a set of tables providing each Jamo, its canonical order, as well as
+its Unicode value. When Jamo are used in combination with each other, they change 
+their shape, size, and positions slightly to fit into a single Hangeul. Unicode 
+has a second range of Jamo characters called "Hangeul Compatibility Jamo" 
+starting at U+3130 which represent the initial and final consonants with the 
+same Unicode codepoint as opposed to the Hangeul Jamo block which assigns them 
+separate codepoints<sup>5</sup>. These compatibility Jamo typically render much 
+more clearer.
+
+The table below shows both, the conjoining Jamo as well as the [compatibility 
+Jamo] with the character reference hex value referring to the former<sup>6</sup>. 
+Depending on your browser, both Jamo may render the same.
+
+| Number | Lead | Jamo    | Character reference |
+|--------|------|---------|---------------------|
+| 1      | G    | ᄀ [ㄱ] | 0x1100              |
+| 2      | GG   | ᄁ [ㄲ] | 0x1101              |
+| 3      | N    | ᄂ [ㄴ] | 0x1102              |
+| 4      | D    | ᄃ [ㄷ] | 0x1103              |
+| 5      | DD   | ᄄ [ㄸ] | 0x1104              |
+| 6      | R    | ᄅ [ㄹ] | 0x1105              |
+| 7      | M    | ᄆ [ㅁ] | 0x1106              |
+| 8      | B    | ᄇ [ㅂ] | 0x1107              |
+| 9      | BB   | ᄈ [ㅃ] | 0x1108              |
+| 10     | S    | ᄉ [ㅅ] | 0x1109              |
+| 11     | SS   | ᄊ [ㅆ] | 0x110A              |
+| 12     |      | ᄋ [ㅇ] | 0x110B              |
+| 13     | J    | ᄌ [ㅈ] | 0x110C              |
+| 14     | JJ   | ᄍ [ㅉ] | 0x110D              |
+| 15     | C    | ᄎ [ㅊ] | 0x110E              |
+| 16     | K    | ᄏ [ㅋ] | 0x110F              |
+| 17     | T    | ᄐ [ㅌ] | 0x1110              |
+| 18     | P    | ᄑ [ㅍ] | 0x1111              |
+| 19     | H    | ᄒ [ㅎ] | 0x1112              |
+
+| Number | Vowel | Jamo   | Character reference |
+|--------|-------|--------|---------------------|
+| 1      | A     | ᅡ [ㅏ] | 0x1161              |
+| 2      | AE    | ᅢ [ㅐ] | 0x1162              |
+| 3      | YA    | ᅣ [ㅑ] | 0x1163              |
+| 4      | YAE   | ᅤ [ㅒ] | 0x1164              |
+| 5      | EO    | ᅥ [ㅓ] | 0x1165              |
+| 6      | E     | ᅦ [ㅔ] | 0x1166              |
+| 7      | YEO   | ᅧ [ㅕ] | 0x1167              |
+| 8      | YE    | ᅨ [ㅖ] | 0x1168              |
+| 9      | O     | ᅩ [ㅗ] | 0x1169              |
+| 10     | WA    | ᅪ [ㅘ] | 0x116A              |
+| 11     | WAE   | ᅫ [ㅙ] | 0x116B              |
+| 12     | OE    | ᅬ [ㅚ] | 0x116C              |
+| 13     | YO    | ᅭ [ㅛ] | 0x116D              |
+| 14     | U     | ᅮ [ㅜ] | 0x116E              |
+| 15     | WEO   | ᅯ [ㅝ] | 0x116F              |
+| 16     | WE    | ᅰ [ㅞ] | 0x1170              |
+| 17     | WI    | ᅱ [ㅟ] | 0x1171              |
+| 18     | YU    | ᅲ [ㅠ] | 0x1172              |
+| 19     | EU    | ᅳ [ㅡ] | 0x1173              |
+| 20     | YI    | ᅴ [ㅢ] | 0x1174              |
+| 21     | I     | ᅵ [ㅣ] | 0x1175              |
+
+| Number | Tail | Jamo   | Character reference |
+|--------|------|--------|---------------------|
+| 1      | G    | ᆨ [ㄱ] | 0x11A8              |
+| 2      | GG   | ᆩ [ㄲ] | 0x11A9              |
+| 3      | GS   | ᆪ [ㄳ] | 0x11AA              |
+| 4      | N    | ᆫ [ㄴ] | 0x11AB              |
+| 5      | NJ   | ᆬ [ㄵ] | 0x11AC              |
+| 6      | NH   | ᆭ [ㄶ] | 0x11AD              |
+| 7      | D    | ᆮ [ㄷ] | 0x11AE              |
+| 8      | L    | ᆯ [ㄹ] | 0x11AF              |
+| 9      | LG   | ᆰ [ㄺ] | 0x11B0              |
+| 10     | LM   | ᆱ [ㄻ] | 0x11B1              |
+| 11     | LB   | ᆲ [ㄼ] | 0x11B2              |
+| 12     | LS   | ᆳ [ㄽ] | 0x11B3              |
+| 13     | LT   | ᆴ [ㄾ] | 0x11B4              |
+| 14     | LP   | ᆵ [ㄿ] | 0x11B5              |
+| 15     | LH   | ᆶ [ㅀ] | 0x11B6              |
+| 16     | M    | ᆷ [ㅁ] | 0x11B7              |
+| 17     | B    | ᆸ [ㅂ] | 0x11B8              |
+| 18     | BS   | ᆹ [ㅄ] | 0x11B9              |
+| 19     | S    | ᆺ [ㅅ] | 0x11BA              |
+| 20     | SS   | ᆻ [ㅆ] | 0x11BB              |
+| 21     | NG   | ᆼ [ㅇ] | 0x11BC              |
+| 22     | J    | ᆽ [ㅈ] | 0x11BD              |
+| 23     | C    | ᆾ [ㅊ] | 0x11BE              |
+| 24     | K    | ᆿ [ㅋ] | 0x11BF              |
+| 25     | T    | ᇀ [ㅌ] | 0x11C0              |
+| 26     | P    | ᇁ [ㅍ] | 0x11C1              |
+| 27     | H    | ᇂ [ㅎ] | 0x11C2              |
+
+### Encoding Hangeul
+
+Although each Jamo has its own individual Unicode value, Unicode values U+AC00 
+to U+D7A3 define every combination of Jamo, or every Hangeul character. 
+This range of Unicode is called the Hangeul Syllables block<sup>7</sup>.
+
+These syllables can be directly mapped by algorithm back to sequences of two 
+or three Jamo in the Hangeul Jamo block mentioned earlier<sup>8</sup>. It's due 
+to this that it's theoretically possible to encode Korean texts with Jamo only 
+and let the font rendered handle Hangeul construction. This is not recommended 
+in practice though due to limitations and lack of support in current renderers.
+
+Isolated Jamo are rarely found in Korean texts instead opting for use of the
+precomposed Hangeul syllables. The codepoint of a Hangeul can be calculated from
+its Jamo components using the following formula<sup>9</sup>.
+
+```=html
+<div align="center">
+Hangeul Unicode = (((lead − 1) * 588) + ((vowel − 1) * 28) + tail) + 44032 
+</div>
+```
+
+In the formula, lead, vowel, and tail refer to the small integers given in the
+above tables. If there is no tail, the value 0 is used. The value 28 is the 
+sum of the tail count. The value 588 is the sum of vowel and tail count. 44032
+(0xAC00) is the first character of the Hangeul Syllables Unicode block.
+
+As an example, let's take the Hangeul 한 (han), which in Unicode is U+D55C. Using
+the Jamo that construct it, let's try reach the final value.
+
+```
+ㅎ = 19 // Lead consonant
+ㅏ = 1  // Median vowel
+ㄴ = 4  // Tail consonant
+
+한 = U+D55C = 54620 = (((19 − 1) * 588) + ((1 − 1) * 28) + 4) + 44032
+                    = (10584 + 0 + 4) + 44032
+                    = 10588 + 44032
+                    = 54620
+```
+
+Given the above formula, it can be rearranged to extract the Jamo of a Hangeul.
+
+```=html
+<div align="center">
+tail = mod(Hangeul Unicode - 44032, 28) <br>
+vowel = 1 + mod(Hangeul Unicode - 44032 - tail, 588) / 28 <br>
+lead = 1 + floor[(Hangeul Unicode - 44032) / 588]
+</div>
+```
+
+As another example, let's try work backwards. Given the Hangeul 한 (han), let's
+try deconstruct it.
+
+```
+한 = U+D55C = 54620
+
+// tail
+ㄴ = 4 = mod(54620 - 44032, 28)
+       = mod(10588, 28)
+       = 4
+          
+// vowel
+ㅏ = 1 = 1 + mod(54620 - 44032 - 4, 588) / 28
+       = 1 + mod(10584, 588) / 28
+       = 1 + 0 / 28
+       = 1
+
+// lead
+ㅎ = 19 = 1 + floor[(54620 - 44032) / 588]
+        = 1 + floor[10592 / 588]
+        = 1 + 18
+        = 19
+```
+
+### Obsolete Hangeul
+
+Overtime, Hangeul has undergone many changes with several Jamo no longer being
+used in modern Korean<sup>10</sup>.
+
+- ㆍ (아래아, arae-a): A short "a" sound.
+- ㆆ (여린히읗, yeorin-hieut): A "light h", akin to a softer version of the English "h".
+- ㅿ (반시옷, bansiot): A "z" sound.
+- ㆁ (옛이응, yet-ieung): A velar nasal sound comparable to "ng" in the word "sing".
+
+Since these obsolete characters are still used in older literature and historical
+texts, there's still a need to have some way of using them. However, because
+they're obsolete, Unicode does not offer precomposed Hangeul. Instead, syllables
+using them must be coded by Jamo.
+
+### Conclusion
+Next time you type "한글" on your keyboard or read a text in Korean, you’ll 
+know there’s a beautifully logical system at play behind the scenes — one that 
+blends centuries of linguistic history with the modern efficiency of Unicode.
+
+Thanks for reading,  
+\- Brook ❤
+
+#### Footnotes
+**1**: [https://en.wikipedia.org/wiki/Hangul](https://en.wikipedia.org/wiki/Hangul)  
+**2**: [https://en.wikipedia.org/wiki/Hanja](https://en.wikipedia.org/wiki/Hanja)  
+**3**: [https://www.namhansouthkorea.com/how-many-korean-characters-are-there/](https://www.namhansouthkorea.com/how-many-korean-characters-are-there/)  
+**4**: [https://www.unicode.org/standard/WhatIsUnicode.html](https://www.unicode.org/standard/WhatIsUnicode.html)  
+**5**: [https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo](https://en.wikipedia.org/wiki/Hangul_Compatibility_Jamo)  
+**6**: [http://www.gernot-katzers-spice-pages.com/var/korean_hangul_unicode.html](http://www.gernot-katzers-spice-pages.com/var/korean_hangul_unicode.html)  
+**7**: [https://en.wikipedia.org/wiki/Hangul_Syllables](https://en.wikipedia.org/wiki/Hangul_Syllables)  
+**8**: [https://www.unicode.org/reports/tr15/tr15-29.html#Hangul](https://www.unicode.org/reports/tr15/tr15-29.html#Hangul)  
+**9**: [https://en.wikipedia.org/wiki/Korean_language_and_computers#Hangul_in_Unicode](https://en.wikipedia.org/wiki/Korean_language_and_computers#Hangul_in_Unicode)  
+**10**: [https://colab.research.google.com/github/bebechien/gemma/blob/main/Translator_of_Old_Korean_Literature.ipynb](https://colab.research.google.com/github/bebechien/gemma/blob/main/Translator_of_Old_Korean_Literature.ipynb)  

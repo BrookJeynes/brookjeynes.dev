@@ -1,20 +1,16 @@
 ---
-.title = "라이브러리",
+.title = "서재",
 .date = @date("2024-07-26T00:00:00"),
 .author = "Brook Jeynes",
 .layout = "index.shtml",
 ---
 
-### 라이브러리
-a collection of books i've read or am reading.
+### 서재
+독서 중이거나 완독한 책 컬렉션.
 
-#### tech
+#### 컴퓨터/ IT
 ```=html
 <ul id="posts">
-    <li>
-        <span>C Programming Language, 2nd Edition</span>
-        <small>Brian W. Kernighan, Dennis M. Ritchie</small>
-    </li>
     <li>
         <span>Linux Device Drivers, 3rd Edition</span>
         <small>Jonathan Corbet, Alessandro Rubini, Greg Kroah-Hartman</small>
@@ -28,20 +24,24 @@ a collection of books i've read or am reading.
         <small>Abraham Silberschatz, Peter B. Galvin, Greg Gagne</small>
     </li>
     <li>
-        <span>Programming with 64-Bit ARM Assembly Language</span>
-        <small>Stephen Smith</small>
-    </li>
-    <li>
-        <span>Programming Rust: Fast, Safe Systems Development, 2nd Edition</span>
-        <small>Jim Blandy</small>
-    </li>
-    <li>
         <span>Grokking Algorithms</span>
         <small>Aditya Y. Bhargava</small>
     </li>
     <li>
         <span>Practical Vim, Second Edition</span>
         <small>Drew Neil</small>
+    </li>
+    <li>
+        <span>C Programming Language, 2nd Edition</span>
+        <small>Brian W. Kernighan, Dennis M. Ritchie</small>
+    </li>
+    <li>
+        <span>Programming with 64-Bit ARM Assembly Language</span>
+        <small>Stephen Smith</small>
+    </li>
+    <li>
+        <span>Programming Rust: Fast, Safe Systems Development, 2nd Edition</span>
+        <small>Jim Blandy</small>
     </li>
     <li>
         <span>The Rust Programming Language, 2nd Edition</span>
@@ -54,7 +54,7 @@ a collection of books i've read or am reading.
 </ul>
 ```
 
-#### electronics
+#### 전기/ 전자
 ```=html
 <ul id="posts">
     <li>
@@ -64,17 +64,21 @@ a collection of books i've read or am reading.
 </ul>
 ```
 
-#### fiction
+#### 소설
 ```=html
 <ul id="posts">
     <li>
         <span>Kokoro</span>
         <small>Natsume Sōseki</small>
     </li>
+    <li>
+        <span>또다시 같은 꿈을 꾸었어</span>
+        <small>스미노 요루</small>
+    </li>
 </ul>
 ```
 
-#### philosophy
+#### 철학
 ```=html
 <ul id="posts">
     <li>
@@ -84,7 +88,7 @@ a collection of books i've read or am reading.
 </ul>
 ```
 
-#### manga
+#### 만화
 ```=html
 <ul id="posts">
     <li>
@@ -102,7 +106,7 @@ a collection of books i've read or am reading.
 </ul>
 ```
     
-#### self help
+#### 자기 계발
 ```=html
 <ul id="posts">
     <li>
