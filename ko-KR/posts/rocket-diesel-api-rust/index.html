@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+  <head id="head">
+    <meta charset="UTF-8">
+    <meta name="description" content="Brook, Just a tech.">
+    <meta property="og:title" content="Building an API in Rust with Rocket.rs and Diesel.rs (Clean Architecture)">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title id="title">
+      Building an API in Rust with Rocket.rs and Diesel.rs (Clean Architecture)
+      - brookjeynes.dev
+    </title>
+    <link rel="stylesheet" type="text/css" href="/ko-KR/style.css">
+    <link rel="stylesheet" type="text/css" href="/ko-KR/highlight.css">
+    <link rel="stylesheet" type="text/css" href="/ko-KR/min770px.css">
+    <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
+        rel="stylesheet">
+  </head>
+
+  <body>
+    <header id="banner">
+      <h2>
+        <a href="/ko-KR/">brookjeynes.dev</a>
+      </h2>
+      <nav>
+        <ul>
+          <li><a class="selected" href="/ko-KR/posts/">블로그</a></li>
+          <li><a class="" href="/ko-KR/videos/">동영상</a></li>
+          <li><a class="" href="/ko-KR/library/">서재</a></li>
+          <li><a class="" href="/ko-KR/contact/">연락처</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="content">
+      
+  <header id="post-header">
+    <h1>Building an API in Rust with Rocket.rs and Diesel.rs (Clean Architecture)</h1>
+    <div>
+      <time>November 23, 2022</time>
+    </div>
+  </header>
+  <div><p>In this guide I'm going to walk you through the process of building a simple CRUD API from scratch in Rust using Rocket.rs. I will show you how to create migrations and access a PostgreSQL database using Diesel.rs and connect everything up to a React + Typescript front-end. When building the project we will follow Clean Architecture, although I won't go into talking too much about what that is as it's not the focus of this guide.</p><p>This guide assumes:</p><ul><li>You already have a PostgreSQL database setup</li><li>You have the latest version of Rust (this guide uses v1.65.0)</li><li>You have a basic-to-decent understanding of Rust concepts and the language syntax</li></ul><p>Now that that's sorted, let's begin!</p><hr><h2>Building the project architecture</h2><p>The first step is to setup the architecture of the application. Start by creating a overarching Rust project:</p><pre><code class="bash"><span class="constant">cargo</span> <span class="constant">new</span> <span class="constant">rust-blog</span>
+<span class="constant">cd</span> <span class="constant">rust-blog</span>
+</code></pre>
+<p>After this, delete the src folder as we won't be needing it. The next thing we're going to do is generate a new project for each layer in the Clean Architecture model. Our architecture will follow as such that the:</p><ul><li>API Layer will handle the API requests and act as our route handler.</li><li>Application layer will handle the logic behind the API requests.</li><li>Domain layer will hold our database models and schemas.</li><li>Infrastructure layer will hold our migrations and database connections.</li><li>Shared layer will hold any other models our project will need such as response structures.</li></ul><pre><code class="bash"><span class="constant">cargo</span> <span class="constant">new</span> <span class="constant">api</span> <span class="constant">--lib</span>
+<span class="constant">cargo</span> <span class="constant">new</span> <span class="constant">application</span> <span class="constant">--lib</span>
+<span class="constant">cargo</span> <span class="constant">new</span> <span class="constant">domain</span> <span class="constant">--lib</span>
+<span class="constant">cargo</span> <span class="constant">new</span> <span class="constant">infrastructure</span> <span class="constant">--lib</span>
+<span class="constant">cargo</span> <span class="constant">new</span> <span class="constant">shared</span> <span class="constant">--lib</span>
+</code></pre>
+<p>By the end of this, our project should be looking something like this:</p><pre><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── api
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── application
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── domain
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+├── infrastructure
+│   ├── Cargo.toml
+│   └── src
+│       └── lib.rs
+└── shared
+    ├── Cargo.toml
+    └── src
+        └── lib.rs
+</code></pre><p>We're now going to link all of these projects in the top-level Cargo.toml file. Delete everything inside the file and enter the following:</p><pre><code class="toml"><span class="punctuation bracket">[</span><span class="property">workspace</span><span class="punctuation bracket">]</span>
+<span class="property">members</span> <span class="operator">=</span> <span class="punctuation bracket">[</span>
+  <span class="string">&quot;api&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;domain&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;infrastructure&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;application&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;shared&quot;</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">]</span>
+</code></pre>
+<p>Nice! That's the majority of our templating finished, now we can get into some actual fun.</p><hr><h2>Migrations</h2><p>Since we're using Diesel.rs as the database manager, we will need to install the CLI tool. Diesel CLI has a few dependencies that need to be installed beforehand depending on what database you're planning on using:</p><ul><li>libpq for PostgreSQL</li><li>libmysqlclient for Mysql</li><li>libsqlite3 for SQlite</li></ul><p>For this project, we will be using PostgreSQL. This means we only need libpq as a dependency. <em>Please refer to the docs for each dependency required to find out how to install it on your operating system.</em></p><p>With libpq installed, we can now run the following command to install Diesel CLI:</p><pre><code class="bash"><span class="constant">cargo</span> <span class="constant">install</span> <span class="constant">diesel_cli</span> <span class="constant">--no-default-features</span> <span class="constant">--features</span> <span class="constant">postgres</span>
+</code></pre>
+<p>With that installed, let's set up a connection string to our database. In the top-level project directory, run the following command with your connections details:</p><pre><code class="bash"><span class="constant">echo</span> <span class="constant">DATABASE_URL=postgres://username:password@localhost/blog</span> <span class="operator">&gt;</span> .env
+</code></pre>
+<p>Now, we can use the Diesel CLI to do the heavy lifting for us. Navigate into the infrastructure folder and run the following command: diesel setup</p><ul><li>This will generate a few things:</li><li>A migrations folder used to store all migrations</li><li>An empty migration we can use to manage our database schema.</li></ul><p>Using the Diesel CLI tool, we can create a new migration to handle the initial setup of our posts table.</p><pre><code class="bash"><span class="constant">diesel</span> <span class="constant">migration</span> <span class="constant">generate</span> <span class="constant">create_posts</span>
+</code></pre>
+<p>Diesel CLI will generate a new migration consisting of a name similar to 2022–11–18–090125_create_posts. The first part is the date the migration was generated with a unique code followed by the migrations name. Inside this migration folder will be two files: up.sql, telling Diesel CLI what to apply in the migration, and down.sql, telling Diesel CLI how to revert a migration.</p><p>Now, let's go ahead and write some SQL for the migrations.</p><pre><code>-- up.sql
+
+CREATE TABLE posts (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR NOT NULL,
+  body TEXT NOT NULL,
+  genre VARCHAR NOT NULL,
+  published BOOLEAN NOT NULL DEFAULT false
+)
+</code></pre><pre><code>-- down.sql
+
+DROP TABLE posts
+</code></pre><p>Using the Diesel CLI, we can apply the new migration we just created.</p><pre><code class="bash"><span class="constant">diesel</span> <span class="constant">migration</span> <span class="constant">run</span>
+</code></pre>
+<p><em>For more information on running migrations with Diesel.rs, visit the official getting started guide here.</em></p><hr><h2>Creating a connection</h2><p>With our first set of migrations finished and our project architecture laid out, let's finally write some Rust code to connect our application to the database.</p><pre><code class="toml"><span class="comment"># infrastructure/Cargo.toml</span>
+
+<span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;infrastructure&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
+<span class="property">diesel</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;2.0.0&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;postgres&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">dotenvy</span> <span class="operator">=</span> <span class="string">&quot;0.15&quot;</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// infrastructure/src/lib.rs</span>
+
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="type">pg</span><span class="punctuation delimiter">::</span><span class="constant">PgConnection</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">prelude</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">dotenvy</span><span class="punctuation delimiter">::</span><span class="constant">dotenv</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">std</span><span class="punctuation delimiter">::</span><span class="constant">env</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> -&gt; <span class="type">PgConnection</span> <span class="punctuation bracket">{</span>
+    <span class="function">dotenv</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">ok</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">let</span> <span class="constant">database_url</span> = <span class="type">env</span><span class="punctuation delimiter">::</span><span class="function">var</span><span class="punctuation bracket">(</span><span class="string">&quot;DATABASE_URL&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">expect</span><span class="punctuation bracket">(</span><span class="string">&quot;DATABASE_URL must be set.&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="type">PgConnection</span><span class="punctuation delimiter">::</span><span class="function">establish</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">database_url</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap_or_else</span><span class="punctuation bracket">(</span>|_| <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Error connecting to {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">database_url</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>With our connection made, we need to create some models for our database, namely Post and NewPost.</p><hr><h2>Models and Schemas</h2><p>Start by navigating into domain and adding the following modules to lib.rs.</p><pre><code class="rust"><span class="comment">// domain/src/lib.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">models</span><span class="punctuation delimiter">;</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">schema</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<p>We'll use models to define the structs our database and code will use, while schema will be auto-generated by Diesel CLI. When we generated our migration, a schema.rs file was created in infrastructure. Simply move that to domain/src. If for some reason schema.rs wasn't generated, you can run diesel print-schema in the terminal to view the schema.</p><pre><code class="toml"><span class="comment"># domain/Cargo.toml</span>
+
+<span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;domain&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
+<span class="property">rocket</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.5.0-rc.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;json&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">diesel</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;2.0.0&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;postgres&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">serde</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;1.0.147&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;derive&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// domain/src/models.rs</span>
+
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="constant">posts</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">prelude</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="constant">serde</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Deserialize</span><span class="punctuation delimiter">,</span> <span class="constant">Serialize</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">std</span><span class="punctuation delimiter">::</span><span class="constant">cmp</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Ord</span><span class="punctuation delimiter">,</span> <span class="constant">Eq</span><span class="punctuation delimiter">,</span> <span class="constant">PartialOrd</span><span class="punctuation delimiter">,</span> <span class="constant">PartialEq</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// Queryable will generate the code needed to load the struct from an SQL statement</span>
+<span class="attribute">#[derive(Queryable, Serialize, Ord, Eq, PartialEq, PartialOrd)]</span>
+<span class="keyword">pub</span> <span class="keyword">struct</span> <span class="type">Post</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">pub</span> <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">title</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">genre</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">published</span><span class="punctuation delimiter">:</span> <span class="type builtin">bool</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">}</span>
+
+<span class="attribute">#[derive(Insertable, Deserialize)]</span>
+<span class="attribute">#[serde(crate = &quot;rocket::serde&quot;)]</span>
+<span class="attribute">#[diesel(table_name = posts)]</span>
+<span class="keyword">pub</span> <span class="keyword">struct</span> <span class="type">NewPost</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">pub</span> <span class="property">title</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">genre</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// domain/src/schema.rs</span>
+
+<span class="comment">// @generated automatically by Diesel CLI.</span>
+
+<span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">table</span>! <span class="punctuation bracket">{</span>
+    <span class="constant">posts</span> <span class="punctuation bracket">(</span><span class="constant">id</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+        <span class="constant">id</span> -&gt; <span class="constant">Int4</span><span class="punctuation delimiter">,</span>
+        <span class="constant">title</span> -&gt; <span class="constant">Varchar</span><span class="punctuation delimiter">,</span>
+        <span class="constant">body</span> -&gt; <span class="constant">Text</span><span class="punctuation delimiter">,</span>
+        <span class="constant">genre</span> -&gt; <span class="constant">Varchar</span><span class="punctuation delimiter">,</span>
+        <span class="constant">published</span> -&gt; <span class="constant">Bool</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>The code in schema.rs may vary slightly for you, but the concept still remains. This file will be updated whenever we run or revert a migration. It's important to note that the order of fields in our Post struct and the posts table must match.</p><p>As well as defining database models, let's create a model to structure how our API responses are going to be formatted. Navigate to shared/src and create a new file response_models.rs.</p><pre><code class="toml"><span class="comment"># shared/Cargo.toml</span>
+
+<span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;shared&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
+<span class="property">domain</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../domain&quot;</span> <span class="punctuation bracket">}</span>
+
+<span class="property">rocket</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.5.0-rc.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;json&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">serde</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;1.0.147&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;derive&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// shared/src/lib.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">response_models</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// shared/src/response_models.rs</span>
+
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">models</span><span class="punctuation delimiter">::</span><span class="constant">Post</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">serde</span><span class="punctuation delimiter">::</span><span class="constant">Serialize</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[derive(Serialize)]</span>
+<span class="keyword">pub</span> <span class="keyword">enum</span> <span class="type">ResponseBody</span> <span class="punctuation bracket">{</span>
+    <span class="constant">Message</span><span class="punctuation bracket">(</span><span class="type">String</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+    <span class="constant">Post</span><span class="punctuation bracket">(</span><span class="type">Post</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+    <span class="constant">Posts</span><span class="punctuation bracket">(</span><span class="type">Vec</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+
+<span class="attribute">#[derive(Serialize)]</span>
+<span class="attribute">#[serde(crate = &quot;rocket::serde&quot;)]</span>
+<span class="keyword">pub</span> <span class="keyword">struct</span> <span class="type">Response</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">pub</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>The ResponseBody enum will be used to define what types of data can be returned from our API and the Response struct will define how the response will be structured.</p><hr><h2>Setting up Rocket.rs</h2><p>Wow! That was a lot of setup just for our database, just so we're all up-to-date, here's what the project structure should look like currently:</p><pre><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── api
+│   └── ...
+├── application
+│   └── ...
+├── domain
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       └── models.rs
+├── infrastructure
+│   ├── Cargo.toml
+│   ├── migrations
+│   │   └── 2022–11–18–090125_create_posts
+│   │       ├── up.sql
+│   │       └── down.sql
+│   └── src
+│     ├── lib.rs
+│     └── schema.rs
+└── shared
+    ├── Cargo.toml
+    └── src
+        ├── lib.rs
+        └── response_models.rs
+</code></pre><p>With the bulk of our database setup done, let's begin the setup of the API portion for the project.</p><p>Navigate to api and import the following dependencies:</p><pre><code class="toml"><span class="comment"># api/Cargo.toml</span>
+
+<span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;api&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
+<span class="property">domain</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../domain&quot;</span> <span class="punctuation bracket">}</span>
+<span class="property">application</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../application&quot;</span> <span class="punctuation bracket">}</span>
+<span class="property">shared</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../shared&quot;</span> <span class="punctuation bracket">}</span>
+
+<span class="property">rocket</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.5.0-rc.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;json&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">serde_json</span> <span class="operator">=</span> <span class="string">&quot;1.0.88&quot;</span>
+</code></pre>
+<p>With our dependencies and references to other folders set, let's create a bin folder to hold main.rs.</p><pre><code>.
+└── api
+    ├── Cargo.toml
+    └── src
+        ├── bin
+        │   └── main.rs
+        └── lib.rs
+</code></pre><p>main.rs is going to be the entry point of our API, this is where we will define the routes we plan to use. We'll start by defining a single route at a time as we build the application up.</p><pre><code class="rust"><span class="comment">// api/src/lib.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">post_handler</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// api/src/bin/main.rs</span>
+
+<span class="attribute">#[macro_use]</span> <span class="keyword">extern</span> <span class="keyword">crate</span> <span class="constant">rocket</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">api</span><span class="punctuation delimiter">::</span><span class="constant">post_handler</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[launch]</span>
+<span class="keyword">fn</span> <span class="function">rocket</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> -&gt; <span class="type">_</span> <span class="punctuation bracket">{</span>
+    <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="function">build</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span>
+        <span class="punctuation delimiter">.</span><span class="function method">mount</span><span class="punctuation bracket">(</span><span class="string">&quot;/api&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">routes</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">list_posts_handler</span><span class="punctuation delimiter">,</span> 
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">list_post_handler</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">]</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>We are going to use post_handler.rs to define the routes themselves. To avoid constant errors from our LSP, we'll use the todo!() macro to let Rust know that these functions/routes are incomplete.</p><p>Create a new file called post_handler.rs in src and write the following template code:</p><pre><code>// api/src/post_handler.rs
+
+use shared::response_models::{Response, ResponseBody};
+use application::post::{read};
+use domain::models::{Post};
+use rocket::{get};
+use rocket::response::status::{NotFound};
+use rocket::serde::json::Json;
+
+#[get(&quot;/&quot;)]
+pub fn list_posts_handler() -&gt; String {
+    todo!()
+}
+
+#[get(&quot;/post/&lt;post_id&gt;&quot;)]
+pub fn list_post_handler(post_id: i32) -&gt; Result&lt;String, NotFound&lt;String&gt;&gt; {
+    todo!()
+}
+</code></pre><p>Here we define two requests:</p><pre><code>GET /api/ (used to list all posts)
+GET /api/post/&lt;post_id&gt; (used to list a post by id)
+</code></pre><hr><h2>Handling API logic</h2><p>With the request handlers templated, let's write the logic required for the routes. Inside of application, create a new folder called post. This folder will contain a file for each of our routes logic.</p><pre><code class="toml"><span class="comment"># application/Cargo.toml</span>
+
+<span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;application&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
+<span class="property">domain</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../domain&quot;</span> <span class="punctuation bracket">}</span>
+<span class="property">infrastructure</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../infrastructure&quot;</span> <span class="punctuation bracket">}</span>
+<span class="property">shared</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">path</span> <span class="operator">=</span> <span class="string">&quot;../shared&quot;</span> <span class="punctuation bracket">}</span>
+
+<span class="property">diesel</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;2.0.0&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;postgres&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">serde_json</span> <span class="operator">=</span> <span class="string">&quot;1.0.88&quot;</span>
+<span class="property">rocket</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.5.0-rc.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;json&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// application/src/lib.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">post</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// application/src/post/mod.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">read</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// application/src/post/read.rs</span>
+
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">models</span><span class="punctuation delimiter">::</span><span class="constant">Post</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">shared</span><span class="punctuation delimiter">::</span><span class="constant">response_models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Response</span><span class="punctuation delimiter">,</span> <span class="constant">ResponseBody</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">infrastructure</span><span class="punctuation delimiter">::</span><span class="constant">establish_connection</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">prelude</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">response</span><span class="punctuation delimiter">::</span><span class="type">status</span><span class="punctuation delimiter">::</span><span class="constant">NotFound</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">list_post</span><span class="punctuation bracket">(</span><span class="variable parameter">post_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Result</span>&lt;<span class="type">Post</span><span class="punctuation delimiter">,</span> <span class="type">NotFound</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="constant">posts</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">match</span> <span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">table</span><span class="punctuation delimiter">.</span><span class="function method">find</span><span class="punctuation bracket">(</span><span class="constant">post_id</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">first</span><span class="punctuation delimiter">::</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="keyword">mut</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+        <span class="constant">Ok</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span> =&gt; <span class="function">Ok</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+        <span class="constant">Err</span><span class="punctuation bracket">(</span><span class="constant">err</span><span class="punctuation bracket">)</span> =&gt; <span class="keyword">match</span> <span class="constant">err</span> <span class="punctuation bracket">{</span>
+            <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="type">result</span><span class="punctuation delimiter">::</span><span class="type">Error</span><span class="punctuation delimiter">::</span><span class="constant">NotFound</span> =&gt; <span class="punctuation bracket">{</span>
+                <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Message</span><span class="punctuation bracket">(</span><span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Error selecting post with id {} - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">post_id</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+                <span class="keyword">return</span> <span class="function">Err</span><span class="punctuation bracket">(</span><span class="function">NotFound</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            _ =&gt; <span class="punctuation bracket">{</span>
+                <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Database error - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span>        
+        <span class="punctuation bracket">}</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">list_posts</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Vec</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="constant">posts</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">match</span> <span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">table</span><span class="punctuation delimiter">.</span><span class="function method">select</span><span class="punctuation bracket">(</span><span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">all_columns</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">load</span><span class="punctuation delimiter">::</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="keyword">mut</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+        <span class="constant">Ok</span><span class="punctuation bracket">(</span><span class="keyword">mut</span> <span class="constant">posts</span><span class="punctuation bracket">)</span> =&gt; <span class="punctuation bracket">{</span>
+            <span class="constant">posts</span><span class="punctuation delimiter">.</span><span class="function method">sort</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="constant">posts</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">Err</span><span class="punctuation bracket">(</span><span class="constant">err</span><span class="punctuation bracket">)</span> =&gt; <span class="keyword">match</span> <span class="constant">err</span> <span class="punctuation bracket">{</span>
+            _ =&gt; <span class="punctuation bracket">{</span>
+                <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Database error - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span>
+        <span class="punctuation bracket">}</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>It's important to note that when using Rocket.rs, the panic!() macro will return a 500 InternalServerError and not crash your program.</p><p>With the logic for our route written, let's return back to our post handler to finish off our two GET routes.</p><pre><code class="rust"><span class="comment">// api/src/post_handler.rs</span>
+
+<span class="comment">// ...</span>
+
+<span class="attribute">#[get(&quot;/&quot;)]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">list_posts_handler</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> -&gt; <span class="type">String</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// 👇 New function body!</span>
+    <span class="keyword">let</span> <span class="constant">posts</span><span class="punctuation delimiter">:</span> <span class="type">Vec</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span> = <span class="type">read</span><span class="punctuation delimiter">::</span><span class="function">list_posts</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+    <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Posts</span><span class="punctuation bracket">(</span><span class="constant">posts</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+
+<span class="attribute">#[get(&quot;/post/&lt;post_id&gt;&quot;)]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">list_post_handler</span><span class="punctuation bracket">(</span><span class="variable parameter">post_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Result</span>&lt;<span class="type">String</span><span class="punctuation delimiter">,</span> <span class="type">NotFound</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// 👇 New function body!</span>
+    <span class="keyword">let</span> <span class="constant">post</span> = <span class="type">read</span><span class="punctuation delimiter">::</span><span class="function">list_post</span><span class="punctuation bracket">(</span><span class="constant">post_id</span><span class="punctuation bracket">)</span>?<span class="punctuation delimiter">;</span>
+    <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Post</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="function">Ok</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Congratulations! You've just written your first two routes, hooked them up to a database, and have them both successfully reading content from it. Unfortunately, there isn't much to read yet as there are no blog posts in our table.</p><p>Let's change that.</p><hr><h2>Creating Posts</h2><p>Like before, we'll start by templating out the route handler. This will be a POST request that will accept JSON data.</p><pre><code class="rust"><span class="comment">// api/src/post_handler.rs</span>
+
+<span class="keyword">use</span> <span class="type">shared</span><span class="punctuation delimiter">::</span><span class="constant">response_models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Response</span><span class="punctuation delimiter">,</span> <span class="constant">ResponseBody</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">application</span><span class="punctuation delimiter">::</span><span class="constant">post</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">create</span><span class="punctuation delimiter">,</span> <span class="constant">read</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New!</span>
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="constant">models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Post</span><span class="punctuation delimiter">,</span> <span class="constant">NewPost</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New! </span>
+<span class="keyword">use</span> <span class="constant">rocket</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">get</span><span class="punctuation delimiter">,</span> <span class="constant">post</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New! </span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">response</span><span class="punctuation delimiter">::</span><span class="constant">status</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">NotFound</span><span class="punctuation delimiter">,</span> <span class="constant">Created</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New! </span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">serde</span><span class="punctuation delimiter">::</span><span class="type">json</span><span class="punctuation delimiter">::</span><span class="constant">Json</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="attribute">#[post(&quot;/new_post&quot;, format = &quot;application/json&quot;, data = &quot;&lt;post&gt;&quot;)]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">create_post_handler</span><span class="punctuation bracket">(</span><span class="variable parameter">post</span><span class="punctuation delimiter">:</span> <span class="type">Json</span>&lt;<span class="type">NewPost</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Created</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="type">create</span><span class="punctuation delimiter">::</span><span class="function">create_post</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>With that done, we can start the implementation of the create_post() function.</p><pre><code class="rust"><span class="comment">// application/src/post/mod.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">read</span><span class="punctuation delimiter">;</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">create</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New!</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// application/src/post/create.rs</span>
+
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="constant">models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Post</span><span class="punctuation delimiter">,</span> <span class="constant">NewPost</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">shared</span><span class="punctuation delimiter">::</span><span class="constant">response_models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Response</span><span class="punctuation delimiter">,</span> <span class="constant">ResponseBody</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">infrastructure</span><span class="punctuation delimiter">::</span><span class="constant">establish_connection</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">prelude</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">response</span><span class="punctuation delimiter">::</span><span class="type">status</span><span class="punctuation delimiter">::</span><span class="constant">Created</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">serde</span><span class="punctuation delimiter">::</span><span class="type">json</span><span class="punctuation delimiter">::</span><span class="constant">Json</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">create_post</span><span class="punctuation bracket">(</span><span class="variable parameter">post</span><span class="punctuation delimiter">:</span> <span class="type">Json</span>&lt;<span class="type">NewPost</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Created</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="constant">posts</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">let</span> <span class="constant">post</span> = <span class="constant">post</span><span class="punctuation delimiter">.</span><span class="function method">into_inner</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">match</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="function">insert_into</span><span class="punctuation bracket">(</span><span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">table</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">values</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">post</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">get_result</span><span class="punctuation delimiter">::</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="keyword">mut</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+        <span class="constant">Ok</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span> =&gt; <span class="punctuation bracket">{</span>
+            <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Post</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+            <span class="type">Created</span><span class="punctuation delimiter">::</span><span class="function">new</span><span class="punctuation bracket">(</span><span class="string">&quot;&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">tagged_body</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">Err</span><span class="punctuation bracket">(</span><span class="constant">err</span><span class="punctuation bracket">)</span> =&gt; <span class="keyword">match</span> <span class="constant">err</span> <span class="punctuation bracket">{</span>
+            _ =&gt; <span class="punctuation bracket">{</span>
+                <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Database error - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span>
+        <span class="punctuation bracket">}</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>The final thing we need to do is register the route so it can be used.</p><pre><code class="rust"><span class="comment">// api/src/bin/main.rs</span>
+
+<span class="attribute">#[macro_use]</span> <span class="keyword">extern</span> <span class="keyword">crate</span> <span class="constant">rocket</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">api</span><span class="punctuation delimiter">::</span><span class="constant">post_handler</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[launch]</span>
+<span class="keyword">fn</span> <span class="function">rocket</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> -&gt; <span class="type">_</span> <span class="punctuation bracket">{</span>
+    <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="function">build</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span>
+        <span class="punctuation delimiter">.</span><span class="function method">mount</span><span class="punctuation bracket">(</span><span class="string">&quot;/api&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">routes</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">list_posts_handler</span><span class="punctuation delimiter">,</span> 
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">list_post_handler</span><span class="punctuation delimiter">,</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">create_post_handler</span><span class="punctuation delimiter">,</span> <span class="comment">// 👈 New!</span>
+        <span class="punctuation bracket">]</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Now that's done, lets finally test the API with some data!</p><hr><h2>CR__ Testing</h2><p>With two of our four letters implemented, let's give it a small test run. Navigate back to the root directory and run the application.</p><pre><code>cargo run
+
+</code></pre><p>After the project has built, open up your favourite API testing tool and check the routes work as expected.</p><hr><h2>The final two letters</h2><p>The final two operations we need is updating and deleting. We'll implement updating via "publishing" a post and deleting by, well… deleting a post.</p><p>Like with the past two letters, let's create our handlers.</p><pre><code class="rust"><span class="comment">// api/src/post_handler.rs</span>
+
+<span class="keyword">use</span> <span class="type">shared</span><span class="punctuation delimiter">::</span><span class="constant">response_models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Response</span><span class="punctuation delimiter">,</span> <span class="constant">ResponseBody</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">application</span><span class="punctuation delimiter">::</span><span class="constant">post</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">create</span><span class="punctuation delimiter">,</span> <span class="constant">read</span><span class="punctuation delimiter">,</span> <span class="constant">publish</span><span class="punctuation delimiter">,</span> <span class="constant">delete</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New!</span>
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="constant">models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Post</span><span class="punctuation delimiter">,</span> <span class="constant">NewPost</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="constant">rocket</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">get</span><span class="punctuation delimiter">,</span> <span class="constant">post</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">response</span><span class="punctuation delimiter">::</span><span class="constant">status</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">NotFound</span><span class="punctuation delimiter">,</span> <span class="constant">Created</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">serde</span><span class="punctuation delimiter">::</span><span class="type">json</span><span class="punctuation delimiter">::</span><span class="constant">Json</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="attribute">#[get(&quot;/publish/&lt;post_id&gt;&quot;)]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">publish_post_handler</span><span class="punctuation bracket">(</span><span class="variable parameter">post_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Result</span>&lt;<span class="type">String</span><span class="punctuation delimiter">,</span> <span class="type">NotFound</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">let</span> <span class="constant">post</span> = <span class="type">publish</span><span class="punctuation delimiter">::</span><span class="function">publish_post</span><span class="punctuation bracket">(</span><span class="constant">post_id</span><span class="punctuation bracket">)</span>?<span class="punctuation delimiter">;</span> 
+    <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Post</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="function">Ok</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+
+<span class="attribute">#[get(&quot;/delete/&lt;post_id&gt;&quot;)]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">delete_post_handler</span><span class="punctuation bracket">(</span><span class="variable parameter">post_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Result</span>&lt;<span class="type">String</span><span class="punctuation delimiter">,</span> <span class="type">NotFound</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">let</span> <span class="constant">posts</span> = <span class="type">delete</span><span class="punctuation delimiter">::</span><span class="function">delete_post</span><span class="punctuation bracket">(</span><span class="constant">post_id</span><span class="punctuation bracket">)</span>?<span class="punctuation delimiter">;</span>
+    <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Posts</span><span class="punctuation bracket">(</span><span class="constant">posts</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="function">Ok</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>And implement the logic for them.</p><pre><code class="rust"><span class="comment">// application/src/post/mod.rs</span>
+
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">create</span><span class="punctuation delimiter">;</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">read</span><span class="punctuation delimiter">;</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">publish</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New!</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">delete</span><span class="punctuation delimiter">;</span> <span class="comment">// 👈 New!</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// application/src/post/publish.rs</span>
+
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">models</span><span class="punctuation delimiter">::</span><span class="constant">Post</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">shared</span><span class="punctuation delimiter">::</span><span class="constant">response_models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Response</span><span class="punctuation delimiter">,</span> <span class="constant">ResponseBody</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">infrastructure</span><span class="punctuation delimiter">::</span><span class="constant">establish_connection</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">response</span><span class="punctuation delimiter">::</span><span class="type">status</span><span class="punctuation delimiter">::</span><span class="constant">NotFound</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">prelude</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">publish_post</span><span class="punctuation bracket">(</span><span class="variable parameter">post_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Result</span>&lt;<span class="type">Post</span><span class="punctuation delimiter">,</span> <span class="type">NotFound</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">dsl</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">match</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="function">update</span><span class="punctuation bracket">(</span><span class="constant">posts</span><span class="punctuation delimiter">.</span><span class="function method">find</span><span class="punctuation bracket">(</span><span class="constant">post_id</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">set</span><span class="punctuation bracket">(</span><span class="constant">published</span><span class="punctuation delimiter">.</span><span class="function method">eq</span><span class="punctuation bracket">(</span><span class="constant builtin">true</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">get_result</span><span class="punctuation delimiter">::</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="keyword">mut</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+        <span class="constant">Ok</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span> =&gt; <span class="function">Ok</span><span class="punctuation bracket">(</span><span class="constant">post</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+        <span class="constant">Err</span><span class="punctuation bracket">(</span><span class="constant">err</span><span class="punctuation bracket">)</span> =&gt; <span class="keyword">match</span> <span class="constant">err</span> <span class="punctuation bracket">{</span>
+            <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="type">result</span><span class="punctuation delimiter">::</span><span class="type">Error</span><span class="punctuation delimiter">::</span><span class="constant">NotFound</span> =&gt; <span class="punctuation bracket">{</span>
+                <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Message</span><span class="punctuation bracket">(</span><span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Error publishing post with id {} - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">post_id</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+                <span class="keyword">return</span> <span class="function">Err</span><span class="punctuation bracket">(</span><span class="function">NotFound</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            _ =&gt; <span class="punctuation bracket">{</span>
+                <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Database error - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span>        
+        <span class="punctuation bracket">}</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// application/src/post/delete.rs</span>
+
+<span class="keyword">use</span> <span class="type">shared</span><span class="punctuation delimiter">::</span><span class="constant">response_models</span><span class="punctuation delimiter">::</span><span class="punctuation bracket">{</span><span class="constant">Response</span><span class="punctuation delimiter">,</span> <span class="constant">ResponseBody</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">infrastructure</span><span class="punctuation delimiter">::</span><span class="constant">establish_connection</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="constant">prelude</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="type">response</span><span class="punctuation delimiter">::</span><span class="type">status</span><span class="punctuation delimiter">::</span><span class="constant">NotFound</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">models</span><span class="punctuation delimiter">::</span><span class="constant">Post</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">delete_post</span><span class="punctuation bracket">(</span><span class="variable parameter">post_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">i32</span><span class="punctuation bracket">)</span> -&gt; <span class="type">Result</span>&lt;<span class="type">Vec</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation delimiter">,</span> <span class="type">NotFound</span>&lt;<span class="type">String</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">&gt;</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">dsl</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+    <span class="keyword">use</span> <span class="type">domain</span><span class="punctuation delimiter">::</span><span class="type">schema</span><span class="punctuation delimiter">::</span><span class="constant">posts</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">let</span> <span class="constant">response</span><span class="punctuation delimiter">:</span> <span class="type">Response</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">let</span> <span class="constant">num_deleted</span> = <span class="keyword">match</span> <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="function">delete</span><span class="punctuation bracket">(</span><span class="constant">posts</span><span class="punctuation delimiter">.</span><span class="function method">filter</span><span class="punctuation bracket">(</span><span class="constant">id</span><span class="punctuation delimiter">.</span><span class="function method">eq</span><span class="punctuation bracket">(</span><span class="constant">post_id</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">execute</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="keyword">mut</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+        <span class="constant">Ok</span><span class="punctuation bracket">(</span><span class="constant">count</span><span class="punctuation bracket">)</span> =&gt; <span class="constant">count</span><span class="punctuation delimiter">,</span>
+        <span class="constant">Err</span><span class="punctuation bracket">(</span><span class="constant">err</span><span class="punctuation bracket">)</span> =&gt; <span class="keyword">match</span> <span class="constant">err</span> <span class="punctuation bracket">{</span>
+            <span class="type">diesel</span><span class="punctuation delimiter">::</span><span class="type">result</span><span class="punctuation delimiter">::</span><span class="type">Error</span><span class="punctuation delimiter">::</span><span class="constant">NotFound</span> =&gt; <span class="punctuation bracket">{</span>
+                <span class="keyword">let</span> <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Message</span><span class="punctuation bracket">(</span><span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Error deleting post with id {} - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">post_id</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+                <span class="keyword">return</span> <span class="function">Err</span><span class="punctuation bracket">(</span><span class="function">NotFound</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            _ =&gt; <span class="punctuation bracket">{</span>
+                <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Database error - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+            <span class="punctuation bracket">}</span>        
+        <span class="punctuation bracket">}</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="keyword">if</span> <span class="constant">num_deleted</span> &gt; <span class="constant builtin">0</span> <span class="punctuation bracket">{</span>
+        <span class="keyword">match</span> <span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">table</span><span class="punctuation delimiter">.</span><span class="function method">select</span><span class="punctuation bracket">(</span><span class="type">posts</span><span class="punctuation delimiter">::</span><span class="constant">all_columns</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">load</span><span class="punctuation delimiter">::</span>&lt;<span class="type">Post</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="keyword">mut</span> <span class="function">establish_connection</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+            <span class="constant">Ok</span><span class="punctuation bracket">(</span><span class="keyword">mut</span> <span class="constant">posts_</span><span class="punctuation bracket">)</span> =&gt; <span class="punctuation bracket">{</span>
+                <span class="constant">posts_</span><span class="punctuation delimiter">.</span><span class="function method">sort</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+                <span class="function">Ok</span><span class="punctuation bracket">(</span><span class="constant">posts_</span><span class="punctuation bracket">)</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            <span class="constant">Err</span><span class="punctuation bracket">(</span><span class="constant">err</span><span class="punctuation bracket">)</span> =&gt; <span class="keyword">match</span> <span class="constant">err</span> <span class="punctuation bracket">{</span>
+                _ =&gt; <span class="punctuation bracket">{</span>
+                    <span class="constant">panic</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Database error - {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">err</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+                <span class="punctuation bracket">}</span>
+            <span class="punctuation bracket">}</span>
+        <span class="punctuation bracket">}</span>
+    <span class="punctuation bracket">}</span> <span class="keyword">else</span> <span class="punctuation bracket">{</span>
+        <span class="constant">response</span> = <span class="type">Response</span> <span class="punctuation bracket">{</span> <span class="property">body</span><span class="punctuation delimiter">:</span> <span class="type">ResponseBody</span><span class="punctuation delimiter">::</span><span class="function">Message</span><span class="punctuation bracket">(</span><span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;Error - no post with id {}&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">post_id</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+        <span class="function">Err</span><span class="punctuation bracket">(</span><span class="function">NotFound</span><span class="punctuation bracket">(</span><span class="type">serde_json</span><span class="punctuation delimiter">::</span><span class="function">to_string</span><span class="punctuation bracket">(</span><span class="operator">&</span><span class="constant">response</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span><span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span> 
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>And finally, register our new routes.</p><pre><code class="rust"><span class="comment">// api/src/bin/main.rs</span>
+
+<span class="attribute">#[macro_use]</span> <span class="keyword">extern</span> <span class="keyword">crate</span> <span class="constant">rocket</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">api</span><span class="punctuation delimiter">::</span><span class="constant">post_handler</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[launch]</span>
+<span class="keyword">fn</span> <span class="function">rocket</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> -&gt; <span class="type">_</span> <span class="punctuation bracket">{</span>
+    <span class="type">rocket</span><span class="punctuation delimiter">::</span><span class="function">build</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span>
+        <span class="punctuation delimiter">.</span><span class="function method">mount</span><span class="punctuation bracket">(</span><span class="string">&quot;/api&quot;</span><span class="punctuation delimiter">,</span> <span class="constant">routes</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">list_posts_handler</span><span class="punctuation delimiter">,</span> 
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">list_post_handler</span><span class="punctuation delimiter">,</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">create_post_handler</span><span class="punctuation delimiter">,</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">publish_post_handler</span><span class="punctuation delimiter">,</span> <span class="comment">// 👈 New!</span>
+            <span class="constant">post_handler</span><span class="punctuation delimiter">::</span><span class="constant">delete_post_handler</span><span class="punctuation delimiter">,</span> <span class="comment">// 👈 New!</span>
+        <span class="punctuation bracket">]</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>And that's it! You now have a fully functioning API written in Rocket.rs, which connects to a PostgreSQL database via Diesel.rs. Not only that, but the application is structured following Clean Architecture.</p><p>Your project should now look close to the following:</p><pre><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── api
+│   ├── Cargo.toml
+│   └── src
+│       ├── bin
+│       │   └── main.rs
+│       ├── lib.rs
+│       └── post_handler.rs
+├── application
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       └── post
+│           ├── create.rs
+│           ├── delete.rs
+│           ├── mod.rs
+│           ├── publish.rs
+│           └── read.rs
+├── domain
+│   ├── Cargo.toml
+│   └── src
+│       ├── lib.rs
+│       ├── models.rs
+│       └── schema.rs
+├── infrastructure
+│   ├── Cargo.toml
+│   ├── migrations
+│   │   └── 2022–11–18–090125_create_posts
+│   │       ├── up.sql
+│   │       └── down.sql
+│   └── src
+│       └── lib.rs
+└── shared
+    ├── Cargo.toml
+    └── src
+        ├── lib.rs
+        └── response_models.rs
+</code></pre><hr><h2>Further Improvements</h2><p>There are a few things that could be improved when looking at the application as a whole.</p><p>Firstly, whenever we want to use the database we open up a new connection. This can become costly and resource intensive when on a larger scale. One way this could be fixed is by using a connection pool, Rocket.rs includes built in support for R2D2, a connection pool handler for Rust.</p><p>Secondly, Diesel.rs is not asynchronous - this isn't too much of an issue on this scale. However, it can become a bigger problem for larger applications. There is, at the time writing, no asynchronous implementation from the official team behind Diesel.rs. As an alternative, an external crate is available to provide this functionality.</p><p>Finally, a front-end UI could be created alongside the Rust API. Inside the root directory you would create a new project called web_ui using your front-end language of choice. All you'd then need to do is run both projects separately, calling the Rust API from your front-end client. Here's my implementation of a front-end for some inspiration:</p><hr><h2>Conclusion</h2><p>Phew! What a journey. Not only have we learnt how to use Rocket.rs and Diesel.rs but we've learnt how to use them together to create a blogging API in Rust. Along with that, we've built a front-end for it and packaged it all together in a single project file following Clean Architecture.</p><p>All code along with my implementation of the front-end can be found here: <a href="https://github.com/BrookJeynes/blog-rust" target="_blank">https://github.com/BrookJeynes/blog-rust</a></p><p>I hope you guys learnt a lot today, and give the process a go yourself and create something new! Make sure to star the <a href="https://github.com/BrookJeynes/blog-rust" target="_blank">Github</a> repository and let me know what I should cover next or any feedback you have.</p><p>Thanks for reading,<br>- Brook ❤</p><hr><h2>References</h2><h3>Crates:</h3><ul><li><a href="https://github.com/diesel-rs/diesel" target="_blank">Diesel.rs</a></li><li><a href="https://github.com/SergioBenitez/Rocket/tree/v0.5-rc" target="_blank">Rocket.rs</a></li><li><a href="https://github.com/serde-rs/serde" target="_blank">Serde-rs/serde</a></li><li><a href="https://github.com/serde-rs/json" target="_blank">Serde-rs/json</a></li></ul><h3>Other guides/docs followed:</h3><ul><li><a href="https://github.com/diesel-rs/diesel" target="_blank">Diesel.rs - Getting started</a></li><li><a href="https://rocket.rs/v0.5-rc/guide/" target="_blank">Rocket.rs - Getting started</a></li><li><a href="https://medium.com/swlh/a-simple-crud-on-rust-with-rocket-rs-and-diesel-rs-e885672cb23d" target="_blank">A Simple Crud on Rust (With Rocket.rs and Diesel.rs)</a> (Uses deprecated packages for current rust version (v1.65.0) 🙁)</li><li>Too many Stackoverflow posts to mention</li></ul></div>
+
+    </main>
+
+    <footer id="footer">brookjeynes.dev</footer>
+  </body>
+</html>

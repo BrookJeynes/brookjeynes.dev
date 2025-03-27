@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html>
+  <head id="head">
+    <meta charset="UTF-8">
+    <meta name="description" content="Brook, Just a tech.">
+    <meta property="og:title" content="Learning Leptos: Building a Todo application - The basics">
+    <meta property="og:type" content="website">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title id="title">
+      Learning Leptos: Building a Todo application - The basics
+      - brookjeynes.dev
+    </title>
+    <link rel="stylesheet" type="text/css" href="/ko-KR/style.css">
+    <link rel="stylesheet" type="text/css" href="/ko-KR/highlight.css">
+    <link rel="stylesheet" type="text/css" href="/ko-KR/min770px.css">
+    <link href="https://iosevka-webfonts.github.io/iosevka-term/iosevka-term.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&display=swap"
+        rel="stylesheet">
+  </head>
+
+  <body>
+    <header id="banner">
+      <h2>
+        <a href="/ko-KR/">brookjeynes.dev</a>
+      </h2>
+      <nav>
+        <ul>
+          <li><a class="selected" href="/ko-KR/posts/">블로그</a></li>
+          <li><a class="" href="/ko-KR/videos/">동영상</a></li>
+          <li><a class="" href="/ko-KR/library/">서재</a></li>
+          <li><a class="" href="/ko-KR/contact/">연락처</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="content">
+      
+  <header id="post-header">
+    <h1>Learning Leptos: Building a Todo application - The basics</h1>
+    <div>
+      <time>April 20, 2023</time>
+    </div>
+  </header>
+  <div><h2>Introduction</h2><p>Hey all, in this 3 part series we're going to build a simple todo application in <a href="https://github.com/leptos-rs/leptos">Leptos</a>. We'll start at the basics, building out the initial UI and learning the common Leptos language. Then, we'll add a database and move server logic into an API layer with Actix in the following parts.</p><p>Here's a sneak peak of what you will have by the end of this part. <a href="https://user-images.githubusercontent.com/25432120/232404896-cad3efd9-735a-4484-a6b7-50c16037ffec.png">Website design preview</a></p><p>All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos</p><p>This guide assumes:</p><ul><li>You have a basic-to-decent understanding of Rust concepts and the language syntax.</li><li>You have Rust and Cargo installed</li></ul><p><em>Note: The code in this tutorial is used for teaching purposes and does not necessarily represent production ready code.</em></p><p>Now that that’s sorted, let’s begin!</p><hr><h2>Getting started</h2><p>First we must enable nightly rust and add the ability for it to compile Rust to WebAssembly:</p><pre><code class="bash"><span class="constant">rustup</span> <span class="constant">toolchain</span> <span class="constant">install</span> <span class="constant">nightly</span>
+<span class="constant">rustup</span> <span class="constant">default</span> <span class="constant">nightly</span>
+<span class="constant">rustup</span> <span class="constant">target</span> <span class="constant">add</span> <span class="constant">wasm32-unknown-unknown</span>
+</code></pre>
+<p>Next we need to install <a href="https://github.com/leptos-rs/leptos">Leptos</a> and it's build tool <a href="https://github.com/leptos-rs/cargo-leptos">Cargo-Leptos</a></p><pre><code class="bash"><span class="constant">cargo</span> <span class="constant">install</span> <span class="constant">cargo-leptos</span>
+</code></pre>
+<p>Now we need to create our project. In this tutorial we will use the Tailwind example Leptos provides for us.</p><p><em>Note: If you don't if you don't care about Tailwind integration, then all you have to do is run the following command to pull down the starter template and skip to the next section:</em></p><pre><code class="bash"><span class="constant">cargo</span> <span class="constant">leptos</span> <span class="constant">new</span> <span class="constant">--git</span> <span class="constant">https://github.com/leptos-rs/start</span>
+</code></pre>
+<p>Currently, adding Tailwind is a little bit of a complicated process. Luckily for us, the team has released a Tailwind template we can simply just copy.</p><pre><code class="bash"><span class="comment"># Clone the Leptos project</span>
+<span class="constant">git</span> <span class="constant">clone</span> <span class="constant">https://github.com/leptos-rs/leptos</span>
+<span class="comment"># Copy the tailwind example and call it todo-leptos</span>
+<span class="constant">mv</span> <span class="constant">leptos/examples/tailwind</span> <span class="constant">./todo-leptos</span>
+<span class="comment"># Delete the Leptos project</span>
+<span class="constant">rm</span> <span class="constant">-rf</span> <span class="constant">leptos</span>
+<span class="comment"># Navigate into the project</span>
+<span class="constant">cd</span> <span class="constant">todo-leptos</span>
+</code></pre>
+<p>With our project created, let's add a few files, folders, and move some things around so we have a more ideal structure for long term.</p><pre><code class="bash"><span class="constant">cd</span> <span class="constant">src</span>
+
+<span class="constant">mkdir</span> <span class="constant">components</span>
+<span class="constant">touch</span> <span class="constant">components.rs</span>
+
+<span class="constant">mkdir</span> <span class="constant">pages</span>
+<span class="constant">touch</span> <span class="constant">pages.rs</span>
+<span class="constant">touch</span> <span class="constant">pages/home.rs</span>
+</code></pre>
+<p>Now that we have our pages and components set up, we need to expose these files to the rest of the project. Add the following code to the top of <code>lib.rs</code> and <code>main.rs</code>.</p><pre><code class="rust"><span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">app</span><span class="punctuation delimiter">;</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">components</span><span class="punctuation delimiter">;</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">pages</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<p>Let's also move the <code>Home</code> component from <code>app.rs</code> to <code>home.rs</code> and remove everything inside it so we're left with a single <code>div</code> tag.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span>&gt;&lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>We now need to expose <code>Home</code> by adding it into <code>pages.rs</code></p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages.rs</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">home</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<p>Import <code>Home</code> back into <code>app.rs</code> by adding the following code to the top of the file.</p><pre><code class="rust"><span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">pages</span><span class="punctuation delimiter">::</span><span class="constant">home</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<p>Finally, update <code>Cargo.toml</code> to reflect the code below:</p><pre><code class="toml"><span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation bracket">]</span>
+<span class="property">name</span> <span class="operator">=</span> <span class="string">&quot;todo-leptos&quot;</span>
+<span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.1.0&quot;</span>
+<span class="property">edition</span> <span class="operator">=</span> <span class="string">&quot;2021&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">lib</span><span class="punctuation bracket">]</span>
+<span class="property">crate-type</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;cdylib&quot;</span><span class="punctuation delimiter">,</span> <span class="string">&quot;rlib&quot;</span><span class="punctuation bracket">]</span>
+
+<span class="punctuation bracket">[</span><span class="property">dependencies</span><span class="punctuation bracket">]</span>
+<span class="property">actix-files</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.6&quot;</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span> <span class="punctuation bracket">}</span>
+<span class="property">actix-web</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;4&quot;</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;macros&quot;</span><span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">console_error_panic_hook</span> <span class="operator">=</span> <span class="string">&quot;0.1&quot;</span>
+<span class="property">console_log</span> <span class="operator">=</span> <span class="string">&quot;1&quot;</span>
+<span class="property">cfg-if</span> <span class="operator">=</span> <span class="string">&quot;1&quot;</span>
+<span class="property">leptos</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span> <span class="property">features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span>
+  <span class="string">&quot;serde&quot;</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">]</span> <span class="punctuation bracket">}</span>
+<span class="property">leptos_meta</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span> <span class="punctuation bracket">}</span>
+<span class="property">leptos_actix</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">optional</span> <span class="operator">=</span> <span class="constant builtin">true</span> <span class="punctuation bracket">}</span>
+<span class="property">leptos_router</span> <span class="operator">=</span> <span class="punctuation bracket">{</span> <span class="property">version</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span><span class="punctuation delimiter">,</span> <span class="property">default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span> <span class="punctuation bracket">}</span>
+<span class="property">log</span> <span class="operator">=</span> <span class="string">&quot;0.4&quot;</span>
+<span class="property">simple_logger</span> <span class="operator">=</span> <span class="string">&quot;4&quot;</span>
+<span class="property">wasm-bindgen</span> <span class="operator">=</span> <span class="string">&quot;0.2&quot;</span>
+
+<span class="punctuation bracket">[</span><span class="property">features</span><span class="punctuation bracket">]</span>
+<span class="property">hydrate</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;leptos/hydrate&quot;</span><span class="punctuation delimiter">,</span> <span class="string">&quot;leptos_meta/hydrate&quot;</span><span class="punctuation delimiter">,</span> <span class="string">&quot;leptos_router/hydrate&quot;</span><span class="punctuation bracket">]</span>
+<span class="property">ssr</span> <span class="operator">=</span> <span class="punctuation bracket">[</span>
+  <span class="string">&quot;dep:actix-files&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;dep:actix-web&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;dep:leptos_actix&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;leptos/ssr&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;leptos_meta/ssr&quot;</span><span class="punctuation delimiter">,</span>
+  <span class="string">&quot;leptos_router/ssr&quot;</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">]</span>
+
+<span class="punctuation bracket">[</span><span class="property">profile</span><span class="punctuation delimiter">.</span><span class="property">release</span><span class="punctuation bracket">]</span>
+<span class="property">codegen-units</span> <span class="operator">=</span> <span class="number">1</span>
+<span class="property">lto</span> <span class="operator">=</span> <span class="constant builtin">true</span>
+<span class="property">opt-level</span> <span class="operator">=</span> <span class="string">&apos;z&apos;</span>
+
+<span class="punctuation bracket">[</span><span class="property">package</span><span class="punctuation delimiter">.</span><span class="property">metadata</span><span class="punctuation delimiter">.</span><span class="property">leptos</span><span class="punctuation bracket">]</span>
+<span class="comment"># The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name   </span>
+<span class="property">output-name</span> <span class="operator">=</span> <span class="string">&quot;tailwind&quot;</span>
+<span class="comment"># The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.</span>
+<span class="property">site-root</span> <span class="operator">=</span> <span class="string">&quot;target/site&quot;</span>
+<span class="comment"># The site-root relative folder where all compiled output (JS, WASM and CSS) is written</span>
+<span class="comment"># Defaults to pkg	</span>
+<span class="property">site-pkg-dir</span> <span class="operator">=</span> <span class="string">&quot;pkg&quot;</span>
+<span class="comment"># [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to &lt;site-root&gt;/&lt;site-pkg&gt;/app.css</span>
+<span class="property">style-file</span> <span class="operator">=</span> <span class="string">&quot;style/output.css&quot;</span>
+<span class="comment"># [Optional] Files in the asset-dir will be copied to the site-root directory</span>
+<span class="property">assets-dir</span> <span class="operator">=</span> <span class="string">&quot;public&quot;</span>
+<span class="comment"># The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.</span>
+<span class="property">site-addr</span> <span class="operator">=</span> <span class="string">&quot;127.0.0.1:3000&quot;</span>
+<span class="comment"># The port to use for automatic reload monitoring</span>
+<span class="property">reload-port</span> <span class="operator">=</span> <span class="number">3001</span>
+<span class="comment"># [Optional] Command to use when running end2end tests. It will run in the end2end dir.</span>
+<span class="property">end2end-cmd</span> <span class="operator">=</span> <span class="string">&quot;npx playwright test&quot;</span>
+<span class="comment">#  The browserlist query used for optimizing the CSS.</span>
+<span class="property">browserquery</span> <span class="operator">=</span> <span class="string">&quot;defaults&quot;</span>
+<span class="comment"># Set by cargo-leptos watch when building with tha tool. Controls whether autoreload JS will be included in the head</span>
+<span class="property">watch</span> <span class="operator">=</span> <span class="constant builtin">false</span>
+<span class="comment"># The environment Leptos will run in, usually either &quot;DEV&quot; or &quot;PROD&quot;</span>
+<span class="property">env</span> <span class="operator">=</span> <span class="string">&quot;DEV&quot;</span>
+<span class="comment"># The features to use when compiling the bin target</span>
+<span class="comment">#</span>
+<span class="comment"># Optional. Can be over-ridden with the command line parameter --bin-features</span>
+<span class="property">bin-features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;ssr&quot;</span><span class="punctuation bracket">]</span>
+
+<span class="comment"># If the --no-default-features flag should be used when compiling the bin target</span>
+<span class="comment">#</span>
+<span class="comment"># Optional. Defaults to false.</span>
+<span class="property">bin-default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span>
+
+<span class="comment"># The features to use when compiling the lib target</span>
+<span class="comment">#</span>
+<span class="comment"># Optional. Can be over-ridden with the command line parameter --lib-features</span>
+<span class="property">lib-features</span> <span class="operator">=</span> <span class="punctuation bracket">[</span><span class="string">&quot;hydrate&quot;</span><span class="punctuation bracket">]</span>
+
+<span class="comment"># If the --no-default-features flag should be used when compiling the lib target</span>
+<span class="comment">#</span>
+<span class="comment"># Optional. Defaults to false.</span>
+<span class="property">lib-default-features</span> <span class="operator">=</span> <span class="constant builtin">false</span>
+</code></pre>
+<p>And we're done! You should now have something that resembles the following.</p><p><em>Note: Your structure may look a little different depending on whether you installed Tailwind or not, the following structure includes Tailwind files.</em></p><pre><code>.
+├── Cargo.lock
+├── Cargo.toml
+├── end2end
+│  ├── package-lock.json
+│  ├── package.json
+│  ├── playwright.config.ts
+│  └── tests
+│     └── example.spec.ts
+├── input.css
+├── LICENSE
+├── Makefile.toml
+├── public
+│  └── favicon.ico
+├── README.md
+├── src
+│  ├── app.rs
+│  ├── components
+│  ├── components.rs
+│  ├── lib.rs
+│  ├── main.rs
+│  ├── pages
+│  │  └── home.rs
+│  └── pages.rs
+├── style
+│  └── output.css
+└── tailwind.config.js
+</code></pre><p>Let's give the project a test run to ensure everything is running correctly.</p><p><em>Note: If you're using Tailwind, open up a terminal and run the following command in the background. This will ensure that the tailwind styles are kept updated on save.</em></p><pre><code class="bash"><span class="constant">npx</span> <span class="constant">tailwindcss</span> <span class="constant">-i</span> <span class="constant">./input.css</span> <span class="constant">-o</span> <span class="constant">./style/output.css</span> <span class="constant">--watch</span>
+</code></pre>
+<p>We can leverage the <code>cargo-leptos</code> tool to run the web app.</p><pre><code class="bash"><span class="constant">cargo</span> <span class="constant">leptos</span> <span class="constant">watch</span>
+</code></pre>
+<p>Hopefully everything ran fine :)</p><p>With that sorted, let's create our first component!</p><h2>Components</h2><p>So what are components? Components are the basic building blocks of web development and that's no different here. We can build components in Leptos by writing normal functions and adding the <code>#[component]</code> macro to it.</p><p>Let's jump straight in and build our first component, something to handle rendering the individual todo items.</p><p>We first need to create a file to house the component.</p><pre><code class="bash"><span class="comment"># todo-leptos/src/components/</span>
+<span class="constant">touch</span> <span class="constant">todo_item.rs</span>
+</code></pre>
+<p>and then register it within <code>components.rs</code></p><pre><code class="rust"><span class="comment">// todo-leptos/src/components.rs</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">todo_item</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<p>With all that out of the way, let's start building out the structure. As mention previously, a Leptos component is a Rust function which has the <code>#[component]</code> macro above it. As well as this, every component must take in a reactive <code>Scope</code> and return <code>impl IntoView</code>.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="constant">todo</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>So what is <code>Scope</code> and why are we returning <code>impl IntoView</code>? As described by the Leptos handbook:</p><blockquote><p>This <code>Scope</code> is our entrypoint into the reactive system</p></blockquote><p>To expand on this, it's what gives our components the ability to be reactive and render new outputs on the DOM based on certain conditions.</p><p><code>impl IntoView</code> on the other hand is almost a wrapper type that allows us to return anything from a Leptos <code>view</code>. This is useful as the <code>view!{}</code> macro we'll use to write the HTML, generates <code>view</code> types.</p><p>Speaking of the <code>view!{}</code> macro, let's use it to write some RSX, like JSX but using rust ;) The <code>view!{}</code> macro starts by taking in our <code>cx</code> variable followed by a series of RSX statements.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
+            &lt;<span class="constant">span</span>&gt;
+                <span class="string">&quot;todo task name&quot;</span>
+            &lt;/<span class="constant">span</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer&quot;</span>&gt;<span class="string">&quot;Complete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>&gt;<span class="string">&quot;Delete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>I mean, wow! That's pretty much straight HTML. All that's really changed is the need to quote text. The power or Rust macros allows us to write (pretty much) standard HTML within our components.</p><p>While we're inside of this file, let's setup a struct to represent what a TodoItem will look like.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[derive(Clone)]</span>
+<span class="keyword">pub</span> <span class="keyword">struct</span> <span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">pub</span> <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="type builtin">u32</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="type builtin">bool</span>
+<span class="punctuation bracket">}</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// ...</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>We need to ensure our structures can be cloned as Leptos relies on data to be cloned from time to time. We'll learn more about signals later on in the post but when signals are created, they must own the data. To access the data from the signal, the value is cloned so the signal can continue owning the underlying value.</p><p>With that all setup, let's add a <code>TodoItem</code> component to the Home page.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;h-screen&quot;</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&quot;</span>&gt;
+                <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">TodoItem</span> /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>And with that we've made our first component in Leptos!</p><h2>Props</h2><p>In the previous section we built a <code>TodoItem</code> component to render the individual todo items. However, you may have noticed that all we did was mock some data inside of the component. Wouldn't it be great if we could pass a <code>TodoItem</code> into the component?</p><p>Using props we can do exactly that! Props allow us to pass different data structures into components. We define props just as we'd define a function parameter, let's go ahead and add a <code>TodoItem</code> prop to our <code>TodoItem</code> component.</p><p>While we're at it, lets also take the time to document our component. We can do so using normal Rust doc strings.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">// 👇 New prop!</span>
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="comment">// ...</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>With a <code>TodoItem</code> now being passed in, let's display those values within the RSX. Variables can be displayed within RSX by surrounding the expresion in curly brackets - <code>{}</code>.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[derive(Clone)]</span>
+<span class="keyword">pub</span> <span class="keyword">struct</span> <span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">pub</span> <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="type builtin">u32</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">,</span>
+    <span class="keyword">pub</span> <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="type builtin">bool</span>
+<span class="punctuation bracket">}</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
+            &lt;<span class="constant">span</span>&gt;
+                <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> <span class="comment">// 👈 New! </span>
+            &lt;/<span class="constant">span</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer&quot;</span>&gt;<span class="string">&quot;Complete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>&gt;<span class="string">&quot;Delete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>With the <code>TodoItem</code> component now taking in a prop, we need to update our instance of it within <code>home.rs</code>.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">let</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span> = <span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
+        <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
+        <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">::</span><span class="function">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+        <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;h-screen&quot;</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&quot;</span>&gt;
+                      <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">task</span><span class="punctuation bracket">}</span> /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p><em>There are so many more things that can be done with props which you can read all about here: https://leptos-rs.github.io/leptos/view/03_components.html#components-and-props</em></p><p>Let's curve away from the <code>TodoItem</code> component for a second and build a new component that will teach us how to use <code>Children</code>. By having a component which takes in children, we can define wrapper components that wrap around some sort of conent. To demonstrate this, we'll build a <code>PageWrapper</code> component which takes in children and wraps it in some styling.</p><p>We'll start by creating a new file, <code>page_wrapper.rs</code> and register our component within <code>components.rs</code>.</p><pre><code class="bash"><span class="comment"># todo-leptos/src/components/</span>
+<span class="constant">touch</span> <span class="constant">page_wrapper.rs</span>
+</code></pre>
+<pre><code class="rust"><span class="comment">// todo-leptos/src/components.rs</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">todo_item</span><span class="punctuation delimiter">;</span>
+<span class="comment">// 👇 New!</span>
+<span class="keyword">pub</span> <span class="keyword">mod</span> <span class="constant">page_wrapper</span><span class="punctuation delimiter">;</span>
+</code></pre>
+<p>Let's now define our component and pass in the <code>Children</code> prop.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/page_wrapper.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">PageWrapper</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> <span class="variable parameter">children</span><span class="punctuation delimiter">:</span> <span class="type">Children</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span>
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;h-screen&quot;</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;pt-20 mb-10 mx-auto px-5 w-full lg:px-0 lg:max-w-[90ch]&quot;</span>&gt;
+                <span class="punctuation bracket">{</span><span class="constant">children</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span>
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Just as we've previously embedded code within RSX, we wrap our <code>children()</code> call in curly brackets - <code>{}</code>. When using <code>children</code> we must also pass in the components <code>Scope</code>, <code>cx</code> in our instance.</p><p>We can now use our <code>PageWrapper</code> component within <code>home.rs</code> and pass in our <code>TodoItem</code> component as a child element.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="comment">// 👇 New!</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">let</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span> = <span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
+        <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
+        <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="type">String</span><span class="punctuation delimiter">::</span><span class="function">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+        <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        <span class="comment">// 👇 New!</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">task</span><span class="punctuation bracket">}</span> /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Everything we place inside the <code>PageWrapper</code> tags will be rendered where we specified <code>children(cx)</code>.</p><h2>Iteration</h2><p>Displaying one todo item is cool and all but what if we wanted to store more? Let's go ahead and create a list of <code>TodoItem</code>s and find out how we can iterate through them and display them all on the page.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// 👇 New!</span>
+    <span class="keyword">let</span> <span class="constant">todo_items</span><span class="punctuation delimiter">:</span> <span class="type">Vec</span>&lt;<span class="type">TodoItem</span><span class="punctuation bracket">&gt;</span> = <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">1</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Make the bed&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">2</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Mow the lawn&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">3</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Wash the dishes&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">]</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                <span class="comment">// Let&apos;s comment this out for the mean time to avoid errors</span>
+                <span class="comment">// &lt;TodoItem todo_item={task} /&gt;</span>
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>There are a few ways we can display a collection of items. One of those ways is via the <code>&lt;For /&gt;</code> component. The <code>&lt;For /&gt;</code> component is a keyed dynamic list and is particularly useful for our usecase as our list of todo items will be changing often as the user creates and deletes items.</p><p>As per the leptos handbook:</p><blockquote><p>The <For/> component ... takes [in] three props: 1. <code>each</code>: a function (such as a signal) that returns the items <code>T</code> to be iterated over 2. <code>key</code>: a key function that takes <code>&T</code> and returns a stable, unique key or ID 3. <code>view</code>: renders each <code>T</code> into a view</p></blockquote><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="keyword">let</span> <span class="constant">todo_items</span><span class="punctuation delimiter">:</span> <span class="type">Vec</span>&lt;<span class="type">TodoItem</span><span class="punctuation bracket">&gt;</span> = <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">1</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Make the bed&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">2</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Mow the lawn&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">3</span><span class="punctuation delimiter">,</span>
+            <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Wash the dishes&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">]</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">For</span>
+                    <span class="constant">each</span>=<span class="constant">move</span> || <span class="punctuation bracket">{</span> <span class="constant">todo_items</span><span class="punctuation delimiter">.</span><span class="constant">clone</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">}</span>
+                    <span class="constant">key</span>=|<span class="constant">task</span>| <span class="constant">task</span><span class="punctuation delimiter">.</span><span class="constant">id</span>
+                    <span class="constant">view</span>=<span class="constant">move</span> |<span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">TodoItem</span>| <span class="punctuation bracket">{</span>
+                        <span class="constant">view</span>! <span class="punctuation bracket">{</span>
+                            <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+                            &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">task</span><span class="punctuation bracket">}</span> /&gt;
+                        <span class="punctuation bracket">}</span>
+                    <span class="punctuation bracket">}</span>
+                /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>And just like that we have a series of todo items being rendered. Don't worry too much right now why we're using closures, we'll go over that in the next section.</p><p><em>Read more about iteration here: https://leptos-rs.github.io/leptos/view/04_iteration.html</em></p><h2>Reactive data</h2><p>A <code>Signal</code> is "the basic unit of reactive change and state management" (Leptos handbook) and is how we make things reactive in Leptos. Using <code>create_signal()</code> we can create a new reactive signal which we can read and write.</p><p><code>create_signal()</code> returns a <code>(getter, setter)</code> tuple. We can use <code>&lt;getter&gt;.get()</code>, or <code>&lt;getter&gt;()</code> in nightly, to get the value, <code>&lt;setter&gt;.set()</code>, or <code>&lt;setter&gt;()</code> in nightly, to set the value, and <code>&lt;setter&gt;.update()</code> to update the value.</p><p>Let's go ahead and turn our <code>todo_items</code> vector into a signal using <code>create_signal()</code>. While we're at it, let's also update the <code>&lt;For /&gt;</code> tag to take in our signal.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">todo_items</span><span class="punctuation delimiter">,</span> <span class="constant">set_todo_items</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span>
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+            <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+                <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">0</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Take out the trash&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+                <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">1</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Make the bed&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+                <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">2</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Mow the lawn&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">true</span><span class="punctuation delimiter">,</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+            <span class="constant">TodoItem</span> <span class="punctuation bracket">{</span>
+                <span class="constant">id</span><span class="punctuation delimiter">:</span> <span class="constant builtin">3</span><span class="punctuation delimiter">,</span>
+                <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">String</span><span class="punctuation delimiter">::</span><span class="constant">from</span><span class="punctuation bracket">(</span><span class="string">&quot;Wash the dishes&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+                <span class="constant">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+            <span class="punctuation bracket">}</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">]</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">For</span>
+                    <span class="comment">// We no longer need to use a closure as `todo_items` is now a signal</span>
+                    <span class="constant">each</span>=<span class="punctuation bracket">{</span><span class="constant">todo_items</span><span class="punctuation bracket">}</span>
+                    <span class="constant">key</span>=|<span class="constant">task</span>| <span class="constant">task</span><span class="punctuation delimiter">.</span><span class="constant">id</span>
+                    <span class="constant">view</span>=<span class="constant">move</span> |<span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">TodoItem</span>| <span class="punctuation bracket">{</span>
+                        <span class="constant">view</span>! <span class="punctuation bracket">{</span>
+                            <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+                            &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">item</span><span class="punctuation bracket">}</span> /&gt;
+                        <span class="punctuation bracket">}</span>
+                    <span class="punctuation bracket">}</span>
+                /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>One thing you may have noticed is we moved from using a closure to just passing in our signal, why is that? While I won't try compete with the <a href="https://leptos-rs.github.io/leptos/interlude_functions.html" target="_blank">official handbook which explains why in much more detail</a> the tldr of it all is that closures give Leptos the ability to re-run certain statements allowing certain components to be updated when call to do so.</p><p>Now that we know how to make things reactive, lets get some more practice in and make our <code>TodoItem</code> component responsive to change.</p><p>Let's start with something simple, changing the todo task from in-progress to done. We'll start by creating a signal to handle the getter and setter methods.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">status</span><span class="punctuation delimiter">,</span> <span class="constant">set_status</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">status</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="comment">// ...</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Now, we want <code>status</code> to update whenever we press the "complete" button. For this, we'll need to add an <code>on:click</code> event handler to the button.</p><p><em>Read more about handlers here: https://docs.rs/leptos/latest/leptos/ev/trait.EventDescriptor.html#associatedtype.EventType</em></p><p>Let's create the logic for when our <code>on:click</code> handler fires. All we want to do is update the <code>status</code> and we can do so with the <code>.update()</code> method on the setter <code>set_status</code>.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">status</span><span class="punctuation delimiter">,</span> <span class="constant">set_status</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">status</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">// Handlers</span>
+    <span class="comment">// We must use a closure here to make the click function reactive.</span>
+    <span class="keyword">let</span> <span class="constant">on_click</span> = <span class="keyword">move</span> |_| <span class="punctuation bracket">{</span>
+        <span class="comment">// Update gives us a `&T` so we must dereference the value to use it</span>
+        <span class="constant">set_status</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span>|<span class="constant">status</span>| <span class="operator">*</span><span class="constant">status</span> = !<span class="operator">*</span><span class="constant">status</span><span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="comment">// ...</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>With the <code>on_click</code> handler defined, let's add it to our buttons callback.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">status</span><span class="punctuation delimiter">,</span> <span class="constant">set_status</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">status</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// Handlers</span>
+    <span class="keyword">let</span> <span class="constant">on_click</span> = <span class="keyword">move</span> |_| <span class="punctuation bracket">{</span>
+        <span class="constant">set_status</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span>|<span class="constant">status</span>| <span class="operator">*</span><span class="constant">status</span> = !<span class="operator">*</span><span class="constant">status</span><span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
+            &lt;<span class="constant">span</span>&gt;
+                <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> 
+            &lt;/<span class="constant">span</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">button</span> <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer&quot;</span>&gt;<span class="string">&quot;Complete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+                &lt;<span class="constant">button</span> <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>&gt;<span class="string">&quot;Delete&quot;</span>&lt;/<span class="constant">button</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Using the same method as above, let's add some reactive text and button styling.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">status</span><span class="punctuation delimiter">,</span> <span class="constant">set_status</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">status</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// Handlers</span>
+    <span class="keyword">let</span> <span class="constant">on_click</span> = <span class="keyword">move</span> |_| <span class="punctuation bracket">{</span>
+        <span class="constant">set_status</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span>|<span class="constant">status</span>| <span class="operator">*</span><span class="constant">status</span> = !<span class="operator">*</span><span class="constant">status</span><span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">// Classes</span>
+    <span class="keyword">let</span> <span class="constant">task_title_style</span> = <span class="keyword">move</span> || <span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span><span class="string">&quot;text-md {}&quot;</span><span class="punctuation delimiter">,</span> <span class="keyword">if</span> <span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">&quot;line-through&quot;</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">&quot;&quot;</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+    <span class="keyword">let</span> <span class="constant">complete_button_style</span> = <span class="keyword">move</span> || <span class="punctuation bracket">{</span>
+        <span class="constant">format</span><span class="function macro">!</span><span class="punctuation bracket">(</span>
+            <span class="string">&quot;hover:cursor-pointer {}&quot;</span><span class="punctuation delimiter">,</span>
+            <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span>
+                <span class="string">&quot;opacity-100&quot;</span>
+            <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span>
+                <span class="string">&quot;opacity-50&quot;</span>
+            <span class="punctuation bracket">}</span>
+        <span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
+            <span class="comment">// 👇 New!</span>
+            &lt;<span class="constant">span</span> <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">task_title_style</span><span class="punctuation bracket">}</span>&gt;
+                <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> 
+            &lt;/<span class="constant">span</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">button</span> 
+                    <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> 
+                    <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">complete_button_style</span><span class="punctuation bracket">}</span>
+                &gt;
+                    <span class="punctuation bracket">{</span><span class="constant">move</span> || <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Complete&quot;</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Undo&quot;</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">}</span>
+                &lt;/<span class="constant">button</span>&gt;
+
+                &lt;<span class="constant">button</span> 
+                    <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>
+                &gt;
+                    <span class="string">&quot;Delete&quot;</span>
+                &lt;/<span class="constant">button</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Look at us go, Reactivity for the win!</p><p>There's one final thing we need to go over within this section before finishing up with the <code>TodoItem</code> component. How would we go about removing a task from our task list? We can't have the delete logic in the component but we also want the user to click a button within the component. It would be great if our component could call a function external to itself.</p><p>We can achieve this behaviour using callbacks. Callback functions are functions we pass into components and have their internal logic decide when the function is called.</p><p>Let's jump back into <code>Home</code> and define the function we'll use to delete a task from our task list.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">todo_items</span><span class="punctuation delimiter">,</span> <span class="constant">set_todo_items</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span>
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+            <span class="comment">// ...</span>
+        <span class="punctuation bracket">]</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">// Handlers</span>
+    <span class="keyword">let</span> <span class="constant">delete_todo_item</span> = <span class="keyword">move</span> |<span class="variable parameter">todo_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">u32</span>| <span class="punctuation bracket">{</span>
+        <span class="comment">// Here we use the `retain()` method to filter out all </span>
+        <span class="comment">// elements that don&apos;t match the predicate</span>
+        <span class="constant">set_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span><span class="keyword">move</span> |<span class="constant">todo_items</span>| <span class="punctuation bracket">{</span>
+                <span class="constant">todo_items</span><span class="punctuation delimiter">.</span><span class="function method">retain</span><span class="punctuation bracket">(</span>|<span class="constant">todo_item</span>| <span class="punctuation bracket">{</span>
+                        <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">id</span> != <span class="constant">todo_id</span>
+                    <span class="punctuation bracket">}</span>
+                <span class="punctuation bracket">)</span>
+            <span class="punctuation bracket">}</span>
+        <span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="comment">// ...</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Now we need to alter <code>TodoItem</code> to take in a callback function. We do so by defining some generic, <code>F</code> in our instance, that maps out to the callbacks signature. Since we're here, we'll also add an <code>on:click</code> method to the delete button using the new callback.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/components/todo_item.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="comment">// ...</span>
+
+<span class="comment">/// A todo item component
+</span><span class="attribute">#[component]</span>
+            <span class="comment">// 👇 New!</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">TodoItem</span>&lt;<span class="type">F</span><span class="punctuation bracket">&gt;</span><span class="punctuation bracket">(</span>
+    <span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation delimiter">,</span> 
+    <span class="comment">/// The todo item the component will use to populate its internal data
+</span>    <span class="variable parameter">todo_item</span><span class="punctuation delimiter">:</span> <span class="type">TodoItem</span>
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">/// A callback to delete a TodoItem
+</span>    <span class="constant">delete_callback</span><span class="punctuation delimiter">:</span> <span class="constant">F</span>
+<span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span>
+<span class="keyword">where</span>
+    <span class="comment">// Remember our delete callback takes in a TodoItem ID</span>
+    <span class="type">F</span><span class="punctuation delimiter">:</span> <span class="type">Fn</span><span class="punctuation bracket">(</span><span class="type builtin">u32</span><span class="punctuation bracket">)</span> + <span class="operator">&apos;</span><span class="label">static</span><span class="punctuation delimiter">,</span>
+<span class="punctuation bracket">{</span>
+    <span class="comment">// ...</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between items-center&quot;</span>&gt;
+            &lt;<span class="constant">span</span> <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">task_title_style</span><span class="punctuation bracket">}</span>&gt;
+                <span class="punctuation bracket">{</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">task</span><span class="punctuation bracket">}</span> 
+            &lt;/<span class="constant">span</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex justify-between w-fit sm:w-1/3&quot;</span>&gt;
+                &lt;<span class="constant">button</span> 
+                    <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">on_click</span><span class="punctuation bracket">}</span> 
+                    <span class="constant">class</span>=<span class="punctuation bracket">{</span><span class="constant">complete_button_style</span><span class="punctuation bracket">}</span>
+                &gt;
+                    <span class="punctuation bracket">{</span><span class="constant">move</span> || <span class="keyword">if</span> !<span class="constant">status</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Complete&quot;</span> <span class="punctuation bracket">}</span> <span class="constant">else</span> <span class="punctuation bracket">{</span> <span class="string">&quot;Undo&quot;</span> <span class="punctuation bracket">}</span><span class="punctuation bracket">}</span>
+                &lt;/<span class="constant">button</span>&gt;
+
+                &lt;<span class="constant">button</span> 
+                    <span class="comment">// 👇 New!</span>
+                    <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">click</span>=<span class="punctuation bracket">{</span><span class="constant">move</span> |_| <span class="constant">delete_callback</span><span class="punctuation bracket">(</span><span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="constant">id</span><span class="punctuation bracket">)</span><span class="punctuation bracket">}</span> 
+                    <span class="constant">class</span>=<span class="string">&quot;hover:cusor-pointer ml-4 sm:ml-0&quot;</span>
+                &gt;
+                    <span class="string">&quot;Delete&quot;</span>
+                &lt;/<span class="constant">button</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">div</span>&gt;
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>To close off this section let's pass in the callback from <code>home.rs</code> and pat ourselves on the back, we're nearly at the finish line for part 1.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// Signals</span>
+    <span class="keyword">let</span> <span class="punctuation bracket">(</span><span class="constant">todo_items</span><span class="punctuation delimiter">,</span> <span class="constant">set_todo_items</span><span class="punctuation bracket">)</span> = <span class="function">create_signal</span><span class="punctuation bracket">(</span>
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        <span class="constant">vec</span><span class="function macro">!</span><span class="punctuation bracket">[</span>
+            <span class="comment">// ...</span>
+        <span class="punctuation bracket">]</span><span class="punctuation delimiter">,</span>
+    <span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// Handlers</span>
+    <span class="keyword">let</span> <span class="constant">delete_todo_item</span> = <span class="keyword">move</span> |<span class="variable parameter">todo_id</span><span class="punctuation delimiter">:</span> <span class="type builtin">u32</span>| <span class="punctuation bracket">{</span>
+        <span class="comment">// Here we use the `retain()` method to filter out all </span>
+        <span class="comment">// elements that don&apos;t match the predicate</span>
+        <span class="constant">set_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">update</span><span class="punctuation bracket">(</span><span class="keyword">move</span> |<span class="constant">todo_items</span>| <span class="punctuation bracket">{</span>
+                <span class="constant">todo_items</span><span class="punctuation delimiter">.</span><span class="function method">retain</span><span class="punctuation bracket">(</span>|<span class="constant">todo_item</span>| <span class="punctuation bracket">{</span>
+                        <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">id</span> != <span class="constant">todo_id</span>
+                    <span class="punctuation bracket">}</span>
+                <span class="punctuation bracket">)</span>
+            <span class="punctuation bracket">}</span>
+        <span class="punctuation bracket">)</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                &lt;<span class="constant">For</span>
+                    <span class="constant">each</span>=<span class="punctuation bracket">{</span><span class="constant">todo_items</span><span class="punctuation bracket">}</span>
+                    <span class="constant">key</span>=|<span class="constant">task</span>| <span class="constant">task</span><span class="punctuation delimiter">.</span><span class="constant">id</span>
+                    <span class="constant">view</span>=<span class="constant">move</span> |<span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">TodoItem</span>| <span class="punctuation bracket">{</span>
+                        <span class="constant">view</span>! <span class="punctuation bracket">{</span>
+                            <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+                                                    <span class="comment">// 👇 New!</span>
+                            &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">item</span><span class="punctuation bracket">}</span> <span class="constant">delete_callback</span>=<span class="punctuation bracket">{</span><span class="constant">delete_todo_item</span><span class="punctuation bracket">}</span> /&gt;
+                        <span class="punctuation bracket">}</span>
+                    <span class="punctuation bracket">}</span>
+                /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p><em>Read more about callbacks here: https://leptos-rs.github.io/leptos/view/08_parent_child.html#2-use-a-callback</em></p><h2>Forms</h2><p>With our todo items able to be complete and deleted, all we need to do now is create a way of adding new tasks. To do this, we'll set up a <code>&lt;form&gt;</code> and learn how to reference nodes and use the <code>on:submit</code> callback.</p><p>To start off, let's create the HTML for the form.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// ...</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            <span class="comment">// 👇 New!</span>
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;add-task&quot;</span> <span class="constant">class</span>=<span class="string">&quot;flex flex-col rounded mb-20 text-black&quot;</span>&gt;
+                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">&quot;text-2xl font-medium mb-4&quot;</span>&gt;<span class="string">&quot;Add Task&quot;</span>&lt;/<span class="constant">h2</span>&gt;
+                &lt;<span class="constant">form</span> <span class="constant">class</span>=<span class="string">&quot;w-full flex flex-col&quot;</span>&gt;
+                    &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex items-center justify-between&quot;</span>&gt;
+                        &lt;<span class="constant">input</span>
+                            <span class="constant">class</span>=<span class="string">&quot;w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none&quot;</span>
+                            <span class="keyword">type</span>=<span class="string">&quot;text&quot;</span>
+                            <span class="constant">placeholder</span>=<span class="string">&quot;Add a new task&quot;</span>
+                        /&gt;
+                        &lt;<span class="constant">input</span> <span class="constant">class</span>=<span class="string">&quot;hover:cursor-pointer&quot;</span> <span class="keyword">type</span>=<span class="string">&quot;submit&quot;</span> <span class="constant">value</span>=<span class="string">&quot;Submit&quot;</span> /&gt;
+                    &lt;/<span class="constant">div</span>&gt;
+                &lt;/<span class="constant">form</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;todo_items&quot;</span>&gt;
+                <span class="comment">// 👇 New!</span>
+                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">&quot;text-2xl font-medium mb-4&quot;</span>&gt;<span class="string">&quot;Tasks&quot;</span>&lt;/<span class="constant">h2</span>&gt;
+                &lt;<span class="constant">For</span>
+                    <span class="constant">each</span>=<span class="punctuation bracket">{</span><span class="constant">todo_items</span><span class="punctuation bracket">}</span>
+                    <span class="constant">key</span>=|<span class="constant">task</span>| <span class="constant">task</span><span class="punctuation delimiter">.</span><span class="constant">id</span>
+                    <span class="constant">view</span>=<span class="constant">move</span> |<span class="constant">cx</span><span class="punctuation delimiter">,</span> <span class="constant">task</span><span class="punctuation delimiter">:</span> <span class="constant">TodoItem</span>| <span class="punctuation bracket">{</span>
+                        <span class="constant">view</span>! <span class="punctuation bracket">{</span>
+                            <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+                                                    <span class="comment">// 👇 New!</span>
+                            &lt;<span class="constant">TodoItem</span> <span class="constant">todo_item</span>=<span class="punctuation bracket">{</span><span class="constant">item</span><span class="punctuation bracket">}</span> <span class="constant">delete_callback</span>=<span class="punctuation bracket">{</span><span class="constant">delete_todo_item</span><span class="punctuation bracket">}</span> /&gt;
+                        <span class="punctuation bracket">}</span>
+                    <span class="punctuation bracket">}</span>
+                /&gt;
+            &lt;/<span class="constant">div</span>&gt;
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Inside our form we have an text input box and a submit button. To get the information from inside the text input box on submit, we'll need to create a <code>NodeRef</code>. "[A] NodeRef to access the input once when we want to get its value." (Leptos handbook).</p><p>To create a <code>NodeRef</code>, the <code>create_node_ref()</code> function can be used. Let's also create the function to handle the <code>on:submit</code> callback.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="comment">// 👇 New!</span>
+<span class="keyword">use</span> <span class="type">leptos</span><span class="punctuation delimiter">::</span><span class="type">html</span><span class="punctuation delimiter">::</span><span class="constant">Input</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">leptos</span><span class="punctuation delimiter">::</span><span class="type">ev</span><span class="punctuation delimiter">::</span><span class="constant">SubmitEvent</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// Signals</span>
+    <span class="comment">// 👇 New!</span>
+    <span class="keyword">let</span> <span class="constant">todo_task_input_ref</span><span class="punctuation delimiter">:</span> <span class="type">NodeRef</span>&lt;<span class="type">Input</span><span class="punctuation bracket">&gt;</span> = <span class="function">create_node_ref</span><span class="punctuation bracket">(</span><span class="constant">cx</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// 👇 New!</span>
+    <span class="comment">// Helpers</span>
+    <span class="comment">/// Helper function to grab the largest ID.
+</span>    <span class="comment">/// Used to know what the next todo item ID should be
+</span>    <span class="keyword">let</span> <span class="constant">last_todo_id</span> = <span class="keyword">move</span> || <span class="function">todo_items</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">iter</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">map</span><span class="punctuation bracket">(</span>|<span class="constant">todo_item</span>| <span class="constant">todo_item</span><span class="punctuation delimiter">.</span><span class="property">id</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">max</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// Handlers</span>
+    <span class="comment">// 👇 New!</span>
+    <span class="keyword">let</span> <span class="constant">on_submit</span> = <span class="keyword">move</span> |<span class="variable parameter">ev</span><span class="punctuation delimiter">:</span> <span class="type">SubmitEvent</span>| <span class="punctuation bracket">{</span>
+        <span class="comment">// Prevent the page from refreshing</span>
+        <span class="constant">ev</span><span class="punctuation delimiter">.</span><span class="function method">prevent_default</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+        <span class="comment">// Clone the vector to mutate it</span>
+        <span class="keyword">let</span> <span class="keyword">mut</span> <span class="constant">new_todo_items</span> = <span class="function">todo_items</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+        <span class="comment">// Get the next node ID</span>
+        <span class="keyword">let</span> <span class="constant">todo_id</span> = <span class="function">last_todo_id</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">unwrap_or_default</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span> + <span class="constant builtin">1</span><span class="punctuation delimiter">;</span>
+
+        <span class="comment">// Create a new TodoItem and push it to our new todo_items vector</span>
+        <span class="constant">new_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">push</span><span class="punctuation bracket">(</span><span class="type">TodoItem</span> <span class="punctuation bracket">{</span>
+            <span class="property">id</span><span class="punctuation delimiter">:</span> <span class="constant">todo_id</span><span class="punctuation delimiter">,</span>
+            <span class="property">task</span><span class="punctuation delimiter">:</span> <span class="function">todo_task_input_ref</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">expect</span><span class="punctuation bracket">(</span><span class="string">&quot;&lt;input&gt; to exist&quot;</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">.</span><span class="function method">value</span><span class="punctuation bracket">(</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">,</span>
+            <span class="property">status</span><span class="punctuation delimiter">:</span> <span class="constant builtin">false</span><span class="punctuation delimiter">,</span>
+        <span class="punctuation bracket">}</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+
+        <span class="comment">// Set our todo_items signal to have the new todo_items vector</span>
+        <span class="constant">set_todo_items</span><span class="punctuation delimiter">.</span><span class="function method">set</span><span class="punctuation bracket">(</span><span class="constant">new_todo_items</span><span class="punctuation bracket">)</span><span class="punctuation delimiter">;</span>
+    <span class="punctuation bracket">}</span><span class="punctuation delimiter">;</span>
+
+    <span class="comment">// ...</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="comment">// ...</span>
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p>Now all we need to do is add the <code>on_submit</code> handler to the submit input button and add the <code>todo_task_input_ref</code> to the text input.</p><pre><code class="rust"><span class="comment">// todo-leptos/src/pages/home.rs</span>
+<span class="keyword">use</span> <span class="constant">leptos</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="comment">// 👇 New!</span>
+<span class="keyword">use</span> <span class="type">leptos</span><span class="punctuation delimiter">::</span><span class="type">html</span><span class="punctuation delimiter">::</span><span class="constant">Input</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="type">leptos</span><span class="punctuation delimiter">::</span><span class="type">ev</span><span class="punctuation delimiter">::</span><span class="constant">SubmitEvent</span><span class="punctuation delimiter">;</span>
+
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">todo_item</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+<span class="keyword">use</span> <span class="keyword">crate</span><span class="punctuation delimiter">::</span><span class="type">components</span><span class="punctuation delimiter">::</span><span class="constant">page_wrapper</span><span class="punctuation delimiter">::</span><span class="operator">*</span><span class="punctuation delimiter">;</span>
+
+<span class="attribute">#[component]</span>
+<span class="keyword">pub</span> <span class="keyword">fn</span> <span class="function">Home</span><span class="punctuation bracket">(</span><span class="variable parameter">cx</span><span class="punctuation delimiter">:</span> <span class="type">Scope</span><span class="punctuation bracket">)</span> -&gt; <span class="keyword">impl</span> <span class="type">IntoView</span> <span class="punctuation bracket">{</span>
+    <span class="comment">// ...</span>
+
+    <span class="constant">view</span><span class="function macro">!</span> <span class="punctuation bracket">{</span> 
+        <span class="constant">cx</span><span class="punctuation delimiter">,</span>
+        &lt;<span class="constant">PageWrapper</span>&gt;
+            &lt;<span class="constant">div</span> <span class="constant">id</span>=<span class="string">&quot;add-task&quot;</span> <span class="constant">class</span>=<span class="string">&quot;flex flex-col rounded mb-20 text-black&quot;</span>&gt;
+                &lt;<span class="constant">h2</span> <span class="constant">class</span>=<span class="string">&quot;text-2xl font-medium mb-4&quot;</span>&gt;<span class="string">&quot;Add Task&quot;</span>&lt;/<span class="constant">h2</span>&gt;
+                &lt;<span class="constant">form</span> 
+                    <span class="constant">class</span>=<span class="string">&quot;w-full flex flex-col&quot;</span>
+                    <span class="comment">// 👇 New!</span>
+                    <span class="constant">on</span><span class="punctuation delimiter">:</span><span class="constant">submit</span>=<span class="punctuation bracket">{</span><span class="constant">on_submit</span><span class="punctuation bracket">}</span>
+                &gt;
+                    &lt;<span class="constant">div</span> <span class="constant">class</span>=<span class="string">&quot;flex items-center justify-between&quot;</span>&gt;
+                        &lt;<span class="constant">input</span>
+                            <span class="constant">class</span>=<span class="string">&quot;w-2/3 px-2 py-1 border-b-2 border-black focus:outline-none&quot;</span>
+                            <span class="keyword">type</span>=<span class="string">&quot;text&quot;</span>
+                            <span class="constant">placeholder</span>=<span class="string">&quot;Add a new task&quot;</span>
+                            <span class="comment">// 👇 New!</span>
+                            <span class="constant">node_ref</span>=<span class="punctuation bracket">{</span><span class="constant">todo_task_input_ref</span><span class="punctuation bracket">}</span>
+                        /&gt;
+                        &lt;<span class="constant">input</span>
+                            <span class="constant">class</span>=<span class="string">&quot;hover:cursor-pointer&quot;</span> 
+                            <span class="keyword">type</span>=<span class="string">&quot;submit&quot;</span> 
+                            <span class="constant">value</span>=<span class="string">&quot;Submit&quot;</span> 
+                        /&gt;
+                    &lt;/<span class="constant">div</span>&gt;
+                &lt;/<span class="constant">form</span>&gt;
+            &lt;/<span class="constant">div</span>&gt;
+
+            <span class="comment">// ...</span>
+
+        &lt;/<span class="constant">PageWrapper</span>&gt;    
+    <span class="punctuation bracket">}</span>
+<span class="punctuation bracket">}</span>
+</code></pre>
+<p><em>Read more about forms here: https://leptos-rs.github.io/leptos/view/05_forms.html#uncontrolled-inputs</em></p><p>And we're done! You can now add, update, and remove todo items.</p><h2>Conclusion</h2><p>Today we covered:</p><ul><li>Creating a Leptos project</li><li>Creating components</li><li>Passing in props</li><li>Passing in children</li><li>Adding reactivity via signals</li><li>Creating and passing callbacks</li><li>Creating node references and dealing with forms</li><li>And more...</li></ul><p>We covered a lot of important concepts and going forward will be using them and learning even more. To learn more about what we covered today, I've linked the Leptos handbook in the "References / Resources" section below which I highly recommend reading along with this guide.</p><p>All the code from this blog post can be found here: https://github.com/BrookJeynes/todo-leptos If you liked the post, please star the <a href="https://github.com/BrookJeynes/todo-leptos" target="_blank">GitHub repository</a> and if you have any comments, feel free to leave them below, I always love hearing what you guys have to say.</p><p>Look out for part 2 and 3 where we create a database and API to interact with from our front-end.</p><p>I'd like to end with saying a huge thank you to the team working at Leptos who not only proof-read this blog post but who have also been working incredibly hard to bring such an amazing framework to the community. Your work is appreciated</p><p>Thanks for reading,<br>- Brook ❤</p><h2>References / Resources</h2><ul><li><a href="https://leptos-rs.github.io/leptos/" target="_blank">The Leptos Handbook</a></li></ul></div>
+
+    </main>
+
+    <footer id="footer">brookjeynes.dev</footer>
+  </body>
+</html>
