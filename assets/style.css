@@ -3,7 +3,7 @@
 }
 
 body {
-    font-family: 'Gentium Plus', serif;
+    font-family: 'Nanum Myeongjo', serif;
     font-size: 20px;
     color: black;
     width: 100%;
@@ -188,7 +188,8 @@ main#content blockquote {
 
 main#content code,
 main#content pre {
-    font-family: 'Iosevka Term Web', 'Menlo', monospace;
+    font-size: 18px;
+    font-family: 'Nanum Gothic Coding', 'Menlo', monospace;
 }
 
 main#content code {
