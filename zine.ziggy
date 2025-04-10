@@ -1,0 +1,25 @@
+Multilingual {
+    .host_url = "https://brookjeynes.dev",
+    .i18n_dir_path = "i18n",
+    .layouts_dir_path = "layouts",
+    .assets_dir_path = "assets",
+    .static_assets = [
+        "brook-jeynes-cv.pdf",
+        "CNAME",
+    ],
+    .locales = [
+        {
+            .code = "en-US",
+            .name = "English (original)",
+            .site_title = "brookjeynes.dev",
+            .content_dir_path = "content/en-US",
+            .output_prefix_override = "",
+        },
+        {
+            .code = "ko-KR",
+            .name = "Korean",
+            .site_title = "brookjeynes.dev",
+            .content_dir_path = "content/ko-KR",
+        },
+    ],
+}

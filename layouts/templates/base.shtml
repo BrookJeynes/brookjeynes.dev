@@ -2,17 +2,15 @@
 <html>
   <head id="head">
     <meta charset="UTF-8">
-    <meta name="description" content="Brook, Just a tech.">
+    <meta name="description" content="brook, just a tech.">
     <meta property="og:title" content="$page.title">
     <meta property="og:type" content="website">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title id="title">
-      <ctx :text="$page.title"></ctx>
-      - brookjeynes.dev
+      <ctx :text="$page.title"></ctx> - <ctx :text="$site.title"></ctx>
     </title>
     <link rel="stylesheet" type="text/css" href="$site.asset('style.css').link()">
     <link rel="stylesheet" type="text/css" href="$site.asset('highlight.css').link()">
-    <link rel="stylesheet" type="text/css" href="$site.asset('min770px.css').link()">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&family=Nanum+Myeongjo&display=swap" rel="stylesheet">
@@ -20,7 +18,7 @@
   <body>
     <header id="banner">
       <h2>
-        <a href="$site.page('/').link()">brookjeynes.dev</a>
+        <a href="$site.link()">brookjeynes.dev</a>
       </h2>
       <nav>
         <ul>

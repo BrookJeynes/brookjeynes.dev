@@ -13,19 +13,19 @@ you can find my [cv here]($link.siteAsset('brook-jeynes-cv.pdf')).
 ```=html
 <ul id="posts">
     <li>
-        <a href="https://github.com/BrookJeynes/jido">jido</a> <br>
+        <a href="https://github.com/BrookJeynes/jido" target="_blank">jido</a> <br>
         <small>地圖 (지도) is a lightweight Unix TUI file explorer designed for speed and simplicity.</small>
     </li>
     <li>
-        <a href="https://korean-conjugation-drill.vercel.app/">동사마스터 - your companion for korean verbs</a> <br>
+        <a href="https://korean-conjugation-drill.vercel.app/" target="_blank">동사마스터 - your companion for korean verbs</a> <br>
         <small>a simple website designed to help you practice your Korean conjugations.</small>
     </li>
     <li>
-        <a href="https://sr2interactivemap.com/">slime rancher 2 - interactive map</a> <br>
+        <a href="https://sr2interactivemap.com/" target="_blank">slime rancher 2 - interactive map</a> <br>
         <small>an interactive map for the game slime rancher 2.</small>
     </li>
     <li>
-        <a href="https://github.com/brookjeynes">github/brookjeynes</a> <br>
+        <a href="https://github.com/brookjeynes" target="_blank">github/brookjeynes</a> <br>
         <small>a home for all my projects.</small>
     </li>
 </ul>

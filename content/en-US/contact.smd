@@ -9,9 +9,9 @@
 
 ```=html
 <ul>
-    <li><a href="https://github.com/brookjeynes">github/brookjeynes</a></li>
-    <li><a href="https://www.youtube.com/@chooky_">youtube/@chooky_</a></li>
-    <li><a href="https://www.linkedin.com/in/brook-jeynes">linkedin/brook-jeynes</a></li>
-    <li><a href="mailto:jeynesbrook@pm.me">mailto:jeynesbrook@pm.me</a></li>
+    <li><a href="https://github.com/brookjeynes" target="_blank">github/brookjeynes</a></li>
+    <li><a href="https://www.youtube.com/@chooky_" target="_blank">youtube/@chooky_</a></li>
+    <li><a href="https://www.linkedin.com/in/brook-jeynes" target="_blank">linkedin/brook-jeynes</a></li>
+    <li><a href="mailto:jeynesbrook@pm.me" target="_blank">mailto:jeynesbrook@pm.me</a></li>
 </ul>
 ```

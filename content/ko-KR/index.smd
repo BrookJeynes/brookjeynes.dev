@@ -13,19 +13,19 @@ brook, just a tech. 저는 하이킹, 클라이밍, 음악 연주를 좋아합�
 ```=html
 <ul id="posts">
     <li>
-        <a href="https://github.com/BrookJeynes/jido">jido</a> <br>
+        <a href="https://github.com/BrookJeynes/jido" target="_blank">jido</a> <br>
         <small>地圖(지도)는 속도와 간결함을 중시하여 설계된 경량 UNIX TUI 파일 탐색기입니다.</small>
     </li>
     <li>
-        <a href="https://korean-conjugation-drill.vercel.app/">동사마스터 - your companion for korean verbs</a> <br>
+        <a href="https://korean-conjugation-drill.vercel.app/" target="_blank">동사마스터 - your companion for korean verbs</a> <br>
         <small>한국어의 시제별 동사 활용을 연습할 수 있도록 고안된 간단한 웹사이트입니다.</small>
     </li>
     <li>
-        <a href="https://sr2interactivemap.com/">slime rancher 2 - interactive map</a> <br>
+        <a href="https://sr2interactivemap.com/" target="_blank">slime rancher 2 - interactive map</a> <br>
         <small>slime rancher 2 게임을 위한 사용자 참여형 웹 지도.</small>
     </li>
     <li>
-        <a href="https://github.com/brookjeynes">github/brookjeynes</a> <br>
+        <a href="https://github.com/brookjeynes" target="_blank">github/brookjeynes</a> <br>
         <small>자세히 알아보기...</small>
     </li>
 </ul>
