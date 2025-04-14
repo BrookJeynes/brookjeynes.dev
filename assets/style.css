@@ -133,7 +133,14 @@ main#content figure figcaption {
 main#content code,
 main#content pre {
     font-size: 0.9rem;
-    font-family: 'Nanum Gothic Coding', 'Menlo', monospace;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 300;
+    font-style: normal;
+}
+
+main#content code:not(pre code) {
+    padding: 0 0.3rem;
+    background-color: #f3f3f3;
 }
 
 main#content pre {
