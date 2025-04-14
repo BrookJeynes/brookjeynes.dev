@@ -1,31 +1,33 @@
 ---
-.title = "Git Tricks: Staging with patches",
+.title = "Everyday Git: Staging with patches",
 .date = @date("2024-12-12T00:00:00"),
 .author = "Brook Jeynes",
 .layout = "post.shtml",
 --- 
 
+*This post is part of Everyday Git, a series that explores Git features from
+the command line, with real-world usage in mind.*
+
 ### Introduction
+When working with Git, it's common to accidentally include changes you didn't
+intend to stage. Git provides tools to manage these situations effectively. One
+such tool is the `patch` sub-command, which allows you to interactively select
+and stage parts of a file's changes. 
 
-When working with Git, it's common to accidentally include changes you didn't 
-intend to stage. Git provides tools to manage these situations effectively. 
-One such tool is the `patch` sub-command, which allows you to interactively 
-select and stage parts of a file's changes. 
-
-This post explores how `git add` operates and how to leverage the `patch` 
-sub-command to stage changes and avoid unintended modifications in your commits.
+This post explores how `git add` operates and how to leverage the `patch`
+sub-command to stage changes and avoid unintended modifications in your
+commits.
 
 ---
 
 ### The basics of `git add`
-
 `git add [<pathspec>...]` will:
 > update the index<sup>1</sup> using the current content found in the working 
-tree... 
+> tree... 
 
 In other words, this will stage the entire patch from the specified files.
 
-In the following example, there are two initial untracked files, `foo.txt` and 
+In the following example, there are two initial untracked files, `foo.txt` and
 `bar.txt`. After running the `git-add` command specifying `foo.txt`, it can be
 seen that the entire patch of `foo.txt` now exists in the index.
 
@@ -51,12 +53,11 @@ Untracked files:
 ```
 
 ### Why use the `patch` sub-command
-
-Adding the whole patch is usually the intended result by the user. However, 
-there may be a time when you realise you left a modification within the file 
+Adding the whole patch is usually the intended result by the user. However,
+there may be a time when you realise you left a modification within the file
 you don't want to stage.
 
-This is where the `patch` sub-command can come in handy. Continuing from the 
+This is where the `patch` sub-command can come in handy. Continuing from the
 previous example, let's add the following lines to `foo.txt`.
 
 ```diff
@@ -71,22 +72,24 @@ foo
 + foo
 ```
 
-Just before staging the file, I notice that the line `bar` was mistakenly 
+Just before staging the file, I notice that the line `bar` was mistakenly
 included in `foo.txt`.
 
 At this stage, you have two options:
-1. Open up a code editor and modify the file directly, then run `git add foo.txt`.
+1. Open up a code editor and modify the file directly, then run `git add
+   foo.txt`.
 2. Use the `patch` sub-command.
 
 `git add [-p | --patch]` allows you to:
-> Interactively choose hunks<sup>2</sup> of patch between the index and the work
-tree and add them to the index.
+> Interactively choose hunks<sup>2</sup> of patch between the index and the
+> work tree and add them to the index.
 
-The `patch` sub-command allows one to review the difference, and optionally edit 
-it, before it is added to the index. The `patch` sub-command is shorthand for 
-`git add --interactive` and selecting `5: patch`.
+The `patch` sub-command allows one to review the difference, and optionally
+edit it, before it is added to the index. The `patch` sub-command is shorthand
+for `git add --interactive` and selecting `5: patch`.
 
-Running the `patch` sub-command on the current example results in the following:
+Running the `patch` sub-command on the current example results in the
+following:
 
 ```diff
 $ git add -p foo.txt
@@ -102,8 +105,9 @@ index 257cc56..bbbdac3 100644
 (1/1) Stage this hunk [y,n,q,a,d,e,p,?]?
 ```
 
-Git offers many options<sup>3</sup>, which can be overwhelming at first. Pressing `?` 
-will print out a small help menu describing what each of the keybinds do.
+Git offers many options<sup>3</sup>, which can be overwhelming at first.
+Pressing `?` will print out a small help menu describing what each of the
+keybinds do.
 
 ```
 y - stage this hunk
@@ -116,7 +120,7 @@ p - print the current hunk
 ? - print help
 ```
 
-In the example above, the line `bar` should be removed. To do so, press `e` to 
+In the example above, the line `bar` should be removed. To do so, press `e` to
 open `$EDITOR` and manually remove the line.
 
 ```diff
@@ -135,9 +139,11 @@ open `$EDITOR` and manually remove the line.
 # edit again.  If all lines of the hunk are removed, then the edit is
 # aborted and the hunk is left unchanged.
 ```
-Once resolved, Git will provide the same options with the next hunk if available.
 
-After the interaction, the index is left in the following state showing that 
+Once resolved, Git will provide the same options with the next hunk if
+available.
+
+After the interaction, the index is left in the following state showing that
 only our selected hunks were staged.
 
 ```diff
@@ -175,9 +181,9 @@ index b4dfe34..bbbdac3 100644
 ```
 
 ### Conclusion
-By using Gits `patch` sub-command, changes can be easily reviewed and controlled 
-prior to staging ensuring commits are clean, intentional, and free of accidental 
-modifications.
+By using Gits `patch` sub-command, changes can be easily reviewed and
+controlled prior to staging ensuring commits are clean, intentional, and free
+of accidental modifications.
 
 Thanks for reading,  
 \- Brook ❤
