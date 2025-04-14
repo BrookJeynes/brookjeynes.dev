@@ -7,7 +7,7 @@
   .name = "rss",
   .type = "application/rss+xml",
   .layout = "rss.xml",
-  .output = "/rss.xml",
+  .output = "rss.xml",
 }],
 ---
 
