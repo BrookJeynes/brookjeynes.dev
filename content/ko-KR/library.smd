@@ -71,10 +71,6 @@
         <span>Kokoro</span>
         <small>Natsume Sōseki</small>
     </li>
-    <li>
-        <span>또다시 같은 꿈을 꾸었어</span>
-        <small>스미노 요루</small>
-    </li>
 </ul>
 ```
 
@@ -102,6 +98,16 @@
     <li>
         <span>Gyo</span>
         <small>Junji Ito</small>
+    </li>
+</ul>
+```
+
+#### 언어
+```=html
+<ul id="posts">
+    <li>
+        <span>Fluent Forever (Revised Edition)</span>
+        <small>Gabriel Wyner</small>
     </li>
 </ul>
 ```

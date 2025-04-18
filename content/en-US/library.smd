@@ -77,10 +77,6 @@ a collection of books i've read or am reading.
         <span>Kokoro</span>
         <small>Natsume Sōseki</small>
     </li>
-    <li>
-        <span>또다시 같은 꿈을 꾸었어</span>
-        <small>스미노 요루</small>
-    </li>
 </ul>
 ```
 
@@ -108,6 +104,16 @@ a collection of books i've read or am reading.
     <li>
         <span>Gyo</span>
         <small>Junji Ito</small>
+    </li>
+</ul>
+```
+
+#### language
+```=html
+<ul id="posts">
+    <li>
+        <span>Fluent Forever (Revised Edition)</span>
+        <small>Gabriel Wyner</small>
     </li>
 </ul>
 ```
