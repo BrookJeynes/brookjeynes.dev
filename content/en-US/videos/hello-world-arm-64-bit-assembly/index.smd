@@ -24,7 +24,7 @@ instructions, and writing a simple hello world program.
 
 Disclaimer: This code is not production safe and just for educational purposes.
 
-You can find the code written in this video here: [github.com/arm64bit-hello-world/]($link.url('https://github.com/arm64bit-hello-world/'))
+You can find the code written in this video here: [github.com/brookjeynes/arm64bit-hello-world/]($link.url('https://github.com/brookjeynes/arm64bit-hello-world/'))
 
 Corrections are in the pinned ERRATA comment.
 
