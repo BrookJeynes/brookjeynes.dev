@@ -563,7 +563,7 @@ Thanks for reading,
 - Chrono
 
 ### Other guides/docs followed:
-- [Rocket.rs - Getting started](https://rocket.rs/v0.5-rc/guide/)
+- [Rocket.rs - Getting started](https://rocket.rs/guide/v0.5/)
 - Fallas, A. U. (2020, October 29). JWT authentication in Rust. LogRocket Blog. Retrieved November 27, 2022, from https://blog.logrocket.com/jwt-authentication-in-rust/
 - SuperTokens Team. (2022, March 24). What is a JWT? Understanding JSON Web Tokens. SuperTokens. Retrieved November 27, 2022, from https://supertokens.com/blog/what-is-jwt
 - Okta. (n.d.). JSON Web Token Introduction - jwt.io. JWT.io. Retrieved November 27, 2022, from https://jwt.io/introduction/
