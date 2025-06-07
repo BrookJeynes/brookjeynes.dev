@@ -105,10 +105,7 @@ the previous one instead.
 Just as before, edit `user_auth.ts` to remove the debug log statement:
 ```ts
 function login(username: string, password: string): boolean {
-    if (username === "admin" && password === "secret") {
-        return true;
-    }
-    return false;
+    return username === "admin" && password === "secret";
 }
 ```
 
@@ -128,7 +125,7 @@ editor will open and allow changes to be made.
 $ git commit --amend --no-edit
 [main xyz7890] feat(auth): implement login functionality
  Date: Tue Mar 4 10:30:00 2025 +1000
- 1 file changed, 6 insertions(+)
+ 1 file changed, 3 insertions(+)
  create mode 100644 user_auth.ts
 ```
 
