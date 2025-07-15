@@ -13,6 +13,10 @@ you can find my [cv here]($link.siteAsset('brook-jeynes-cv.pdf')).
 ```=html
 <ul id="posts">
     <li>
+        <a href="https://yoten.app" target="_blank">yōten</a> <br>
+        <small>a minimal, social tracker for your language learning journey.</small>
+    </li>
+    <li>
         <a href="https://github.com/BrookJeynes/jido" target="_blank">jido</a> <br>
         <small>地圖 (지도) is a lightweight Unix TUI file explorer designed for speed and simplicity.</small>
     </li>

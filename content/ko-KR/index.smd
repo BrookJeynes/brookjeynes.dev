@@ -13,6 +13,10 @@ brook, just a tech. 저는 하이킹, 클라이밍, 음악 연주를 좋아합�
 ```=html
 <ul id="posts">
     <li>
+        <a href="https://yoten.app" target="_blank">yōten</a> <br>
+        <small>네 언어 학습 여정을 위한 심플하고 소셜한 트래커야.</small>
+    </li>
+    <li>
         <a href="https://github.com/BrookJeynes/jido" target="_blank">jido</a> <br>
         <small>地圖(지도)는 속도와 간결함을 중시하여 설계된 경량 UNIX TUI 파일 탐색기입니다.</small>
     </li>
