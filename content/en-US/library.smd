@@ -15,6 +15,15 @@ a collection of books i've read or am reading.
     <li>
         <div>
             <div class="title">
+                <span>Human Acts</span>
+                <small>Han Kang</small>
+            </div>
+            <small class="status text">now reading</small>
+        </div>
+    </li>
+    <li>
+        <div>
+            <div class="title">
                 <span>Masters of Doom: How Two Guys Created an Empire and Transformed Pop Culture</span>
                 <small>David Kushner</small>
             </div>
@@ -27,7 +36,7 @@ a collection of books i've read or am reading.
                 <span>Alice in Borderland (eng) Vol.1-9</span>
                 <small>Haro Aso</small>
             </div>
-            <small class="status text">now reading</small>
+            <small class="status text">★★★★★</small>
         </div>
     </li>
     <li>

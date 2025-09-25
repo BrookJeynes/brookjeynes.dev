@@ -14,7 +14,7 @@ you can find my [cv here]($link.siteAsset('brook-jeynes-cv.pdf')).
 <ul id="posts">
     <li>
         <a href="https://yoten.app" target="_blank">yōten</a> <br>
-        <small>a minimal, social tracker for your language learning journey.</small>
+        <small>a social tracker for your language learning journey built on the atproto.</small>
     </li>
     <li>
         <a href="https://github.com/BrookJeynes/jido" target="_blank">jido</a> <br>

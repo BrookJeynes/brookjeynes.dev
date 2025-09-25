@@ -15,6 +15,15 @@
     <li>
         <div>
             <div class="title">
+                <span>소년이 온다</span>
+                <small>한강</small>
+            </div>
+            <small class="status text">읽고 있는 책</small>
+        </div>
+    </li>
+    <li>
+        <div>
+            <div class="title">
                 <span>Masters of Doom: How Two Guys Created an Empire and Transformed Pop Culture</span>
                 <small>David Kushner</small>
             </div>
@@ -27,7 +36,7 @@
                 <span>Alice in Borderland (eng) Vol.1-9</span>
                 <small>Haro Aso</small>
             </div>
-            <small class="status text">읽고 있는 책</small>
+            <small class="status text">★★★★★</small>
         </div>
     </li>
     <li>
