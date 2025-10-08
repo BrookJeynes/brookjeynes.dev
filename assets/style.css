@@ -57,7 +57,7 @@ header#banner {
     }
 }
 
-/* Underline navbar link when on page */
+/* Underline navbar link when on page. */
 .selected {
     text-decoration: underline !important;
 }
