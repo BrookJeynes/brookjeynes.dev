@@ -11,11 +11,9 @@
     </title>
     <link rel="stylesheet" type="text/css" href="$site.asset('style.css').link()">
     <link rel="stylesheet" type="text/css" href="$site.asset('highlight.css').link()">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300&family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
   </head>
   <body>
+    <div class="container">
     <header id="banner">
       <h2>
         <a href="$site.link()">brookjeynes.dev</a>
@@ -35,5 +33,6 @@
     </main>
 
     <footer>brookjeynes.dev</footer>
+    </div>
   </body>
 </html>

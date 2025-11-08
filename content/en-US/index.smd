@@ -5,13 +5,13 @@
 .layout = "index.shtml",
 ---
 
-brook, just a tech. i enjoy hiking, bouldering, and playing music. 
-speak korean? find my <a href="/ko-KR">korean content here</a>.
-you can find my [cv here]($link.siteAsset('brook-jeynes-cv.pdf')). 
+brook, just a tech. i enjoy hiking, bouldering, and playing music. <a
+href="/ko-KR">여기서 제 한국어</a>  콘텐츠를 확인해보세요. you can find my [cv
+here]($link.siteAsset('brook-jeynes-cv.pdf')).
 
-### projects
 ```=html
-<ul id="posts">
+<h3 class="projects-header">projects</h3>
+<ul id="projects">
     <li>
         <a href="https://yoten.app" target="_blank">yōten</a> <br>
         <small>a social tracker for your language learning journey built on the atproto.</small>

@@ -5,6 +5,11 @@ Multilingual {
     .assets_dir_path = "assets",
     .static_assets = [
         "brook-jeynes-cv.pdf",
+        "fonts/crimson-pro/CrimsonPro-Italic.ttf",
+        "fonts/crimson-pro/CrimsonPro-Regular.ttf",
+        "fonts/crimson-pro/CrimsonPro-SemiBold.ttf",
+        "fonts/gowun-batang/GowunBatang-Regular.ttf",
+        "fonts/ibm-plex-mono/IBMPlexMono-Light.ttf",
         "CNAME",
     ],
     .locales = [

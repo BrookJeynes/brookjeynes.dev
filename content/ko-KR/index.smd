@@ -5,13 +5,13 @@
 .layout = "index.shtml",
 ---
 
-brook, just a tech. 저는 하이킹, 클라이밍, 음악 연주를 좋아합니다.
-영어를 할 줄 아십니까? <a href="/">여기서 제 영어</a>  콘텐츠를 확인해보세요.
-제 이력서는 [여기서]($link.siteAsset('brook-jeynes-cv.pdf')) 확인하실 수 있습니다.
+brook, just a tech. 저는 하이킹, 클라이밍, 음악 연주를 좋아합니다. 영어를 할 줄
+아십니까? speak english? find my <a href="/">english content here</a>. 제
+이력서는 [여기서]($link.siteAsset('brook-jeynes-cv.pdf')) 확인하실 수 있습니다.
 
-### 프로젝트
 ```=html
-<ul id="posts">
+<h3 class="projects-header">프로젝트</h3>
+<ul id="projects">
     <li>
         <a href="https://yoten.app" target="_blank">yōten</a> <br>
         <small>AT 프로토콜 기반으로 제작된 여러분의 언어 학습 여정을 위한 소셜 트래커입니다.</small>
