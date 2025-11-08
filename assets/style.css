@@ -88,15 +88,15 @@ body {
     -webkit-mask-image: linear-gradient(
         to bottom,
         transparent 0%,
-        black 40px,
-        black calc(100% - 40px),
+        black 100px,
+        black calc(100% - 100px),
         transparent 100%
     );
     mask-image: linear-gradient(
         to bottom,
         transparent 0%,
-        black 40px,
-        black calc(100% - 40px),
+        black 100px,
+        black calc(100% - 100px),
         transparent 100%
     );
 
