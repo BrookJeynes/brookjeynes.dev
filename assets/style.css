@@ -85,6 +85,21 @@ body {
     display: flex;
     flex-direction: column;
 
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 40px,
+        black calc(100% - 40px),
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        transparent 0%,
+        black 40px,
+        black calc(100% - 40px),
+        transparent 100%
+    );
+
     a {
         position: relative;
         display: inline-block;
