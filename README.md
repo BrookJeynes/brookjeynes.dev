@@ -1,43 +1,32 @@
-# brookjeynes.dev
+**[brookjeynes.dev](https://brookjeynes.dev)**
 
-Personal website built with Zine static site generator.
+my personal site
 
-## Technologies
+# hacking
 
-- **[Zine](https://zine-ssg.io/)** - Static site generator written in Zig
-- **HTML/CSS** - Layout templates (`.shtml` files)
-- **Multilingual support** - English (en-US) and Korean (ko-KR)
+## Required tools
+- [zine](https://github.com/kristoff-it/zine/releases)
 
-## Getting Started
+## Running
 
-### Prerequisites
-
-#### Install Zine
-
-Download from: https://github.com/kristoff-it/zine/releases
-
-### Development
-
-Start the development server with hot-reload:
+To run:
 ```bash
-zine serve
+zine
 ```
 
-Visit `http://localhost:1990` in your browser.
-
-### Build
-
-Generate the static site for production:
+To build:
 ```bash
 zine release
 ```
 
-Output will be in the `public/` directory.
-
 ## Project Structure
-
-- `zine.ziggy` - Main configuration file
-- `content/` - Markdown content (en-US, ko-KR)
-- `layouts/` - HTML templates
-- `assets/` - Static assets (fonts, PDFs, etc.)
-- `i18n/` - Internationalization files
+```
+.
+├── assets         -- static assets (fonts, PDFs, etc.)
+├── content        -- (super)markdown content (en-US, ko-KR)
+├── i18n           -- internationalization files
+├── layouts        -- (super)html templates
+├── LICENSE
+├── README.md
+└── zine.ziggy     -- website configuration
+```
