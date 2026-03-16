@@ -80,7 +80,7 @@ body {
     overflow-x: hidden;
     width: 800px;
     margin: 0 auto;
-    padding: 60px 40px;
+    padding: 60px 10px;
     background-color: rgba(250, 250, 248, 0.8);
     display: flex;
     flex-direction: column;
@@ -326,7 +326,6 @@ main#content {
             display: flex;
             flex-direction: row;
             justify-content: space-between;
-            width: 100%;
             gap: 2rem;
         }
 
@@ -348,6 +347,10 @@ main#content {
         small {
             color: var(--text-muted);
         }
+
+        a {
+            color: var(--text-color)
+        }
     }
 
     header#post-header > div {
@@ -362,6 +365,10 @@ footer {
     flex-direction: column;
     align-items: center;
     color: var(--text-muted);
+
+    a {
+        color: var(--text-color)
+    }
 }
 
 table, th, td {

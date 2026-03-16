@@ -1,0 +1,14 @@
+---
+.title = "writings",
+.date = @date("2024-07-26T00:00:00"),
+.author = "Brook Jeynes",
+.layout = "writings.shtml",
+.alternatives = [{
+  .name = "rss",
+  .type = "application/rss+xml",
+  .layout = "rss-en.xml",
+  .output = "rss.xml",
+}],
+---
+
+### writings

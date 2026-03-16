@@ -2,7 +2,7 @@
  <channel>
   <title>brookjeynes.dev - en</title>
   <link>brookjeynes.dev</link>
-  <description>a collection of my english posts</description>
+  <description>a collection of my english writings</description>
   <generator>Zine -- https://zine-ssg.io</generator>
   <language>en-us</language>
   <lastBuildDate :text="$build.generated.formatHTTP()"></lastBuildDate>

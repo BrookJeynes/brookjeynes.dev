@@ -5,9 +5,10 @@
 .layout = "index.shtml",
 ---
 
-brook, just a tech. i enjoy hiking, bouldering, and playing music. <a
-href="/ko-KR">여기서 제 한국어</a>  콘텐츠를 확인해보세요. you can find my [cv
+i enjoy hiking, bouldering, and playing music. you can find my [cv
 here]($link.siteAsset('brook-jeynes-cv.pdf')).
+
+<a href="/ko-KR">여기서 제 한국어</a>  콘텐츠를 확인해보세요. 
 
 ```=html
 <h3 class="projects-header">projects</h3>
@@ -17,16 +18,12 @@ here]($link.siteAsset('brook-jeynes-cv.pdf')).
         <small>a social tracker for your language learning journey built on the atproto.</small>
     </li>
     <li>
+        <a href="https://shlf.space" target="_blank">shlf</a> <br>
+        <small>discover books, shows, and movies at your language level. *no dusting required. </small>
+    </li>
+    <li>
         <a href="https://github.com/BrookJeynes/jido" target="_blank">jido</a> <br>
         <small>地圖 (지도) is a lightweight Unix TUI file explorer designed for speed and simplicity.</small>
-    </li>
-    <li>
-        <a href="https://korean-conjugation-drill.vercel.app/" target="_blank">동사마스터 - your companion for korean verbs</a> <br>
-        <small>a simple website designed to help you practice your Korean conjugations.</small>
-    </li>
-    <li>
-        <a href="https://sr2interactivemap.com/" target="_blank">slime rancher 2 - interactive map</a> <br>
-        <small>an interactive map for the game slime rancher 2.</small>
     </li>
     <li>
         <a href="https://github.com/brookjeynes" target="_blank">github/brookjeynes</a> <br>
