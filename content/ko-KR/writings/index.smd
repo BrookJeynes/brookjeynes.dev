@@ -6,7 +6,7 @@
 .alternatives = [{
   .name = "rss",
   .type = "application/rss+xml",
-  .layout = "rss-ko.xml",
+  .layout = "rss.xml",
   .output = "rss.xml",
 }],
 ---
