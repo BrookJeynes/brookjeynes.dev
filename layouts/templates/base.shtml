@@ -31,7 +31,14 @@
       <super>
     </main>
 
-    <footer><small><a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a></small></footer>
+    <footer>
+        <div align="center">
+            <small>
+                Have comments? Reach me via <a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a> <br>
+                <a href="/writings/rss.xml">Subscribe to my RSS feed</a>.
+            </small>
+        </div>
+    </footer>
     </div>
   </body>
 </html>
