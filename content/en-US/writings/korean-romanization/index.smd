@@ -1,0 +1,1100 @@
+---
+.title = "The history of Korean romanization",
+.date = @date("2026-03-17T00:00:00"),
+.author = "Brook Jeynes",
+.layout = "post.shtml",
+--- 
+
+If I gave you the word "안녕하세요" in written text and asked you to tell me
+how to say that, could you? I'm making a wide assumption here that those of you
+who are reading this do not speak Korean. What I just showed you is one of the
+many ways to say "hello" written in 한글, Koreas writing system.
+
+I'm making a very deliberate choice not to romanize those words for you.
+Romanization is the act of converting text from one writing system to the Roman
+(latin) script. The act of romanization is messy, especially so for Korean. The
+word "한글" can be romanized in a few ways depending on which system you opt to
+use. You'll frequently see it as either "Hangul", "Hangeul", or even "Han'gŭl".
+To make things more difficult, the Korean language includes a number of
+morphophonemic constraints that cause one Hangeul syllable to be pronounced
+differently according to the phonological environment<sup>[1]</sup>. That is to
+say, many words are written differently to how they are pronounced given
+certain contexts.
+
+One of the first attempts at romanization dates back to 1832 when Philipp Franz
+J B. van Siebold, a German doctor serving as an advisor to the Japanese
+government at the time, developed a system<sup>[2]</sup>. What followed
+was not widespread adoption but rather several other attempts at devising a
+romanization system. Only three of which made strong impacts; the Siebold
+system (1832), the Dallet system (1874) and the Ross system (1877). While these
+systems are no longer used in modern day Korea, both North and South,
+influences from them can be found in the systems used today.
+
+---
+
+To appreciate why romanization is a tricky feat, let's take some time to
+understand how Koreas writing system works. Hangeul was invented in 1443 by
+King Sejong, the great (세종대왕), the fourth king of the Joseon dynasty.
+Before its invention, Koreans used Chinese characters. In his book, "The
+Correct Sounds for the Instruction of the People"<sup>[20]</sup> (훈민정음)
+published in 1446, he described the principles behind his new alphabet:
+
+> The sounds of our country's language are different from those of the
+Middle Kingdom and are not confluent with the sounds of characters. Therefore,
+among the ignorant people, there have been too many who, having something they
+want to put into words, have in the end been unable to express their feelings.
+I have been distressed because of this, and have newly designed twenty-eight
+letters, which I wish to have everyone practice at their ease and make
+convenient for their daily use<sup>[4]</sup>.
+
+Hangeul is a phonographic script in which 24 (originally 28) graphs, also
+called Jamo (자모), depict the points of articulation of all the phonemes in
+the Korean language<sup>[3]</sup>. These are then arranged into syllable blocks
+containing a lead consonant (초성, choseong), a medial vowel (중성, jungseong),
+and an optional tail consonant (종성 / 받침, jongseong / batchim). For example,
+"한글" can be broken down into two syllables, and then further to two sets of
+three Jamo.
+
+```=html
+<div align="center">
+consonant + vowel + consonant = syllable -> word <br>
+ㅎ + ㅏ + ㄴ = 한 + ㄱ + ㅡ + ㄹ = 글 -> 한글
+</div>
+```
+
+The optional tail may be constructed from two consonants and, while they are
+considered to be two separate letters, they are phonologically considered to be
+one<sup>[5]</sup>.
+
+```=html
+<div align="center">
+consonant + vowel + consonant + consonant = syllable -> word <br>
+ㄷ + ㅏ + ㄺ = 닭 -> 닭
+</div>
+```
+
+Syllables starting with an initial vowel, for example 안 (an), must be prefixed
+with ㅇ (eung), a special lead consonant that produces no sound when used at
+the start. This is not the case when placed as the tail consonant however,
+instead making the /ŋ/ (ng) sound.
+
+---
+
+As mentioned previously, there were three strong contendors in the early days
+of romanization - the Siebold system (1832), the Dallet system (1874) and the
+Ross system (1877). Most romanization systems can be traced back to these three
+systems as done by Do Hyong-su using the three voiced unaspirated consonants
+ㄱ, ㄷ, and ㅂ and the two vowels ㅓ and ㅡ<sup>[6]</sup>.
+
+The Siebold system used a "k" for ㄱ, a "t" for ㄷ, and a "p" for ㅂ. For the
+aspirated versions, an apostrophe was added - (ㅋ, k'), (ㅌ, t'), and (ㅍ, p').
+The use of apostrophes to indicate aspiration can be seen as a direct influence
+to the later produced McCune-Reischauer system. 
+
+The Dallet system used the same consonants as mentioned above but instead
+indicated aspiration via an "h" instead of an apostrophe - (ㅋ, kh), (ㅌ, th),
+and (ㅍ, ph). The use of the "h" can be seen in the official North Korean
+romanization system<sup>[7]</sup>. Another notable thing the Dallet system did
+was use "e" in addition to another vowel to indicate the two vowels ㅓ and ㅡ
+which became "eo" and "eu" respectively. This is used to this day in South
+Koreas official romanization system - The Revised Romanization of Korean. The
+Dallet system was also the first system to use diacritics via the two French
+accents, grave (è) and acute (é) over the "e" to indicate different vowels.
+
+Finally, the Ross system used voiced English consonants "g", "d", and "b" for
+the voiceless unaspirated consonants ㄱ, ㄷ, and ㅂ. For the aspirated
+consonants ㅋ, ㅌ, and ㅍ, the Ross system uses the voiceless English
+consonants "k", "t", and "p", thereby avoiding the need for additional
+information for aspiration.
+
+---
+
+Following the colonization of Korea by the Empire of Japan in 1910, swift
+actions were taken by the Japanese in an attempt to abolish and erase Koreas
+history<sup>[8]</sup>. This was done under the pretext of the racial theory
+known as Nissen dōsoron - a theory such that Japanese and Korean people had
+once shared a common ancestory where the Japanese people had descended from the
+Japanese deity Amaterasu and the Korean people from Susanoo, her younger
+brother. This lead to the eventual ban of Korean names under the Sōshi-kaimei
+policy which forced Koreans under Japanese rule to adopt Japanese names and
+identity as such<sup>[9]</sup>. What followed in 1938 was a complete ban on the
+use of Korean which retained until the defeat of the Japanese in
+1945. During this period, the Korean Language Society (한글 학회) - a society
+with the goal of preserving Korean language during the Japanese
+ocupation<sup>[10]</sup> - maintained strong activity despite many of their
+members being put into prison. One of the outputs from this group is considered
+to be the first romanization system developed by Koreans. Although it was never
+widely used, the work done by the Korean Language Society was appended to the
+Unified Hangeul Orthography system<sup>[11]</sup>. 
+
+Systems continued to be developed and by 1934 Japanese linguist Shinpei Ogura
+(小倉進平) counted at least twenty-seven different systems<sup>[12]</sup>. Due
+to the Korean languages complex phonetic structure, romanization is extremely
+difficult. One major difficulty faced is the challenge of mapping Koreas ten
+vowels to the five present in the Latin script. Sacrifices needed to be made
+such as vowels being rendered with multiple letters or the usage of diacritics
+as seen in the previously mentioned systems. Another difficulty presented
+itself in the form of linguist assimilation - the change of sound in certain
+phonemes based on the context of nearby sounds<sup>[13]</sup>. The Korean dynasty
+신라 (Silla) for example is written as "Sin-la" but pronounced "Sil-la"<sup>[21]</sup>.
+
+The liberation from the Japanese was short lived as soon after came the Korean
+war bringing an end to a unified Korea and dividing it into North and South.
+Although romanization was the least of concerns for these two states, efforts
+had to be made due to each of their close ties with one of the cold-war
+superpowers. North Korea was the first to invent a new romanization system in
+1956<sup>[14]</sup>. It took influences from both the Dallet and Unified
+Hangeul Orthography systems, notably adding "h" to signify aspiration.
+
+```=html
+<figure>
+<table>
+    <tbody>
+        <tr>
+            <td>ㄱ</td>
+            <td>ㄴ</td>
+            <td>ㄷ</td>
+            <td>ㄹ</td>
+            <td>ㅁ</td>
+            <td>ㅂ</td>
+            <td>ㅅ</td>
+            <td>ㅇ</td>
+            <td>ㅈ</td>
+            <td>ㅊ</td>
+            <td>ㅋ</td>
+            <td>ㅌ</td>
+            <td>ㅍ</td>
+            <td>ㅎ</td>
+            <td>ㄲ</td>
+            <td>ㄸ</td>
+            <td>ㅃ</td>
+            <td>ㅆ</td>
+            <td>ㅉ</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>k</td>
+            <td>n</td>
+            <td>t</td>
+            <td>r</td>
+            <td>m</td>
+            <td>p</td>
+            <td>s</td>
+            <td>ng</td>
+            <td>ts</td>
+            <td>tsh</td>
+            <td>kh</td>
+            <td>th</td>
+            <td>ph</td>
+            <td>h</td>
+            <td>kk</td>
+            <td>tt</td>
+            <td>pp</td>
+            <td>ss</td>
+            <td>tss</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ㅏ</td>
+            <td>ㅓ</td>
+            <td>ㅗ</td>
+            <td>ㅜ</td>
+            <td>ㅡ</td>
+            <td>ㅣ</td>
+            <td>ㅐ</td>
+            <td>ㅔ</td>
+            <td>ㅚ</td>
+            <td>ㅢ</td>
+            <td>ㅘ</td>
+            <td>ㅟ</td>
+            <td>ㅙ</td>
+            <td>ㅝ</td>
+            <td>ㅞ</td>
+            <td>ㅑ</td>
+            <td>ㅕ</td>
+            <td>ㅛ</td>
+            <td>ㅠ</td>
+            <td>ㅒ</td>
+            <td>ㅖ</td>
+        </tr>
+        <tr>
+            <td>a</td>
+            <td>ŏ</td>
+            <td>o</td>
+            <td>u</td>
+            <td>ŭ</td>
+            <td>i</td>
+            <td>ai</td>
+            <td>e</td>
+            <td>oi</td>
+            <td>ŭi</td>
+            <td>wa</td>
+            <td>wi</td>
+            <td>wai</td>
+            <td>wŏ</td>
+            <td>we</td>
+            <td>ya</td>
+            <td>yŏ</td>
+            <td>yo</td>
+            <td>yu</td>
+            <td>yai</td>
+            <td>ye</td>
+        </tr>
+    </tbody>
+</table>
+<figcaption>North Korean System (1986)</figcaption>
+</figure>
+```
+
+It has since been updated a handful of times with the latest change happening
+in 2012<sup>[15]</sup>. Notable changes include differentiation between initial
+and final consonant sounds and a handful of vowel reworkings. The system was
+also given an official name - "Rules of the Latin Alphabetical Transcriptions
+of the Korean Language"<sup>[15]</sup>.
+
+```=html
+<figure>
+<table>
+    <caption>Vowels</caption>
+    <tbody>
+        <tr>
+            <th>Hangeul</th>
+            <td>ㅏ</td>
+            <td>ㅓ</td>
+            <td>ㅗ</td>
+            <td>ㅜ</td>
+            <td>ㅡ</td>
+            <td>ㅣ</td>
+            <td>ㅐ</td>
+            <td>ㅔ</td>
+            <td>ㅚ</td>
+            <td>ㅢ</td>
+            <td>ㅘ</td>
+            <td>ㅟ</td>
+            <td>ㅙ</td>
+            <td>ㅝ</td>
+            <td>ㅞ</td>
+            <td>ㅑ</td>
+            <td>ㅕ</td>
+            <td>ㅛ</td>
+            <td>ㅠ</td>
+            <td>ㅒ</td>
+            <td>ㅖ</td>
+        </tr>
+        <tr>
+            <th>Romanization</th>
+            <td>a</td>
+            <td>ŏ</td>
+            <td>o</td>
+            <td>u</td>
+            <td>ŭ</td>
+            <td>i</td>
+            <td>ae</td>
+            <td>e</td>
+            <td>oi</td>
+            <td>ŭi</td>
+            <td>wa</td>
+            <td>wi</td>
+            <td>wae</td>
+            <td>wŏ</td>
+            <td>we</td>
+            <td>ya</td>
+            <td>yŏ</td>
+            <td>yo</td>
+            <td>yu</td>
+            <td>yai</td>
+            <td>ye</td>
+        </tr>
+    </tbody>
+</table>
+<table>
+    <caption>Consonants</caption>
+    <tbody>
+        <tr>
+            <th colspan="2">Hangeul</th>
+            <td>ㄱ</td>
+            <td>ㄴ</td>
+            <td>ㄷ</td>
+            <td>ㄹ</td>
+            <td>ㅁ</td>
+            <td>ㅂ</td>
+            <td>ㅅ</td>
+            <td>ㅈ</td>
+            <td>ㅊ</td>
+            <td>ㅋ</td>
+            <td>ㅌ</td>
+            <td>ㅍ</td>
+            <td>ㅎ</td>
+            <td>ㄲ</td>
+            <td>ㄸ</td>
+            <td>ㅃ</td>
+            <td>ㅆ</td>
+            <td>ㅉ</td>
+            <td>ㅇ</td>
+        </tr>
+        <tr>
+            <th rowspan="2">Romanization</th>
+            <th>Initial</th>
+            <td rowspan="2">k</td>
+            <td rowspan="2">n</td>
+            <td rowspan="2">t</td>
+            <td>r</td>
+            <td rowspan="2">m</td>
+            <td rowspan="2">p</td>
+            <td>s</td>
+            <td>j</td>
+            <td>ch</td>
+            <td>kh</td>
+            <td>th</td>
+            <td>ph</td>
+            <td>h</td>
+            <td>kk</td>
+            <td>tt</td>
+            <td>pp</td>
+            <td>ss</td>
+            <td>jj</td>
+            <td>—</td>
+        </tr>
+        <tr>
+            <th>Final</th>
+            <td>l</td>
+            <td>t</td>
+            <td>t</td>
+            <td>t</td>
+            <td>k</td>
+            <td>t</td>
+            <td>p</td>
+            <td>t</td>
+            <td>k</td>
+            <td>—</td>
+            <td>—</td>
+            <td>t</td>
+            <td>—</td>
+            <td>ng</td>
+        </tr>
+    </tbody>
+</table>
+<figcaption>Rules of the Latin Alphabetical Transcriptions of the Korean Language (2012)</figcaption>
+</figure>
+```
+
+Meanwhile, South Korea was still attempting to come to an agreement on how
+romanization should be done. In 1959, the Ministry of Education developed a
+system to represent each Hangeul graph with one Roman letter. This was done in
+an attempt to make romanization for Koreans easier. The devised system would
+allow those who "think in Hangeul" to produce accurate romanized Korean without
+the need to think about the many phonological changes that cause deviation from
+the orthography<sup>[16]</sup>. This system became the center of controversy
+due to its use of voiced consonants. While this makes sense for English
+speakers as their voiced consonants are much closer to the unaspirated voiced
+consonants in Korean, it unfortunately led to many romanized words resembling
+combinations of english words. 독립문, for example, would be romanized as
+"Dogribmun" leading to many jokes about "Dog ribs"<sup>[17]</sup>. Further
+romanizations would follow the same unfortunate pattern. Despite the
+controversy, the use of "eo" for ㅓ and "eu" for ㅡ is still popular to this
+day as the use of a breve is inconvenient for most people.
+
+```=html
+<figure>
+<table>
+    <tbody>
+        <tr>
+            <td>ㄱ</td>
+            <td>ㄴ</td>
+            <td>ㄷ</td>
+            <td>ㄹ</td>
+            <td>ㅁ</td>
+            <td>ㅂ</td>
+            <td>ㅅ</td>
+            <td>ㅇ</td>
+            <td>ㅈ</td>
+            <td>ㅊ</td>
+            <td>ㅋ</td>
+            <td>ㅌ</td>
+            <td>ㅍ</td>
+            <td>ㅎ</td>
+            <td>ㄲ</td>
+            <td>ㄸ</td>
+            <td>ㅃ</td>
+            <td>ㅆ</td>
+            <td>ㅉ</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>g</td>
+            <td>n</td>
+            <td>d</td>
+            <td>l/r</td>
+            <td>m</td>
+            <td>b</td>
+            <td>s</td>
+            <td>ng</td>
+            <td>j</td>
+            <td>ch</td>
+            <td>k</td>
+            <td>t</td>
+            <td>p</td>
+            <td>h</td>
+            <td>gg</td>
+            <td>dd</td>
+            <td>bb</td>
+            <td>ss</td>
+            <td>jj</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ㅏ</td>
+            <td>ㅓ</td>
+            <td>ㅗ</td>
+            <td>ㅜ</td>
+            <td>ㅡ</td>
+            <td>ㅣ</td>
+            <td>ㅐ</td>
+            <td>ㅔ</td>
+            <td>ㅚ</td>
+            <td>ㅢ</td>
+            <td>ㅘ</td>
+            <td>ㅟ</td>
+            <td>ㅙ</td>
+            <td>ㅝ</td>
+            <td>ㅞ</td>
+            <td>ㅑ</td>
+            <td>ㅕ</td>
+            <td>ㅛ</td>
+            <td>ㅠ</td>
+            <td>ㅒ</td>
+            <td>ㅖ</td>
+        </tr>
+        <tr>
+            <td>a</td>
+            <td>eo</td>
+            <td>o</td>
+            <td>u</td>
+            <td>eu</td>
+            <td>i</td>
+            <td>ae</td>
+            <td>e</td>
+            <td>oe</td>
+            <td>eui</td>
+            <td>wa</td>
+            <td>wi</td>
+            <td>wae</td>
+            <td>weo</td>
+            <td>we</td>
+            <td>ya</td>
+            <td>yeo</td>
+            <td>yo</td>
+            <td>yu</td>
+            <td>yae</td>
+            <td>ye</td>
+        </tr>
+    </tbody>
+</table>
+<figcaption>The Ministry of Education System (1959)</figcaption>
+</figure>
+```
+
+---
+
+Displeased with the systems available, George M. McCune and Edwin O. Reischauer
+worked together with help from Korean linguists Choe Hyeon-bae (최현배), Jeong
+In-seop (정인섭), Kim Seon-gi (김선기), and others to devise a new system which
+they aptly named the McCune–Reischauer system. As stated in their 1993
+published work "The Romanization of the Korean Language Based on Its Phonetic
+Structure", the main goal of their romanization system was not meant for use in
+phonetic or technical philological research but rather for "general scholarly
+and non-scholarly use where phonetic symbols would be cumbersome and annoying
+and where strict phonetic exactness is not demanded"<sup>[18]</sup>. Their
+method differed greatly from what existed at the time. Instead of employing a
+letter-by-letter transcription they instead opted for a system that is able to
+represent the phonetic pronunciation of words. Although attempts were made to
+keep the romanization system simple, diacritical marks were still required. Due
+to differences in pronunciation caused by varying Korean dialects, the
+McCune-Reischauer system defined the standard Korean pronunciation as that
+spoken by the "educated middle class of the capital, Sŏul
+(Keijō)"<sup>[19]</sup> and designed its romanization around such
+pronunciation.
+
+What follows is a simplified table showcasing the McCune-Reischauer system.
+There are cases and irregularities not covered by the table below. The full
+system can be viewed in the following [wikipedia entry on the McCune–Reischauer
+system](https://en.wikipedia.org/wiki/McCune%E2%80%93Reischauer#Guide)  or
+sections "II. THE VOWELS" and "III. THE CONSONANTS" in "The Romanization of the
+Korean Language Based on Its Phonetic Structure".
+
+```=html
+<figure>
+<table>
+    <caption>Vowels</caption>
+    <tbody>
+        <tr>
+            <th>Hangeul</th>
+            <td>ㅏ</td>
+            <td>ㅓ</td>
+            <td>ㅗ</td>
+            <td>ㅜ</td>
+            <td>ㅡ</td>
+            <td>ㅣ</td>
+            <td>ㅐ</td>
+            <td>ㅔ</td>
+            <td>ㅚ</td>
+            <td>ㅢ</td>
+            <td>ㅘ</td>
+            <td>ㅟ</td>
+            <td>ㅙ</td>
+            <td>ㅝ</td>
+            <td>ㅞ</td>
+            <td>ㅑ</td>
+            <td>ㅕ</td>
+            <td>ㅛ</td>
+            <td>ㅠ</td>
+            <td>ㅒ</td>
+            <td>ㅖ</td>
+        </tr>
+        <tr>
+            <th>Romanization</th>
+            <td>a</td>
+            <td>ŏ</td>
+            <td>o</td>
+            <td>u</td>
+            <td>ŭ</td>
+            <td>i</td>
+            <td>ae</td>
+            <td>e</td>
+            <td>oe</td>
+            <td>ŭi</td>
+            <td>wa</td>
+            <td>wi</td>
+            <td>wae</td>
+            <td>wŏ</td>
+            <td>we</td>
+            <td>ya</td>
+            <td>yŏ</td>
+            <td>yo</td>
+            <td>yu</td>
+            <td>yae</td>
+            <td>ye</td>
+        </tr>
+    </tbody>
+</table>
+<table>
+    <caption>Final consonant of the previous syllable + initial consonant of the next syllable</caption>
+    <tbody>
+        <tr>
+            <th colspan="2" rowspan="2"></th>
+            <th colspan="15">Initial </th>
+        </tr>
+        <tr>
+            <th>ㅇ<br>—</th>
+            <th>ㄱ<br>k</th>
+            <th>ㄲ<br>kk</th>
+            <th>ㄴ<br>n</th>
+            <th>ㄷ<br>t</th>
+            <th>ㄸ<br>tt</th>
+            <th>ㄹ<br>r</th>
+            <th>ㅁ<br>m</th>
+            <th>ㅂ<br>p</th>
+            <th>ㅃ<br>pp</th>
+            <th>ㅅ<br>s</th>
+            <th>ㅆ<br>ss</th>
+            <th>ㅈ<br>ch</th>
+            <th>ㅉ<br>tch</th>
+            <th>ㅎ<br>h</th>
+        </tr>
+        <tr>
+            <th rowspan="8">Final</th>
+            <th>(vowel)</th>
+            <td>—</td>
+            <td><b>g</b></td>
+            <td>kk</td>
+            <td>n</td>
+            <td><b>d</b></td>
+            <td>tt</td>
+            <td>r</td>
+            <td>m</td>
+            <td><b>b</b></td>
+            <td>pp</td>
+            <td>s</td>
+            <td>ss</td>
+            <td><b>j</b></td>
+            <td>tch</td>
+            <td>h</td>
+        </tr>
+        <tr>
+            <th>ㄱ k</th>
+            <td><b>g</b></td>
+            <td>kk</td>
+            <td>k<b>k</b></td>
+            <td><b>ng</b>n</td>
+            <td>kt</td>
+            <td>ktt</td>
+            <td><b>ngn</b></td>
+            <td><b>ng</b>m</td>
+            <td>kp</td>
+            <td>kpp</td>
+            <td>ks</td>
+            <td>kss</td>
+            <td>kch</td>
+            <td>ktch</td>
+            <td>kh</td>
+        </tr>
+        <tr>
+            <th>ㄴ n</th>
+            <td>n</td>
+            <td>n<b>'g</b></td>
+            <td>nkk</td>
+            <td>nn</td>
+            <td>n<b>d</b></td>
+            <td>ntt</td>
+            <td><b>ll</b></td>
+            <td>nm</td>
+            <td>n<b>b</b></td>
+            <td>npp</td>
+            <td>ns</td>
+            <td>nss</td>
+            <td>n<b>j</b></td>
+            <td>ntch</td>
+            <td>nh</td>
+        </tr>
+        <tr>
+            <th>ㄷ t</th>
+            <td><b>d</b></td>
+            <td>tk</td>
+            <td>tkk</td>
+            <td><b>n</b>n</td>
+            <td>tt</td>
+            <td>t<b>t</b></td>
+            <td><b>nn</b></td>
+            <td><b>n</b>m</td>
+            <td>tp</td>
+            <td>tpp</td>
+            <td><b>s</b>s</td>
+            <td><b>ss</b></td>
+            <td>tch</td>
+            <td>t<b>ch</b></td>
+            <td>th</td>
+        </tr>
+        <tr>
+            <th>ㄹ l</th>
+            <td><b>r</b></td>
+            <td>l<b>g</b></td>
+            <td>lkk</td>
+            <td>l<b>l</b></td>
+            <td>l<b>d</b></td>
+            <td>ltt</td>
+            <td>l<b>l</b></td>
+            <td>lm</td>
+            <td>l<b>b</b></td>
+            <td>lpp</td>
+            <td>ls</td>
+            <td>lss</td>
+            <td>l<b>j</b></td>
+            <td>ltch</td>
+            <td><b>r</b>h</td>
+        </tr>
+        <tr>
+            <th>ㅁ m</th>
+            <td>m</td>
+            <td>m<b>g</b></td>
+            <td>mkk</td>
+            <td>mn</td>
+            <td>m<b>d</b></td>
+            <td>mtt</td>
+            <td>m<b>n</b></td>
+            <td>mm</td>
+            <td>m<b>b</b></td>
+            <td>mpp</td>
+            <td>ms</td>
+            <td>mss</td>
+            <td>m<b>j</b></td>
+            <td>mtch</td>
+            <td>mh</td>
+        </tr>
+        <tr>
+            <th>ㅂ p</th>
+            <td><b>b</b></td>
+            <td>pk</td>
+            <td>pkk</td>
+            <td><b>m</b>n</td>
+            <td>pt</td>
+            <td>ptt</td>
+            <td><b>mn</b></td>
+            <td><b>m</b>m</td>
+            <td>pp</td>
+            <td>p<b>p</b></td>
+            <td>ps</td>
+            <td>pss</td>
+            <td>pch</td>
+            <td>ptch</td>
+            <td>ph</td>
+        </tr>
+        <tr>
+            <th>ㅇ ng</th>
+            <td>ng</td>
+            <td>ng<b>g</b></td>
+            <td>ngkk</td>
+            <td>ngn</td>
+            <td>ng<b>d</b></td>
+            <td>ngtt</td>
+            <td>ng<b>n</b></td>
+            <td>ngm</td>
+            <td>ng<b>b</b></td>
+            <td>ngpp</td>
+            <td>ngs</td>
+            <td>ngss</td>
+            <td>ng<b>j</b></td>
+            <td>ngtch</td>
+            <td>ngh</td>
+        </tr>
+    </tbody>
+</table>
+<figcaption>McCune-Reischauer System (1939)</figcaption>
+</figure>
+```
+
+Due to the rising criticms, the Ministry of Education decided to reexamine the
+issues presented by their romanization system. In 1983, the Korean National
+Academy of Sciences invited three phonologists to help aid an investigation
+into a way forward. Of the three invited, only Lee Sang-oak (이상억) was in
+favour of changing the system to the McCune-Reischauer system. The system put
+into place in 1984 following these discussions was, for the most part, the same
+as the McCune-Reischauer system. There were minor changes to the original
+McCune-Reischauer system, notably 시 romanized as "shi" instead of "si", ㄹㅎ
+romanized as "lh" instead of "rh", and divisions in words indicated by a hyphen
+instead of an apostrophe. A full breakdown of the changes can be viewed in the
+following [wikipedia entry on the McCune–Reischauer
+system](https://en.wikipedia.org/wiki/McCune%E2%80%93Reischauer#South_Korean_variant).
+This was released not without pushback, notably from Koreans who found the
+system confusing as many were not used to representing phonological changes
+with different graphs<sup>[22]</sup>. Although the system gave a rough approximation
+to the sounds of the Korean language, it came at the cost of convenience.
+
+Although the McCune-Reischauer and Ministry of Educations systems were the most
+commonly used, it did not stop others attempting further iterations on existing
+systems. In 1968, Professor Samuel Martin of Yale University developed the Yale
+system. It was widely adopted by linguists as it allowed readers who know
+Hangeul to come up with accurate romanized representations. Beyond its use in
+scholarship, it never saw much reach. This could be traced to its unsightly
+presentation (독립문: toklipmwun) and failure to provide approximate
+pronounciations (전라: cenla, pronounced closer to "jeolla").
+
+```=html
+<figure>
+<table>
+    <tbody>
+        <tr>
+            <td>ㄱ</td>
+            <td>ㄴ</td>
+            <td>ㄷ</td>
+            <td>ㄹ</td>
+            <td>ㅁ</td>
+            <td>ㅂ</td>
+            <td>ㅅ</td>
+            <td>ㅇ</td>
+            <td>ㅈ</td>
+            <td>ㅊ</td>
+            <td>ㅋ</td>
+            <td>ㅌ</td>
+            <td>ㅍ</td>
+            <td>ㅎ</td>
+            <td>ㄲ</td>
+            <td>ㄸ</td>
+            <td>ㅃ</td>
+            <td>ㅆ</td>
+            <td>ㅉ</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>k</td>
+            <td>n</td>
+            <td>t</td>
+            <td>l</td>
+            <td>m</td>
+            <td>p</td>
+            <td>s</td>
+            <td>ng</td>
+            <td>c</td>
+            <td>ch</td>
+            <td>kh</td>
+            <td>th</td>
+            <td>ph</td>
+            <td>h</td>
+            <td>kk</td>
+            <td>tt</td>
+            <td>pp</td>
+            <td>ss</td>
+            <td>cc</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>ㅏ</td>
+            <td>ㅓ</td>
+            <td>ㅗ</td>
+            <td>ㅜ</td>
+            <td>ㅡ</td>
+            <td>ㅣ</td>
+            <td>ㅐ</td>
+            <td>ㅔ</td>
+            <td>ㅚ</td>
+            <td>ㅢ</td>
+            <td>ㅘ</td>
+            <td>ㅟ</td>
+            <td>ㅙ</td>
+            <td>ㅝ</td>
+            <td>ㅞ</td>
+            <td>ㅑ</td>
+            <td>ㅕ</td>
+            <td>ㅛ</td>
+            <td>ㅠ</td>
+            <td>ㅒ</td>
+            <td>ㅖ</td>
+        </tr>
+        <tr>
+            <td>a</td>
+            <td>e</td>
+            <td>o</td>
+            <td>wu</td>
+            <td>u</td>
+            <td>i</td>
+            <td>ay</td>
+            <td>ey</td>
+            <td>woy</td>
+            <td>uy</td>
+            <td>wa</td>
+            <td>we</td>
+            <td>way</td>
+            <td>we</td>
+            <td>wey</td>
+            <td>ya</td>
+            <td>ye</td>
+            <td>yo</td>
+            <td>yu</td>
+            <td>yay</td>
+            <td>yey</td>
+        </tr>
+    </tbody>
+</table>
+<figcaption>Yale system (1954)</figcaption>
+</figure>
+```
+
+---
+
+The spread of computer and internet usage in the 1990s, lead to growing
+complaints with the McCune-Reischauer system. Although fonts for breves and
+other diacritics were available, they were not widespread. This lead to many
+internet users dropping the breve when romanizing text or replacing it with the
+circumflex. The use of diacritics is especially confusing to Koreans whose main
+exposure to a Roman-alphabet language is English. Participants in a 1980
+workshop on romanization conducted by the University of Hawaii argued to
+replace the usage of a breve with a more common diacritic mark such as the
+accent mark from Spanish. The group also suggested replacing the apostrophe
+with "h" to indicate aspiration<sup>[23]</sup>. Another criticm from Koreans is
+that the system requires too much overhead when reading and writing. Since it
+requires native-speakers to think about phonological changes, it often times
+leads to them having to sound out the words as they write. Many also argue it
+doesn't sit right to them that the system was developed by foreigners during
+Japanese occupation. Linguistic nationalists feel the system violates the
+genius of Hangeul by representing allophones and phonological changes with
+different Roman letters<sup>[24]</sup>.
+
+In 1986, the International Organization for Standardization requested that both
+North and South Korea work together to devise a unified North-South
+romanization system. Discussions continued through to 1995 with a clear
+consensus failing to be reached. In 1991, The South Korean National Academy for
+the Korean Language (국립국어연구원) announced a new system it had been working
+on. Around the same time, Kim Bokmoon (김복문) developed his own system and
+launched an accompanying media campaign in an attempt to get his system
+adopted. In response to the burst of new systems, many jumped to the current
+systems (The Ministry of Education System, 1984) defense.
+
+It wasn't until 1997 that the South Korean government decided to consider
+changing the system driven by the decision to repaint road signs with the
+inclusion of romanization. This was not without its controversy and heated
+debates sparked online. By the end of June 1998, the Ministry of Culture and
+Sports announced that all further debates on the changing of the official
+romanization system be stopped due to a lack of funds and nation wide inability
+to come to a consensus. 
+
+It wouldn't be until July, 2000 that the Ministry of Culture and Sports would
+announce that South Korea would be adopting a new system titled the Revised
+Romanization of Korea (국어의 로마자 표기법). It had been being developed
+behind the scenes since 1995 by the National Academy of the Korean Language.
+The new system was designed with the explicit goal of only using the 26 letters
+of the Roman-alphabet<sup>[24]</sup>. This meant ridding of all breves and
+diacritics; one of the main criticms of the McCune-Reischauer system. Along
+with the announcement of the new system, it was mandated that all Korean
+textbooks, maps and signs to do with cultural heritage were to comply with the
+new system by 28 February 2002. This was at an estimated cost of roughly 500
+billion to 600 billion won<sup>[25]</sup>.
+
+```=html
+<figure>
+<table>
+    <caption>Vowels</caption>
+    <tbody>
+        <tr>
+            <th>Hangeul</th>
+            <td>ㅏ</td>
+            <td>ㅓ</td>
+            <td>ㅗ</td>
+            <td>ㅜ</td>
+            <td>ㅡ</td>
+            <td>ㅣ</td>
+            <td>ㅐ</td>
+            <td>ㅔ</td>
+            <td>ㅚ</td>
+            <td>ㅢ</td>
+            <td>ㅘ</td>
+            <td>ㅟ</td>
+            <td>ㅙ</td>
+            <td>ㅝ</td>
+            <td>ㅞ</td>
+            <td>ㅑ</td>
+            <td>ㅕ</td>
+            <td>ㅛ</td>
+            <td>ㅠ</td>
+            <td>ㅒ</td>
+            <td>ㅖ</td>
+        </tr>
+        <tr>
+            <th>Romanization</th>
+            <td>a</td>
+            <td>eo</td>
+            <td>o</td>
+            <td>u</td>
+            <td>eu</td>
+            <td>i</td>
+            <td>ae</td>
+            <td>e</td>
+            <td>oe</td>
+            <td>ui</td>
+            <td>wa</td>
+            <td>wi</td>
+            <td>wae</td>
+            <td>wo</td>
+            <td>we</td>
+            <td>ya</td>
+            <td>yeo</td>
+            <td>yo</td>
+            <td>yu</td>
+            <td>yae</td>
+            <td>ye</td>
+        </tr>
+    </tbody>
+</table>
+<table>
+    <caption>Consonants</caption>
+    <tbody>
+        <tr>
+            <th colspan="2">Hangeul</th>
+            <td>ㄱ</td>
+            <td>ㄴ</td>
+            <td>ㄷ</td>
+            <td>ㄹ</td>
+            <td>ㅁ</td>
+            <td>ㅂ</td>
+            <td>ㅅ</td>
+            <td>ㅈ</td>
+            <td>ㅊ</td>
+            <td>ㅋ</td>
+            <td>ㅌ</td>
+            <td>ㅍ</td>
+            <td>ㅎ</td>
+            <td>ㄲ</td>
+            <td>ㄸ</td>
+            <td>ㅃ</td>
+            <td>ㅆ</td>
+            <td>ㅉ</td>
+            <td>ㅇ</td>
+        </tr>
+        <tr>
+            <th rowspan="2">Romanization</th>
+            <th>Initial</th>
+            <td>g</td>
+            <td rowspan="2">n</td>
+            <td>d</td>
+            <td>r</td>
+            <td rowspan="2">m</td>
+            <td>b</td>
+            <td>s</td>
+            <td>j</td>
+            <td>ch</td>
+            <td rowspan="2">k</td>
+            <td rowspan="2">t</td>
+            <td rowspan="2">p</td>
+            <td>h</td>
+            <td>kk</td>
+            <td>tt</td>
+            <td>pp</td>
+            <td>ss</td>
+            <td>jj</td>
+            <td>—</td>
+        </tr>
+        <tr>
+            <th>Final</th>
+            <td>k</td>
+            <td>t</td>
+            <td>l</td>
+            <td>p</td>
+            <td>t</td>
+            <td>t</td>
+            <td>t</td>
+            <td>t</td>
+            <td>k</td>
+            <td>—</td>
+            <td>—</td>
+            <td>t</td>
+            <td>—</td>
+            <td>ng</td>
+        </tr>
+    </tbody>
+</table>
+<figcaption>Revised Romanization of Korean (2002)</figcaption>
+</figure>
+```
+
+The Revised Romanization of Korean system also specified a process to follow
+when romanizing words<sup>[24]</sup>. The first step in the process is to write
+the word to follow the standard pronunciation spellings. Each syllable is then
+broken down into individual graphs/jamo. Referring to the romanization table
+above, each graph is then transcribed depending on whether it is a vowel or a
+consonant in the initial or final position. Finally, spaces are inserted
+between family and given names and proper nouns are capitalized. Hyphens are
+also optionally added to either disambiguating pronunciation or between
+syllables of a given name. The National Institute of Korean Language has stated
+however that the use of optional hyphens should be discouraged<sup>[26]</sup>.
+
+```=html
+<figure>
+<div align="center">
+안녕하세요 → ㅇㅏㄴㄴㅕㅇㅎㅏㅅㅔㅇㅛ → annyeonghaseyo <br>
+종로구 → 종노구 → ㅈㅗㅇㄴㅗㄱㅜ → jongnogu → Jongno-gu
+</div>
+<figcaption>The Revised Romanization of Korean romanization process</figcaption>
+</figure>
+```
+
+---
+
+<small>[1] [2] [3] [11] [14] [16] [17] [22] [24] Fouser, Robert J. (1999). "Nationalism and Globalism in Transliteration Systems: Romanization Debates in Korea" (PDF). Language Research 어학연구. 35 (1/4). Seoul National University Language Education Institute 서울대학교 언어교육원.</small>  
+<small>[4] Ledyard, Gari K. (1966) The Korean language reform of 1446: The origin, background, and early history of the Korean alphabet, Unpublished Ph. D. dissertation, University of California at Berkeley.</small>  
+<small>[5] Pae, Hye K.; Winskel, Heather; Kim, Say Young (2025a). "An Introduction to the Korean Language and the Special Status of the Korean Alphabet".</small>  
+<small>[7] "Working Paper No. 46" (PDF). UNGEGN.</small>  
+<small>[8] Oguma, Eiji; 小熊英二 (1995). Tan'itsu minzoku shinwa no kigen: "Nihonjin" no jigazō no keifu = The myth of the homogeneous nation (Shohan ed.). Tōkyō. ISBN 4-7885-0528-2. OCLC 34028233.</small>  
+<small>[9] "Korea under Japanese rule". Library of Congress Country Studies. Washington, D.C.: United States Library of Congress. 1982.</small>  
+<small>[10] Lee, Peter H.; Bary, William Theodore De (1997). Sources of Korean Tradition: From the sixteenth to the twentieth centuries. Columbia University Press. p. 321. ISBN 9780231120302.</small>  
+<small>[12] Ogura Shimpei 小倉進平: Ommun no Romaji Hyokiho 諺文の ローマ 字表記法 (A System of Romanizing Ŏnrnun) in Oda Sensei Shoju Kinen Chosen Ronshu 小田先生頌籌記念朝鮮論集 Keijo, 1934.</small>  
+<small>[13] [18] [19] [21] McCune, George M.; Reischauer, Edwin O. (1939). "The Romanization of the Korean Language Based on Its Phonetic Structure". Transactions of the Royal Asiatic Society Korea Branch. 29. Royal Asiatic Society Korea Branch: 1–55.</small>  
+<small>[15] "E/CONF.101/CRP15 - The Rules of Latin Alphabetic Transcription of Korean Language" (PDF). UNGEGN.</small>  
+<small>[20] Ahn, Pyong-hi (2018) [2007]. Studies in Hunminjeongeum. Translated by Jung, Ha-yun (English ed.). National Hangeul Museum. ISBN 979-11-89438-00-5.</small>  
+<small>[23] Austerlitz, Robert, et al. (1980) 'Report on workshop conference on Korean romanization,' Korean studies.</small>  
+<small>[24] "Romanization of Korean". National Institute of Korean Language.</small>  
+<small>[25] 강만수 (1 September 2000). 신판 斥和碑 새 로마자표기법이 불러올 국가적 위기. Monthly Chosun (in Korean). "2005년까지 연차적으로 도로표지판을 바꾸는 데 5000억~6000억원이 들고".</small>  
+<small>[26] "국어의 로마자 표기법 해설 – 제1장 표기의 기본 원칙". hangeul.or.kr. National Institute of Korean Language. 8 October 2001.</small>  
