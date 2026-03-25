@@ -5,8 +5,6 @@
 .layout = "index.shtml",
 ---
 
-### 서재
-
 #### 2025
 
 ```=html
@@ -23,8 +21,8 @@
     <li>
         <div>
             <div class="title">
-                <span>Masters of Doom: How Two Guys Created an Empire and Transformed Pop Culture</span>
-                <small>David Kushner</small>
+                <span>원피스</span>
+                <small>오다 에이이치로</small>
             </div>
             <small class="status text">읽고 있는 책</small>
         </div>
