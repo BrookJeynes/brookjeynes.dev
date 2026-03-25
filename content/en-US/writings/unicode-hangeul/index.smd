@@ -1,5 +1,5 @@
 ---
-.title = "Encoding Hangeul, Koreas writing system.",
+.title = "Encoding Hangeul, Koreas writing system",
 .date = @date("2025-01-24T00:00:00"),
 .author = "Brook Jeynes",
 .layout = "post.shtml",
