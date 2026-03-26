@@ -2,10 +2,11 @@
 <html>
   <head id="head">
     <meta charset="UTF-8">
-    <meta name="description" content="brook, just a tech.">
+    <meta name="description" content="a collection of writings from me about varying topics i find interesting">
     <meta property="og:title" content="$page.title">
     <meta property="og:type" content="website">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="alternate" type="application/rss+xml" href="/writings/rss.xml">
     <title id="title">
       <ctx :text="$page.title"></ctx> - <ctx :text="$site.title"></ctx>
     </title>
