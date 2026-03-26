@@ -5,32 +5,23 @@
 .layout = "post.shtml",
 --- 
 
-### Introduction
-
 Hangeul (한글) is the modern writing system for the Korean language, created in 
-1443 by King Sejong the great, the fourth king of the Joseon dynasty<sup>1</sup>. 
+1443 by King Sejong the great, the fourth king of the Joseon dynasty<sup>[1]</sup>. 
 Before its invention, Korean was written using Hanja (한자) — Chinese characters 
 adapted for Korean. Even after Hangeul's creation, Hanja remained in regular use 
-for centuries, particularly in formal and scholarly contexts<sup>2</sup>.
+for centuries, particularly in formal and scholarly contexts<sup>[2]</sup>.
 
 Hangeul is a syllabic writing system where each syllable is composed of letters
 called Jamo (자모). These Jamo function like Latin letters, each representing
 an individual sound. There are a total of 11,172 syllabic combinations of Jamo 
-which can be used to form Hangeul<sup>3</sup>.
+which can be used to form Hangeul<sup>[3]</sup>.
 
 However, learning Hangeul doesn't require memorizing thousands of combinations.
 Instead, one only needs to learn the 68 different Jamo shapes and rules 
 governing the construction of Hangeul. This is much easier than it sounds with 
 the basics of the Korean alphabet being able to be learned within 60-90 minutes.
 
-This post explores how Hangeul is encoded in Unicode, a universal standard that 
-assigns unique values to characters across all languages<sup>4</sup>. It also 
-delves into the mathematical operations used to construct and deconstruct 
-individual Jamo from encoded Hangeul.
-
 ---
-
-### Hangeul, Jamo, and Unicode
 
 A Korean syllable consists of a lead consonant, a medial vowel, and a tail 
 consonant. For example, 
@@ -60,11 +51,11 @@ their shape, size, and positions slightly to fit into a single Hangeul. Unicode
 has a second range of Jamo characters called "Hangeul Compatibility Jamo" 
 starting at U+3130 which represent the initial and final consonants with the 
 same Unicode codepoint as opposed to the Hangeul Jamo block which assigns them 
-separate codepoints<sup>5</sup>. These compatibility Jamo typically render much 
+separate codepoints<sup>[4]</sup>. These compatibility Jamo typically render much 
 more clearer.
 
 The table below shows both, the conjoining Jamo as well as the [compatibility 
-Jamo] with the character reference hex value referring to the former<sup>6</sup>. 
+Jamo] with the character reference hex value referring to the former<sup>[5]</sup>. 
 Depending on your browser, both Jamo may render the same.
 
 | Number | Lead | Jamo    | Character reference |
@@ -143,21 +134,21 @@ Depending on your browser, both Jamo may render the same.
 | 26     | P    | ᇁ [ㅍ] | 0x11C1              |
 | 27     | H    | ᇂ [ㅎ] | 0x11C2              |
 
-### Encoding Hangeul
+---
 
 Although each Jamo has its own individual Unicode value, Unicode values U+AC00 
 to U+D7A3 define every combination of Jamo, or every Hangeul character. 
-This range of Unicode is called the Hangeul Syllables block<sup>7</sup>.
+This range of Unicode is called the Hangeul Syllables block<sup>[6]</sup>.
 
 These syllables can be directly mapped by algorithm back to sequences of two 
-or three Jamo in the Hangeul Jamo block mentioned earlier<sup>8</sup>. It's due 
+or three Jamo in the Hangeul Jamo block mentioned earlier<sup>[7]</sup>. It's due 
 to this that it's theoretically possible to encode Korean texts with Jamo only 
 and let the font rendered handle Hangeul construction. This is not recommended 
 in practice though due to limitations and lack of support in current renderers.
 
 Isolated Jamo are rarely found in Korean texts instead opting for use of the
 precomposed Hangeul syllables. The codepoint of a Hangeul can be calculated from
-its Jamo components using the following formula<sup>9</sup>.
+its Jamo components using the following formula<sup>[8]</sup>.
 
 ```=html
 <div align="center">
@@ -218,10 +209,10 @@ try deconstruct it.
         = 19
 ```
 
-### Obsolete Hangeul
+---
 
 Overtime, Hangeul has undergone many changes with several Jamo no longer being
-used in modern Korean<sup>10</sup>.
+used in modern Korean<sup>[9]</sup>.
 
 - ㆍ (아래아, arae-a): A short "a" sound.
 - ㆆ (여린히읗, yeorin-hieut): A "light h", akin to a softer version of the English "h".
@@ -232,11 +223,6 @@ Since these obsolete characters are still used in older literature and historica
 texts, there's still a need to have some way of using them. However, because
 they're obsolete, Unicode does not offer precomposed Hangeul. Instead, syllables
 using them must be coded by Jamo.
-
-### Conclusion
-Next time you type "한글" on your keyboard or read a text in Korean, you’ll 
-know there’s a beautifully logical system at play behind the scenes — one that 
-blends centuries of linguistic history with the modern efficiency of Unicode.
 
 #### Footnotes
 <small>[1] [https://en.wikipedia.org/wiki/Hangul](https://en.wikipedia.org/wiki/Hangul)</small>  
