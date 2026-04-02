@@ -5,15 +5,15 @@
 .layout = "index.shtml",
 ---
 
-#### 2025
+#### 2026
 
 ```=html
 <ul id="library">
     <li>
         <div>
             <div class="title">
-                <span>The Vegetarian</span>
-                <small>Han Kang</small>
+                <span>Chainsaw Man (eng)</span>
+                <small>Tatsuki Fujimoto</small>
             </div>
             <small class="status text">now reading</small>
         </div>
@@ -30,12 +30,28 @@
     <li>
         <div>
             <div class="title">
+                <span>The Vegetarian</span>
+                <small>Han Kang</small>
+            </div>
+            <small class="status text">★★★★</small>
+        </div>
+    </li>
+    <li>
+        <div>
+            <div class="title">
                 <span>Jujutsu Kaisen (eng)</span>
                 <small>Gege Akutami</small>
             </div>
             <small class="status text">★★★★</small>
         </div>
     </li>
+</ul>
+```
+
+#### 2025
+
+```=html
+<ul id="library">
     <li>
         <div>
             <div class="title">
@@ -112,7 +128,7 @@
                 <span>The Subtle Art of Not Giving a F*ck: A Counterintuitive Approach to Living a Good Life</span>
                 <small>Mark Manson</small>
             </div>
-            <small class="status">★★★★</small>
+            <small class="status">★★★</small>
         </div>
     </li>
     <li>
@@ -121,7 +137,7 @@
                 <span>Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones</span>
                 <small>James Clear</small>
             </div>
-            <small class="status">★★★★</small>
+            <small class="status">★★★</small>
         </div>
     </li>
     <li>
