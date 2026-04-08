@@ -5,8 +5,8 @@
 .layout = "index.shtml",
 ---
 
-저는 하이킹, 클라이밍, 음악 연주를 좋아합니다. 영어를 할 줄 아십니까? 제
-이력서는 [여기서]($link.siteAsset('brook-jeynes-cv.pdf')) 확인하실 수 있습니다.
+저는 하이킹, 클라이밍, 음악 연주를 좋아합니다. 제 이력서는
+[여기서]($link.siteAsset('brook-jeynes-cv.pdf')) 확인하실 수 있습니다.
 
 speak english? find my <a href="/">english content here</a>. 
 
