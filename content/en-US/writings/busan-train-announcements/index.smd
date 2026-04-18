@@ -1,0 +1,63 @@
+---
+.title = "Busan train announcements are interesting",
+.date = @date("2026-04-17T20:00:00"),
+.author = "Brook Jeynes",
+.layout = "post.shtml",
+--- 
+
+<small><i>This post was originally written in Korean. You can read it in its <a
+href="/ko-KR/writings/부산-안내방송이-신기해요">original form
+here</a>.</i></small>
+
+I recently visited Busan for the first time and the thing that interested me
+the most was the train announcements. Compared to Australia, Korea has a wide
+variety of different train announcements. In Australia, you only hear a voice
+when the train arrives. However, in Busan train stations, you hear various
+sounds along with the announcement. For example, there's traditional music,
+waves and seaguls, and the sound of a ship's horn.
+
+[Busan train]($image.asset('부산-지하철.png'))
+
+If you're heading towards Haeundae Beach, you'll hear waves and seagulls before
+the announcement, and if you're heading in the opposite direction towards Busan
+Port, you'll hear a ship's horn. So, if you're unsure of the incoming train's
+direction or can't hear the announcement clearly, you just need to listen out
+for those sounds.
+
+https://www2.humetro.busan.kr/homepage/default/broadcast/list.do#n
+
+However, it's not just the sounds for the direction. At stations where you
+transfer trains, traditional music plays alongside the announcements. I've
+heard that they use a different song in Seoul, but I haven't heard it myself.
+
+```=html
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden">
+    <iframe 
+        src="https://www.youtube.com/embed/NwXY6zElXY4"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" 
+        allowfullscreen="" 
+        title="부산교통공사 환승역 안내방송 모음 (2025 개정)"
+    ></iframe>
+</div>
+```
+
+The stations at both ends of the underground line have a unique song, which
+differs depending on whether the train is arriving or departing. I've never
+taken it all the way to the last station, but I asked a friend who lives in
+Busan and he said that when the train arrives, women sing, whereas when it
+departs, men sing.
+
+```=html
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden">
+    <iframe 
+        src="https://youtube.com/embed/RZnZrtUuh6c" 
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" 
+        allowfullscreen="" 
+        title="부산교통공사 로고송/사가"
+    ></iframe>
+</div>
+```
+
+The announcements in Korea are really creative. I wish the Australian
+announcements were more fun, but I'm worried the song would get stuck in my
+head. When I was in Seoul, I kept humming the underground arrival song.

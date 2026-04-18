@@ -1,0 +1,54 @@
+---
+.title = "부산 안내방송이 신기해요",
+.date = @date("2026-04-17T20:00:00"),
+.author = "Brook Jeynes",
+.layout = "post.shtml",
+--- 
+
+최근에 처음 부산에 갔는데 지하철 안내방송이 가장 신기했습니다. 호주보다 한국이
+더 다양한 지하철 안내방송 있었습니다. 호주에서 지하철 올 때 목소리만 들립니다.
+하지만, 부산 지하철역에서 안내방송과 함께 여러 가지 소리 들립니다. 예를 들면
+전통 음악, 파도와 갈매기, 뱃고동 소리 등 있습니다.
+
+[부산 지하철]($image.asset('부산-지하철.png'))
+
+해운대 해수욕장 방향으로 가면 안내방송 앞에 파도와 갈매기 소리 들리고, 반대
+쪽인 부산항으로 가면 뱃고동 소리 들립니다. 그래서 들어오는 열차의 방향 잘
+모르거나 안내방송 잘 안 들리면 그 소리들만 알면 됩니다.
+
+https://www2.humetro.busan.kr/homepage/default/broadcast/list.do#n
+
+근데 신기하게도 그 방향 소리만 있는 것이 아닙니다. 지하철을 갈아타는 역에서는
+안내방송과 함께 전통 음악이 나옵니다. 듣자 하니 서울에서 다른 노래를 사용한다고
+하지만 나는 아직 들어보지 못했습니다.
+
+```=html
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden">
+    <iframe 
+        src="https://www.youtube.com/embed/NwXY6zElXY4"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" 
+        allowfullscreen="" 
+        title="부산교통공사 환승역 안내방송 모음 (2025 개정)"
+    ></iframe>
+</div>
+```
+
+지하철 노선의 양쪽 마지막 역은 독특한 노래가 있는데, 그 노래는 도착 혹은 출발할
+때 각각 다릅니다. 마지막 역까지 타본 적 없지만, 부산 사는 친구한테
+물어봤습니다. 그는 지하철 올 때, 여자가 노래하는 반면에 지하철 출발할 때,
+남자가 노래한다고 말했습니다.
+
+```=html
+<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden">
+    <iframe 
+        src="https://youtube.com/embed/RZnZrtUuh6c" 
+        style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" 
+        allowfullscreen="" 
+        title="부산교통공사 로고송/사가"
+    ></iframe>
+</div>
+```
+
+한국에서 안내방송이 정말 창의적이었습니다. 호주 안내방송이 더 재미있으면
+좋겠지만, 그 노래가 머릿속에 계속 맴돌 것 같아서 걱정됩니다. 서울에 있었을 때,
+지하철 도착 노래 계속 흥얼거렸기 때문입니다.
