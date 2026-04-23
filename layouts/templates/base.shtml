@@ -36,7 +36,8 @@
         <div align="center">
             <small>
                 Have comments? Reach out to <a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a> <br>
-                <a href="/writings/rss.xml">Subscribe to my RSS feed</a>.
+                <a href="/writings/rss.xml">Subscribe to my RSS feed</a>. <br>
+                <small><a href="https://old.brookjeynes.dev">Hate the bloat? me too</a></small>
             </small>
         </div>
     </footer>
