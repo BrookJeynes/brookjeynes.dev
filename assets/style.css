@@ -310,8 +310,8 @@ main#content {
         }
     }
 
-    ul#library,
-    ul#concerts {
+    ul.library,
+    ul.concerts {
         font-size: 0.9rem;
         list-style-type: none;
         margin: 0 0 4rem 0;

@@ -8,7 +8,7 @@
 #### 2026
 
 ```=html
-<ul id="library">
+<ul class="library">
     <li>
         <div>
             <div class="title">
@@ -51,7 +51,7 @@
 #### 2025
 
 ```=html
-<ul id="library">
+<ul class="library">
     <li>
         <div>
             <div class="title">
@@ -103,7 +103,7 @@
 #### 2024
 
 ```=html
-<ul id="library">
+<ul class="library">
     <li>
         <div>
             <div class="title">
@@ -182,7 +182,7 @@
 #### 2023
 
 ```=html
-<ul id="library">
+<ul class="library">
     <li>
         <div>
             <div class="title">
@@ -234,7 +234,7 @@
 #### 2022
 
 ```=html
-<ul id="library">
+<ul class="library">
     <li>
         <div>
             <div class="title">
