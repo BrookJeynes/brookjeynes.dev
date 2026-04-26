@@ -24,6 +24,7 @@
           <li><a class="$page.link().contains('/writings/').then('selected', '')" href="$site.page('writings').link()" :text="$i18n.getOr('writings', 'writings')"></a></li>
           <li><a class="$page.link().contains('/videos/').then('selected', '')" href="$site.page('videos').link()" :text="$i18n.getOr('videos', 'videos')"></a></li>
           <li><a class="$page.link().contains('/library/').then('selected', '')" href="$site.page('library').link()" :text="$i18n.getOr('library', 'library')"></a></li>
+          <li><a class="$page.link().contains('/concerts/').then('selected', '')" href="$site.page('concerts').link()" :text="$i18n.getOr('concerts', 'concerts')"></a></li>
         </ul>
       </nav>
     </header>
@@ -35,10 +36,24 @@
     <footer>
         <div align="center">
             <small>
-                Have comments? Reach out to <a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a> <br>
-                <a href="/writings/rss.xml">Subscribe to my RSS feed</a>. <br>
-                <small><a href="https://old.brookjeynes.dev">Hate the bloat? me too</a></small>
+                Have comments or want to say hi? Reach out to <a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a> <br>
+                <small><a href="https://old.brookjeynes.dev">Yearn for simpler times? me too</a></small>
             </small>
+            <div class="badges" title="88×31 buttons from hellnet.work, yesterweb.org, cyber.dabamos.de, lmnt.me, and other friends.">
+                <a href="mailto:me@brookjeynes.dev"><img alt="reply via email" src="$site.asset('badges/reply-via-email.gif').link()"></a>
+                <a href="/writings/rss.xml"><img alt="rss" src="$site.asset('badges/rss.gif').link()"></a>
+                <a href="http://bsky.app/brookjeynes.dev"><img alt="bluesky" src="$site.asset('badges/bluesky.gif').link()"></a>
+                <a href="https://github.com/adryd325/oneko.js"><img alt="catlover" src="$site.asset('badges/catlover.gif').link()"></a>
+                <img alt="made by hand" src="$site.asset('badges/made-by-hand.gif').link()">
+                <img alt="no ai" src="$site.asset('badges/no-ai.svg').link()">
+                <img alt="css" src="$site.asset('badges/css.gif').link()">
+                <img alt="got html" src="$site.asset('badges/got-html.gif').link()">
+                <a href="https://grapheneos.org/"><img alt="grapheneos" src="$site.asset('badges/grapheneos.gif').link()"></a>
+                <img alt="gnu-linux" src="$site.asset('badges/gnu-linux.gif').link()">
+                <img alt="screw" src="$site.asset('badges/screw.gif').link()">
+                <img alt="sendit" src="$site.asset('badges/sendit.gif').link()">
+                <img alt="vim" src="$site.asset('badges/vim.gif').link()">
+            </div>
         </div>
     </footer>
     </div>

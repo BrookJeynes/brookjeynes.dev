@@ -10,6 +10,8 @@ Multilingual {
         "fonts/crimson-pro/CrimsonPro-SemiBold.ttf",
         "fonts/gowun-batang/GowunBatang-Regular.ttf",
         "fonts/ibm-plex-mono/IBMPlexMono-Light.ttf",
+        "oneko.js",
+        "oneko.gif",
         "CNAME",
     ],
     .locales = [

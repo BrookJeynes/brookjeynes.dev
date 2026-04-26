@@ -310,7 +310,8 @@ main#content {
         }
     }
 
-    ul#library {
+    ul#library,
+    ul#concerts {
         font-size: 0.9rem;
         list-style-type: none;
         margin: 0 0 4rem 0;
@@ -367,6 +368,14 @@ footer {
 
     a {
         color: var(--text-color)
+    }
+
+    .badges {
+        margin-top: 40px;
+
+        a {
+           all: revert!important;
+        }
     }
 }
 

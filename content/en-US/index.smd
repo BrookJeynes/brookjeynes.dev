@@ -5,6 +5,10 @@
 .layout = "index.shtml",
 ---
 
+```=html
+  <script defer src='/oneko.js'></script>
+```
+
 im a [software engineer at ssw](https://ssw.com.au/people/brook-jeynes). i
 enjoy hiking, bouldering, and playing music. you can find my [cv
 here]($link.siteAsset('brook-jeynes-cv.pdf')).
