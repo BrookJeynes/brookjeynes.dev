@@ -1,6 +1,6 @@
 ---
 .title = "You should leave your garage door open",
-.date = @date("2026-04-26T20:00:00"),
+.date = @date("2026-04-27"),
 .author = "Brook Jeynes",
 .layout = "post.shtml",
 --- 
