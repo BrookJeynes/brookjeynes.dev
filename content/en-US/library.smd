@@ -5,7 +5,7 @@
 .layout = "index.shtml",
 ---
 
-#### 2026
+#### now reading
 
 ```=html
 <ul class="library">
@@ -15,7 +15,6 @@
                 <span>Chainsaw Man (eng)</span>
                 <small>Tatsuki Fujimoto</small>
             </div>
-            <small class="status text">now reading</small>
         </div>
     </li>
     <li>
@@ -24,16 +23,21 @@
                 <span>One Piece (eng)</span>
                 <small>Eiichirō Oda</small>
             </div>
-            <small class="status text">now reading</small>
         </div>
     </li>
+</ul>
+```
+
+#### 2026
+
+```=html
+<ul class="library">
     <li>
         <div>
             <div class="title">
                 <span>The Vegetarian</span>
                 <small>Han Kang</small>
             </div>
-            <small class="status text">★★★★</small>
         </div>
     </li>
     <li>
@@ -42,7 +46,6 @@
                 <span>Jujutsu Kaisen (eng)</span>
                 <small>Gege Akutami</small>
             </div>
-            <small class="status text">★★★★</small>
         </div>
     </li>
 </ul>
@@ -58,7 +61,6 @@
                 <span>Alice in Borderland (eng)</span>
                 <small>Haro Aso</small>
             </div>
-            <small class="status text">★★★★★</small>
         </div>
     </li>
     <li>
@@ -67,7 +69,6 @@
                 <span>Fluent Forever (Revised Edition)</span>
                 <small>Gabriel Wyner</small>
             </div>
-            <small class="status">★★★★★</small>
         </div>
     </li>
     <li>
@@ -76,7 +77,6 @@
                 <span>Uzumaki</span>
                 <small>Junji Ito</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
     <li>
@@ -85,7 +85,6 @@
                 <span>The Book of Five Rings</span>
                 <small>Miyamoto Musashi</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
     <li>
@@ -94,7 +93,6 @@
                 <span>The Book of Family Traditions on the Art of War</span>
                 <small>Yagyu Munenori</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
 </ul>
@@ -110,7 +108,6 @@
                 <span>No Longer Human</span>
                 <small>Junji Ito</small>
             </div>
-            <small class="status">★★★★★</small>
         </div>
     </li>
     <li>
@@ -119,7 +116,6 @@
                 <span>Gyo</span>
                 <small>Junji Ito</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
     <li>
@@ -128,7 +124,6 @@
                 <span>The Subtle Art of Not Giving a F*ck: A Counterintuitive Approach to Living a Good Life</span>
                 <small>Mark Manson</small>
             </div>
-            <small class="status">★★★</small>
         </div>
     </li>
     <li>
@@ -137,7 +132,6 @@
                 <span>Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones</span>
                 <small>James Clear</small>
             </div>
-            <small class="status">★★★</small>
         </div>
     </li>
     <li>
@@ -146,16 +140,14 @@
                 <span>Kokoro</span>
                 <small>Natsume Sōseki</small>
             </div>
-            <small class="status">★★★★★</small>
         </div>
     </li>
     <li>
         <div>
             <div class="title">
-                <span>Learning the Art of Electronics: A Hands-On Lab Course</span>
+                <del><span>Learning the Art of Electronics: A Hands-On Lab Course</span></del>
                 <small>Thomas C. Hayes, Paul Horowitz</small>
             </div>
-            <small class="status text">dropped</small>
         </div>
     </li>
     <li>
@@ -164,7 +156,6 @@
                 <span>Programming Rust: Fast, Safe Systems Development, 2nd Edition</span>
                 <small>Jim Blandy</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
     <li>
@@ -173,7 +164,6 @@
                 <span>The Rust Programming Language, 2nd Edition</span>
                 <small>Steve Klabnik, Carol Nichols</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
 </ul>
@@ -189,7 +179,6 @@
                 <span>C Programming Language, 2nd Edition</span>
                 <small>Brian W. Kernighan, Dennis M. Ritchie</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
     <li>
@@ -198,7 +187,6 @@
                 <span>Operating System Concepts, 10th/Global Edition</span>
                 <small>Abraham Silberschatz, Peter B. Galvin, Greg Gagne</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
     <li>
@@ -207,7 +195,6 @@
                 <span>Linux Device Drivers, 3rd Edition</span>
                 <small>Jonathan Corbet, Alessandro Rubini, Greg Kroah-Hartman</small>
             </div>
-            <small class="status">★★★</small>
         </div>
     </li>
     <li>
@@ -216,7 +203,6 @@
                 <span>Linux Kernel Development, 3rd Edition</span>
                 <small>Robert Love</small>
             </div>
-            <small class="status">★★★</small>
         </div>
     </li>
     <li>
@@ -225,7 +211,6 @@
                 <span>Grokking Algorithms</span>
                 <small>Aditya Y. Bhargava</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
 </ul>
@@ -241,7 +226,6 @@
                 <span>Letters from a Stoic</span>
                 <small>Seneca</small>
             </div>
-            <small class="status">★★★★★</small>
         </div>
     </li>
     <li>
@@ -250,16 +234,14 @@
                 <span>Programming with 64-Bit ARM Assembly Language</span>
                 <small>Stephen Smith</small>
             </div>
-            <small class="status">★★★</small>
         </div>
     </li>
     <li>
         <div>
             <div class="title">
-                <span>Seven Languages in Seven Weeks</span>
+                <del><span>Seven Languages in Seven Weeks</span></del>
                 <small>Bruce A. Tate</small>
             </div>
-            <small class="status text">dropped</small>
         </div>
     </li>
     <li>
@@ -268,7 +250,6 @@
                 <span>Practical Vim, Second Edition</span>
                 <small>Drew Neil</small>
             </div>
-            <small class="status">★★★★</small>
         </div>
     </li>
 </ul>

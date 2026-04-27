@@ -11,7 +11,7 @@
                         <a href="$loop.it.link()">
                             <span :text="$loop.it.title"></span>
                         </a>
-                        <small :text="$loop.it.date.format('January 02, 2006')"></small>
+                        <small :text="$loop.it.date.format('January 02')"></small>
                     </div>
                 </div>
             </li>

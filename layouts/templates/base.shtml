@@ -36,8 +36,8 @@
     <footer>
         <div align="center">
             <small>
-                Have comments or want to say hi? Reach out to <a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a> <br>
-                <small><a href="https://old.brookjeynes.dev">Yearn for simpler times? me too</a></small>
+                have comments or want to say hi? reach out to <a href="mailto:me@brookjeynes.dev" target="_blank">me@brookjeynes.dev</a> <br>
+                <small><a href="https://old.brookjeynes.dev">yearn for simpler times? me too</a></small>
             </small>
             <div class="badges" title="88×31 buttons from hellnet.work, yesterweb.org, cyber.dabamos.de, lmnt.me, and other friends.">
                 <a href="mailto:me@brookjeynes.dev"><img alt="reply via email" src="$site.asset('badges/reply-via-email.gif').link()"></a>

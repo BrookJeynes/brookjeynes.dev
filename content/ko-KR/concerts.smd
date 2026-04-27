@@ -15,7 +15,7 @@
                 <span>Violent Soho</span>
                 <small>supported by: Beddy Rays; Teenage Joans</small>
             </div>
-            <small class="status text">2026-09-25</small>
+            <small class="status">Fortitude Music Hall</small>
         </div>
     </li>
     <li>
@@ -24,7 +24,15 @@
                 <span>Hot Mulligan</span>
                 <small>supported by: Forests; Saturdays At Your Place</small>
             </div>
-            <small class="status text">2026-04-25</small>
+            <small class="status">Fortitude Music Hall</small>
+        </div>
+    </li>
+    <li>
+        <div>
+            <div class="title">
+                <span>QWER</span>
+            </div>
+            <small class="status">Zepp Shinjuku</small>
         </div>
     </li>
 </ul>
@@ -39,7 +47,7 @@
             <div class="title">
                 <span>Se So Neon</span>
             </div>
-            <small class="status text">2025-12-10</small>
+            <small class="status">The Triffid</small>
         </div>
     </li>
     <li>
@@ -48,7 +56,7 @@
                 <span>Free Throw</span>
                 <small>supported by: Microwave</small>
             </div>
-            <small class="status text">2025-07-24</small>
+            <small class="status">The Princess Theatre</small>
         </div>
     </li>
     <li>
@@ -56,7 +64,7 @@
             <div class="title">
                 <span>Clown Core</span>
             </div>
-            <small class="status text">2025-06-04</small>
+            <small class="status">The Triffid</small>
         </div>
     </li>
     <li>
@@ -65,7 +73,7 @@
                 <span>Origami Angel</span>
                 <small>supported by: Talk Heavy; Cardboard Cutouts</small>
             </div>
-            <small class="status text">2025-04-14</small>
+            <small class="status">The Brightside</small>
         </div>
     </li>
 </ul>
@@ -80,7 +88,7 @@
             <div class="title">
                 <span>Best Night Ever Festival</span>
             </div>
-            <small class="status">2024-12-28</small>
+            <small class="status">Miami Marketta</small>
         </div>
     </li>
     <li>
@@ -88,7 +96,7 @@
             <div class="title">
                 <span>The Tallest Man on Earth</span>
             </div>
-            <small class="status">2024-12-07</small>
+            <small class="status">The Princess Theatre</small>
         </div>
     </li>
     <li>
@@ -97,7 +105,7 @@
                 <span>Hanabie</span>
                 <small>supported by: The Gloom In The Corner</small>
             </div>
-            <small class="status">2024-11-08</small>
+            <small class="status">The Triffid</small>
         </div>
     </li>
     <li>
@@ -106,7 +114,7 @@
                 <span>Emei</span>
                 <small>supported by: Bella Amor</small>
             </div>
-            <small class="status">2024-09-19</small>
+            <small class="status">The Brightside</small>
         </div>
     </li>
     <li>
@@ -115,7 +123,7 @@
                 <span>Concrete and Grass Festival</span>
                 <small>Memi; 1300; Lunadira; Lur:; Loft Beach; Benn</small>
             </div>
-            <small class="status">2024-09-06</small>
+            <small class="status">The Tivoli</small>
         </div>
     </li>
     <li>
@@ -123,7 +131,7 @@
             <div class="title">
                 <span>Lovejoy</span>
             </div>
-            <small class="status text">2024-08-30</small>
+            <small class="status">Fortitude Music Hall</small>
         </div>
     </li>
 </ul>
@@ -138,7 +146,7 @@
             <div class="title">
                 <span>Niki</span>
             </div>
-            <small class="status">2023-09-18</small>
+            <small class="status">Fortitude Music Hall</small>
         </div>
     </li>
     <li>
@@ -147,7 +155,7 @@
                 <span>Beddy Rays</span>
                 <small>supported by; Selfish Sons; Cheap Date; Ham</small>
             </div>
-            <small class="status">2023-07-01</small>
+            <small class="status">The Triffid</small>
         </div>
     </li>
     <li>
@@ -156,7 +164,7 @@
                 <span>Phum Viphurit</span>
                 <small>supported by: Ricewine</small>
             </div>
-            <small class="status">2023-04-30</small>
+            <small class="status">The Princess Theatre</small>
         </div>
     </li>
     <li>
@@ -164,7 +172,7 @@
             <div class="title">
                 <span>Men I Trust</span>
             </div>
-            <small class="status">2023-03-23</small>
+            <small class="status">The Triffid</small>
         </div>
     </li>
     <li>
@@ -173,7 +181,7 @@
                 <span>Stella Donnelly</span>
                 <small>supported by: Mia June</small>
             </div>
-            <small class="status">2023-03-10</small>
+            <small class="status">The Triffid</small>
         </div>
     </li>
     <li>
@@ -181,7 +189,7 @@
             <div class="title">
                 <span>Laneway Festival</span>
             </div>
-            <small class="status">2023-02-04</small>
+            <small class="status">Brisbane</small>
         </div>
     </li>
 </ul>
