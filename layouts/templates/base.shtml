@@ -52,7 +52,7 @@
                 <a href="https://grapheneos.org/"><img alt="grapheneos" src="$site.asset('badges/grapheneos.gif').link()"></a>
                 <a href="https://fedoraproject.org/"><img alt="gnu-linux" src="$site.asset('badges/gnu-linux.gif').link()"></a>
                 <img alt="screw" src="$site.asset('badges/screw.gif').link()">
-                <img alt="sendit" src="$site.asset('badges/sendit.gif').link()">
+                <a href="mailto:?subject=brookjeynes.dev&body=hello \<0.0>/ ~!"><img alt="sendit" src="$site.asset('badges/sendit.gif').link()"></a>
                 <a href="https://www.gnu.org/software/emacs/?message=yourmum"><img alt="vim" src="$site.asset('badges/vim.gif').link()"></a>
             </div>
         </div>
